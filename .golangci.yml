@@ -1,0 +1,52 @@
+linters:
+  disable:
+    - cyclop
+    - dupl
+    - goerr113
+    - exhaustivestruct
+    - exhaustruct
+    - forbidigo
+    - forcetypeassert
+    - funlen
+    - gochecknoinits
+    - gochecknoglobals
+    - gocognit
+    - gocyclo
+    - godox
+    - gofumpt
+    - gomnd
+    - nlreturn
+    - paralleltest
+    - tagliatelle
+    - testpackage
+    - varnamelen
+    - wrapcheck
+    - wsl
+    # disabled because of generics
+    - rowserrcheck
+    - sqlclosecheck
+    - wastedassign
+    # deprecated
+    - deadcode
+    - golint
+    - ifshort
+    - interfacer
+    - maligned
+    - nosnakecase
+    - scopelint
+    - structcheck
+    - varcheck
+  enable-all: true
+
+linters-settings:
+  exhaustive:
+    default-signifies-exhaustive: true
+
+  gci:
+    sections:
+      - standard # Standard section: captures all standard packages.
+      - default # Default section: contains all imports that could not be matched to another section type.
+      - prefix(github.com/twelvelabs/stylist) # Custom section: groups all imports with the specified Prefix.
+
+  lll:
+    line-length: 100

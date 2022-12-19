@@ -1,0 +1,48 @@
+
+stylist list [linters|formatters]
+stylist check --type [lint|format] --processor [name]
+stylist fix --type [lint|format] --processor [name]
+
+pre-commit:
+  stylist check
+
+vscode extension:
+  on command:
+    stylist $action --processor=$name
+  on type:
+    stylist check --type=lint
+  on save:
+    stylist fix
+
+
+
+
+ui.UserInterface
+	ui.Prompter
+	ui.Stub
+	ui.StubPrompter
+	ios
+
+
+a.UI.Confirm(...)
+a.UI.Input(...)
+a.UI.Select(...)
+
+a.UI.Out("Some line")
+a.UI.OutInfo("Some line")
+a.UI.OutSuccess("Some line")
+a.UI.OutWarning("Some line")
+a.UI.OutFailure("Some line")
+
+a.UI.Stub(
+	ui.MatchConfirm("Proceed?"),
+	ui.RespondBool(true),
+)
+a.UI.Stub(
+	ui.MatchInput("First Name:"),
+	ui.RespondString("Skip"),
+)
+a.UI.Stub(
+	ui.MatchInput("Last Name:"),
+	ui.RespondError(ErrInterrupt),
+)

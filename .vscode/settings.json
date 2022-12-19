@@ -1,0 +1,22 @@
+{
+    "editor.rulers": [80, 100],
+    "go.lintTool": "golangci-lint",
+    "gopls": {
+        "local": "github.com/twelvelabs/stylist",
+        "ui.semanticTokens": true
+    },
+    "cSpell.words": [
+        "bmatcuk",
+        "deckarep",
+        "doublestar",
+        "errgroup",
+        "gofmt",
+        "iostreams",
+        "ireturn",
+        "mapset",
+        "shellcheck",
+        "shlex",
+        "stretchr",
+        "unparam"
+    ]
+}

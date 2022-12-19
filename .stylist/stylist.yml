@@ -1,0 +1,58 @@
+---
+excludes:
+  - "**/tmp"
+
+processors:
+  - name: "gofmt"
+    includes:
+      - "**/*.go"
+
+    editor_config: true
+    check_before_fix: true
+
+    check:
+      template: "gofmt -d"
+      input: variadic
+      output: diff
+    fix:
+      template: "gofmt -w"
+      input: variadic
+      output: none
+
+  - name: "markdownlint"
+    includes:
+      - "**/*.md"
+
+    check:
+      template: "markdownlint --json"
+      input: variadic
+      # output: regexp
+      #  message: ' - (.+) \('
+      # output: sarif
+      output: json
+      mapping:
+        code: "{{ index .ruleNames 0 }}"
+        code_description: "{{ index .ruleNames 0 }}/{{ index .ruleNames 1 }}"
+        code_url: "{{ .ruleInformation }}"
+        file_name: "{{ .fileName }}"
+        message: "{{ .ruleDescription }}"
+        range_start_line: "{{ .lineNumber }}"
+        range_start_char: "{{ if (eq .errorRange nil) 0 else (index .errorRange 0) end }}"
+        range_end_line: "{{ .lineNumber }}"
+        range_end_char: "{{ if (eq .errorRange nil) 0 else (add (index .errorRange 1) (index .errorRange 1)) end }}"
+        severity: "error"
+        source: "markdownlint"
+    fix:
+      template: "markdownlint --fix"
+      input: variadic
+      output: none
+
+  - name: "shellcheck"
+    includes:
+      - "**/*.sh"
+
+  - name: "yamllint"
+    includes:
+      - "**/*.{yaml,yml}"
+    excludes:
+      - "**/secrets.yaml"
