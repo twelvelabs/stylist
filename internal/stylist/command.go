@@ -1,8 +1,10 @@
 package stylist
 
 import (
+	"bytes"
 	"context"
 	"errors"
+	"io"
 	"os"
 	"runtime"
 
@@ -89,13 +91,22 @@ func (c *Command) executeBatch(ctx context.Context, paths []string) ([]*Diagnost
 		cmd.Stdin = file
 	}
 
+	stderr := &bytes.Buffer{}
+	stdout := &bytes.Buffer{}
+	cmd.Stderr = stderr
+	cmd.Stdout = stdout
+
 	err = cmd.Run()
 	if err != nil {
 		return nil, err
 	}
 
-	// TODO: parse output...
-	return []*Diagnostic{}, nil
+	resp := &CommandResponse{
+		Out:      stdout,
+		Err:      stderr,
+		ExitCode: cmd.ProcessState.ExitCode(),
+	}
+	return NewOutputParser(c.Output).Parse(resp)
 }
 
 func (c *Command) parallelism() int {
@@ -137,4 +148,10 @@ func (c *Command) partition(paths []string) [][]string {
 	}
 
 	return batches
+}
+
+type CommandResponse struct {
+	Out      io.Reader
+	Err      io.Reader
+	ExitCode int
 }

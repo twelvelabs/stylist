@@ -2,14 +2,13 @@ package stylist
 
 import (
 	"fmt"
-	"io"
 )
 
 // OutputParser is the interface that wraps the Parse method.
 //
-// Parse parses output into a slice of diagnostic pointers.
+// Parse parses a command response into a slice of diagnostics.
 type OutputParser interface {
-	Parse(cmd *Command, r io.Reader) ([]*Diagnostic, error)
+	Parse(response *CommandResponse) ([]*Diagnostic, error)
 }
 
 // NewOutputParser returns the appropriate parser for the given output type.
@@ -36,8 +35,8 @@ func NewOutputParser(ot OutputType) OutputParser { //nolint:ireturn
 type JSONOutputParser struct {
 }
 
-// Parse parses output into a slice of diagnostic pointers.
-func (p *JSONOutputParser) Parse(cmd *Command, r io.Reader) ([]*Diagnostic, error) {
+// Parse parses a command response into a slice of diagnostics.
+func (p *JSONOutputParser) Parse(response *CommandResponse) ([]*Diagnostic, error) {
 	return nil, nil
 }
 
@@ -49,8 +48,8 @@ func (p *JSONOutputParser) Parse(cmd *Command, r io.Reader) ([]*Diagnostic, erro
 type NoneOutputParser struct {
 }
 
-// Parse parses output into a slice of diagnostic pointers.
-func (p *NoneOutputParser) Parse(cmd *Command, r io.Reader) ([]*Diagnostic, error) {
+// Parse parses a command response into a slice of diagnostics.
+func (p *NoneOutputParser) Parse(response *CommandResponse) ([]*Diagnostic, error) {
 	return nil, nil
 }
 
@@ -62,8 +61,8 @@ func (p *NoneOutputParser) Parse(cmd *Command, r io.Reader) ([]*Diagnostic, erro
 type RegexpOutputParser struct {
 }
 
-// Parse parses output into a slice of diagnostic pointers.
-func (p *RegexpOutputParser) Parse(cmd *Command, r io.Reader) ([]*Diagnostic, error) {
+// Parse parses a command response into a slice of diagnostics.
+func (p *RegexpOutputParser) Parse(response *CommandResponse) ([]*Diagnostic, error) {
 	return nil, nil
 }
 
@@ -75,7 +74,7 @@ func (p *RegexpOutputParser) Parse(cmd *Command, r io.Reader) ([]*Diagnostic, er
 type SarifOutputParser struct {
 }
 
-// Parse parses output into a slice of diagnostic pointers.
-func (p *SarifOutputParser) Parse(cmd *Command, r io.Reader) ([]*Diagnostic, error) {
+// Parse parses a command response into a slice of diagnostics.
+func (p *SarifOutputParser) Parse(response *CommandResponse) ([]*Diagnostic, error) {
 	return nil, nil
 }
