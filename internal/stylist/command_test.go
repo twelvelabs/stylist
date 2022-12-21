@@ -21,7 +21,7 @@ func TestCommand_Execute(t *testing.T) {
 		command  *Command
 		paths    []string
 		setup    func(c *Command)
-		expected []*Diagnostic
+		expected []*Result
 		err      string
 	}{
 		{
@@ -32,7 +32,7 @@ func TestCommand_Execute(t *testing.T) {
 				Output:   OutputTypeNone,
 			},
 			paths:    []string{},
-			expected: []*Diagnostic{},
+			expected: []*Result{},
 			err:      "",
 		},
 
@@ -45,7 +45,7 @@ func TestCommand_Execute(t *testing.T) {
 				"testdata/aaa.txt",
 				"testdata/bbb.txt",
 			},
-			expected: []*Diagnostic{},
+			expected: []*Result{},
 			err:      ErrCommandEmpty.Error(),
 		},
 		{
@@ -57,7 +57,7 @@ func TestCommand_Execute(t *testing.T) {
 				"testdata/aaa.txt",
 				"testdata/bbb.txt",
 			},
-			expected: []*Diagnostic{},
+			expected: []*Result{},
 			err:      "EOF found when expecting closing quote",
 		},
 
@@ -82,7 +82,7 @@ func TestCommand_Execute(t *testing.T) {
 					run.StringResponse(""),
 				)
 			},
-			expected: []*Diagnostic{},
+			expected: []*Result{},
 			err:      "",
 		},
 
@@ -113,7 +113,7 @@ func TestCommand_Execute(t *testing.T) {
 					run.StringResponse(""),
 				)
 			},
-			expected: []*Diagnostic{},
+			expected: []*Result{},
 			err:      "",
 		},
 
@@ -134,7 +134,7 @@ func TestCommand_Execute(t *testing.T) {
 					run.StringResponse(""),
 				)
 			},
-			expected: []*Diagnostic{},
+			expected: []*Result{},
 			err:      "",
 		},
 	}
@@ -162,8 +162,8 @@ func TestCommand_Execute(t *testing.T) {
 func TestCommand_executeBatch_ErrorCases(t *testing.T) {
 	command := &Command{}
 
-	diagnostics, err := command.executeBatch(context.Background(), []string{})
-	assert.Equal(t, []*Diagnostic(nil), diagnostics)
+	results, err := command.executeBatch(context.Background(), []string{})
+	assert.Equal(t, []*Result(nil), results)
 	assert.NoError(t, err)
 }
 

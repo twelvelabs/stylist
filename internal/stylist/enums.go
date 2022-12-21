@@ -13,3 +13,7 @@ type OutputType string
 // ProcessorType represents the type of processor.
 // ENUM(formatter, linter).
 type ProcessorType string
+
+// ResultLevel represents the severity level of the result.
+// ENUM(none, note, warning, error).
+type ResultLevel string

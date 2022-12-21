@@ -36,8 +36,8 @@ type Command struct {
 }
 
 // Execute executes paths concurrently in batches of 10.
-func (c *Command) Execute(ctx context.Context, paths []string) ([]*Diagnostic, error) {
-	diagnostics := []*Diagnostic{}
+func (c *Command) Execute(ctx context.Context, paths []string) ([]*Result, error) {
+	results := []*Result{}
 
 	group, ctx := errgroup.WithContext(ctx)
 	group.SetLimit(c.parallelism())
@@ -45,22 +45,22 @@ func (c *Command) Execute(ctx context.Context, paths []string) ([]*Diagnostic, e
 	for _, batch := range c.partition(paths) {
 		batch := batch
 		group.Go(func() error {
-			results, err := c.executeBatch(ctx, batch)
+			batchResults, err := c.executeBatch(ctx, batch)
 			if err != nil {
 				return err
 			}
 			// TODO: wrap access to this in a mutex
-			diagnostics = append(diagnostics, results...)
+			results = append(results, batchResults...)
 			return nil
 		})
 	}
 
 	err := group.Wait()
-	return diagnostics, err
+	return results, err
 }
 
 // executes a single batch of paths.
-func (c *Command) executeBatch(ctx context.Context, paths []string) ([]*Diagnostic, error) {
+func (c *Command) executeBatch(ctx context.Context, paths []string) ([]*Result, error) {
 	if len(paths) == 0 {
 		return nil, nil
 	}

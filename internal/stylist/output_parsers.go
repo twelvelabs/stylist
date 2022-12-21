@@ -6,9 +6,9 @@ import (
 
 // OutputParser is the interface that wraps the Parse method.
 //
-// Parse parses a command response into a slice of diagnostics.
+// Parse parses a command response into a slice of results.
 type OutputParser interface {
-	Parse(response *CommandResponse) ([]*Diagnostic, error)
+	Parse(response *CommandResponse) ([]*Result, error)
 }
 
 // NewOutputParser returns the appropriate parser for the given output type.
@@ -35,8 +35,8 @@ func NewOutputParser(ot OutputType) OutputParser { //nolint:ireturn
 type JSONOutputParser struct {
 }
 
-// Parse parses a command response into a slice of diagnostics.
-func (p *JSONOutputParser) Parse(response *CommandResponse) ([]*Diagnostic, error) {
+// Parse parses a command response into a slice of results.
+func (p *JSONOutputParser) Parse(response *CommandResponse) ([]*Result, error) {
 	return nil, nil
 }
 
@@ -48,8 +48,8 @@ func (p *JSONOutputParser) Parse(response *CommandResponse) ([]*Diagnostic, erro
 type NoneOutputParser struct {
 }
 
-// Parse parses a command response into a slice of diagnostics.
-func (p *NoneOutputParser) Parse(response *CommandResponse) ([]*Diagnostic, error) {
+// Parse parses a command response into a slice of results.
+func (p *NoneOutputParser) Parse(response *CommandResponse) ([]*Result, error) {
 	return nil, nil
 }
 
@@ -61,8 +61,8 @@ func (p *NoneOutputParser) Parse(response *CommandResponse) ([]*Diagnostic, erro
 type RegexpOutputParser struct {
 }
 
-// Parse parses a command response into a slice of diagnostics.
-func (p *RegexpOutputParser) Parse(response *CommandResponse) ([]*Diagnostic, error) {
+// Parse parses a command response into a slice of results.
+func (p *RegexpOutputParser) Parse(response *CommandResponse) ([]*Result, error) {
 	return nil, nil
 }
 
@@ -74,7 +74,7 @@ func (p *RegexpOutputParser) Parse(response *CommandResponse) ([]*Diagnostic, er
 type SarifOutputParser struct {
 }
 
-// Parse parses a command response into a slice of diagnostics.
-func (p *SarifOutputParser) Parse(response *CommandResponse) ([]*Diagnostic, error) {
+// Parse parses a command response into a slice of results.
+func (p *SarifOutputParser) Parse(response *CommandResponse) ([]*Result, error) {
 	return nil, nil
 }

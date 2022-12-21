@@ -202,3 +202,71 @@ func (x *ProcessorType) UnmarshalText(text []byte) error {
 	*x = tmp
 	return nil
 }
+
+const (
+	// ResultLevelNone is a ResultLevel of type none.
+	ResultLevelNone ResultLevel = "none"
+	// ResultLevelNote is a ResultLevel of type note.
+	ResultLevelNote ResultLevel = "note"
+	// ResultLevelWarning is a ResultLevel of type warning.
+	ResultLevelWarning ResultLevel = "warning"
+	// ResultLevelError is a ResultLevel of type error.
+	ResultLevelError ResultLevel = "error"
+)
+
+var ErrInvalidResultLevel = fmt.Errorf("not a valid ResultLevel, try [%s]", strings.Join(_ResultLevelNames, ", "))
+
+var _ResultLevelNames = []string{
+	string(ResultLevelNone),
+	string(ResultLevelNote),
+	string(ResultLevelWarning),
+	string(ResultLevelError),
+}
+
+// ResultLevelNames returns a list of possible string values of ResultLevel.
+func ResultLevelNames() []string {
+	tmp := make([]string, len(_ResultLevelNames))
+	copy(tmp, _ResultLevelNames)
+	return tmp
+}
+
+// String implements the Stringer interface.
+func (x ResultLevel) String() string {
+	return string(x)
+}
+
+// String implements the Stringer interface.
+func (x ResultLevel) IsValid() bool {
+	_, err := ParseResultLevel(string(x))
+	return err == nil
+}
+
+var _ResultLevelValue = map[string]ResultLevel{
+	"none":    ResultLevelNone,
+	"note":    ResultLevelNote,
+	"warning": ResultLevelWarning,
+	"error":   ResultLevelError,
+}
+
+// ParseResultLevel attempts to convert a string to a ResultLevel.
+func ParseResultLevel(name string) (ResultLevel, error) {
+	if x, ok := _ResultLevelValue[name]; ok {
+		return x, nil
+	}
+	return ResultLevel(""), fmt.Errorf("%s is %w", name, ErrInvalidResultLevel)
+}
+
+// MarshalText implements the text marshaller method.
+func (x ResultLevel) MarshalText() ([]byte, error) {
+	return []byte(string(x)), nil
+}
+
+// UnmarshalText implements the text unmarshaller method.
+func (x *ResultLevel) UnmarshalText(text []byte) error {
+	tmp, err := ParseResultLevel(string(text))
+	if err != nil {
+		return err
+	}
+	*x = tmp
+	return nil
+}

@@ -19,7 +19,7 @@ type Processor struct {
 	paths []string
 }
 
-func (p *Processor) Check(ctx context.Context) ([]*Diagnostic, error) {
+func (p *Processor) Check(ctx context.Context) ([]*Result, error) {
 	if p.CheckCommand == nil {
 		fmt.Println("p.CheckCommand == nil")
 		return nil, nil
@@ -27,7 +27,7 @@ func (p *Processor) Check(ctx context.Context) ([]*Diagnostic, error) {
 	return p.CheckCommand.Execute(ctx, p.Paths())
 }
 
-func (p *Processor) Fix(ctx context.Context) ([]*Diagnostic, error) {
+func (p *Processor) Fix(ctx context.Context) ([]*Result, error) {
 	if p.FixCommand == nil {
 		fmt.Println("p.FixCommand == nil")
 		return nil, nil
