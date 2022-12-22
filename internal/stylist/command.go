@@ -101,12 +101,13 @@ func (c *Command) executeBatch(ctx context.Context, paths []string) ([]*Result, 
 		return nil, err
 	}
 
-	resp := &CommandResponse{
-		Out:      stdout,
-		Err:      stderr,
-		ExitCode: cmd.ProcessState.ExitCode(),
-	}
-	return NewOutputParser(c.Output).Parse(resp)
+	return NewOutputParser(c.Output).Parse(
+		&CommandOutput{
+			Out:      stdout,
+			Err:      stderr,
+			ExitCode: cmd.ProcessState.ExitCode(),
+		},
+	)
 }
 
 func (c *Command) parallelism() int {
@@ -150,7 +151,8 @@ func (c *Command) partition(paths []string) [][]string {
 	return batches
 }
 
-type CommandResponse struct {
+// CommandOutput contains the result of a single command invocation.
+type CommandOutput struct {
 	Out      io.Reader
 	Err      io.Reader
 	ExitCode int
