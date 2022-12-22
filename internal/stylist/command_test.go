@@ -42,8 +42,8 @@ func TestCommand_Execute(t *testing.T) {
 				Template: "",
 			},
 			paths: []string{
-				"testdata/aaa.txt",
-				"testdata/bbb.txt",
+				"testdata/txt/aaa.txt",
+				"testdata/txt/bbb.txt",
 			},
 			expected: []*Result{},
 			err:      ErrCommandEmpty.Error(),
@@ -54,8 +54,8 @@ func TestCommand_Execute(t *testing.T) {
 				Template: `"`,
 			},
 			paths: []string{
-				"testdata/aaa.txt",
-				"testdata/bbb.txt",
+				"testdata/txt/aaa.txt",
+				"testdata/txt/bbb.txt",
 			},
 			expected: []*Result{},
 			err:      "EOF found when expecting closing quote",
@@ -69,16 +69,16 @@ func TestCommand_Execute(t *testing.T) {
 				Output:   OutputTypeNone,
 			},
 			paths: []string{
-				"testdata/aaa.txt",
-				"testdata/bbb.txt",
+				"testdata/txt/aaa.txt",
+				"testdata/txt/bbb.txt",
 			},
 			setup: func(c *Command) {
 				c.client.RegisterStub(
-					run.MatchString("test-linter --verbose testdata/aaa.txt"),
+					run.MatchString("test-linter --verbose testdata/txt/aaa.txt"),
 					run.StringResponse(""),
 				)
 				c.client.RegisterStub(
-					run.MatchString("test-linter --verbose testdata/bbb.txt"),
+					run.MatchString("test-linter --verbose testdata/txt/bbb.txt"),
 					run.StringResponse(""),
 				)
 			},
@@ -94,8 +94,8 @@ func TestCommand_Execute(t *testing.T) {
 				Output:   OutputTypeNone,
 			},
 			paths: []string{
-				"testdata/aaa.txt",
-				"testdata/bbb.txt",
+				"testdata/txt/aaa.txt",
+				"testdata/txt/bbb.txt",
 			},
 			setup: func(c *Command) {
 				c.client.RegisterStub(
@@ -125,12 +125,12 @@ func TestCommand_Execute(t *testing.T) {
 				Output:   OutputTypeNone,
 			},
 			paths: []string{
-				"testdata/aaa.txt",
-				"testdata/bbb.txt",
+				"testdata/txt/aaa.txt",
+				"testdata/txt/bbb.txt",
 			},
 			setup: func(c *Command) {
 				c.client.RegisterStub(
-					run.MatchString("test-linter --verbose testdata/aaa.txt testdata/bbb.txt"),
+					run.MatchString("test-linter --verbose testdata/txt/aaa.txt testdata/txt/bbb.txt"),
 					run.StringResponse(""),
 				)
 			},
