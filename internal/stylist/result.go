@@ -21,5 +21,5 @@ type ResultRule struct {
 	ID          string
 	Name        string
 	Description string
-	HelpURI     string
+	URI         string
 }

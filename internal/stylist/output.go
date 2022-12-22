@@ -4,11 +4,28 @@ import (
 	"fmt"
 )
 
+// OutputMapping is a set of rules for how to map command output to a result.
+//
+// Mappings are typically defined in stylist.yml when the output type
+// has been set to "json" or "regexp".
+type OutputMapping struct {
+	Level           string `yaml:"level"`
+	Path            string `yaml:"path"`
+	StartLine       string `yaml:"start_line"`
+	StartColumn     string `yaml:"start_column"`
+	EndLine         string `yaml:"end_line"`
+	EndColumn       string `yaml:"end_column"`
+	RuleID          string `yaml:"rule_id"`
+	RuleName        string `yaml:"rule_name"`
+	RuleDescription string `yaml:"rule_description"`
+	RuleURI         string `yaml:"rule_url"`
+}
+
 // OutputParser is the interface that wraps the Parse method.
 //
 // Parse parses command output into a slice of results.
 type OutputParser interface {
-	Parse(output *CommandOutput) ([]*Result, error)
+	Parse(output CommandOutput, mapping OutputMapping) ([]*Result, error)
 }
 
 // NewOutputParser returns the appropriate parser for the given output type.
@@ -36,7 +53,7 @@ type JSONOutputParser struct {
 }
 
 // Parse parses command output into a slice of results.
-func (p *JSONOutputParser) Parse(output *CommandOutput) ([]*Result, error) {
+func (p *JSONOutputParser) Parse(output CommandOutput, mapping OutputMapping) ([]*Result, error) {
 	return nil, nil
 }
 
@@ -49,7 +66,7 @@ type NoneOutputParser struct {
 }
 
 // Parse parses command output into a slice of results.
-func (p *NoneOutputParser) Parse(output *CommandOutput) ([]*Result, error) {
+func (p *NoneOutputParser) Parse(output CommandOutput, mapping OutputMapping) ([]*Result, error) {
 	return nil, nil
 }
 
@@ -62,7 +79,7 @@ type RegexpOutputParser struct {
 }
 
 // Parse parses command output into a slice of results.
-func (p *RegexpOutputParser) Parse(output *CommandOutput) ([]*Result, error) {
+func (p *RegexpOutputParser) Parse(output CommandOutput, mapping OutputMapping) ([]*Result, error) {
 	return nil, nil
 }
 
@@ -75,6 +92,6 @@ type SarifOutputParser struct {
 }
 
 // Parse parses command output into a slice of results.
-func (p *SarifOutputParser) Parse(output *CommandOutput) ([]*Result, error) {
+func (p *SarifOutputParser) Parse(output CommandOutput, mapping OutputMapping) ([]*Result, error) {
 	return nil, nil
 }

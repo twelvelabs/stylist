@@ -26,11 +26,12 @@ func NewCommand(client *run.Client) *Command {
 
 // Command represents a check or fix command to be run by a Processor.
 type Command struct {
-	Template    string     `yaml:"template"`
-	Input       InputType  `yaml:"input"`
-	Output      OutputType `yaml:"output"`
-	Parallelism int        `yaml:"parallelism"`
-	BatchSize   int        `yaml:"batch_size"`
+	Template    string        `yaml:"template"`
+	Input       InputType     `yaml:"input"`
+	Output      OutputType    `yaml:"output"`
+	Mapping     OutputMapping `yaml:"mapping"`
+	Parallelism int           `yaml:"parallelism"`
+	BatchSize   int           `yaml:"batch_size"`
 
 	client *run.Client
 }
@@ -102,11 +103,12 @@ func (c *Command) executeBatch(ctx context.Context, paths []string) ([]*Result, 
 	}
 
 	return NewOutputParser(c.Output).Parse(
-		&CommandOutput{
+		CommandOutput{
 			Out:      stdout,
 			Err:      stderr,
 			ExitCode: cmd.ProcessState.ExitCode(),
 		},
+		c.Mapping,
 	)
 }
 
