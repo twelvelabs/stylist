@@ -1,6 +1,7 @@
 package stylist
 
 import (
+	"encoding/json"
 	"fmt"
 )
 
@@ -37,7 +38,12 @@ type JSONOutputParser struct {
 
 // Parse parses command output into a slice of results.
 func (p *JSONOutputParser) Parse(output CommandOutput, mapping OutputMapping) ([]*Result, error) {
-	return nil, nil
+	var items []outputData
+	err := json.NewDecoder(output.Out).Decode(&items)
+	if err != nil {
+		return nil, err
+	}
+	return mapping.ToResultSlice(items)
 }
 
 /*

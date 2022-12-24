@@ -1,0 +1,34 @@
+[
+    {
+        "file": "entrypoint.sh",
+        "line": 15,
+        "endLine": 15,
+        "column": 6,
+        "endColumn": 19,
+        "level": "info",
+        "code": 2086,
+        "message": "Double quote to prevent globbing and word splitting.",
+        "fix": {
+            "replacements": [
+                {
+                    "column": 6,
+                    "endColumn": 6,
+                    "endLine": 15,
+                    "insertionPoint": "afterEnd",
+                    "line": 15,
+                    "precedence": 11,
+                    "replacement": "\""
+                },
+                {
+                    "column": 19,
+                    "endColumn": 19,
+                    "endLine": 15,
+                    "insertionPoint": "beforeStart",
+                    "line": 15,
+                    "precedence": 11,
+                    "replacement": "\""
+                }
+            ]
+        }
+    }
+]
