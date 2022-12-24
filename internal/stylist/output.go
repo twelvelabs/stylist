@@ -4,23 +4,6 @@ import (
 	"fmt"
 )
 
-// OutputMapping is a set of rules for how to map command output to a result.
-//
-// Mappings are typically defined in stylist.yml when the output type
-// has been set to "json" or "regexp".
-type OutputMapping struct {
-	Level           string `yaml:"level"`
-	Path            string `yaml:"path"`
-	StartLine       string `yaml:"start_line"`
-	StartColumn     string `yaml:"start_column"`
-	EndLine         string `yaml:"end_line"`
-	EndColumn       string `yaml:"end_column"`
-	RuleID          string `yaml:"rule_id"`
-	RuleName        string `yaml:"rule_name"`
-	RuleDescription string `yaml:"rule_description"`
-	RuleURI         string `yaml:"rule_url"`
-}
-
 // OutputParser is the interface that wraps the Parse method.
 //
 // Parse parses command output into a slice of results.
