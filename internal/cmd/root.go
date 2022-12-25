@@ -90,13 +90,21 @@ func (a *RootAction) Run(ctx context.Context) error {
 
 	fmt.Println("")
 	for _, processor := range processors {
+		processor.SetCmdClient(a.CmdClient)
+
 		a.Messenger.Success("%s:\n", processor.Name)
 		fmt.Println("")
 		for _, path := range processor.Paths() {
 			a.Messenger.Info("%s\n", path)
 		}
 		fmt.Println("")
-		_, _ = processor.Check(ctx)
+		results, err := processor.Check(ctx)
+		if err != nil {
+			return err
+		}
+		for _, result := range results {
+			fmt.Printf("RESULT: %#v \n", result)
+		}
 		// _, _ = processor.Fix(ctx)
 		fmt.Println("")
 	}

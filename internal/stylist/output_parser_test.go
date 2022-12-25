@@ -29,7 +29,7 @@ func TestJSONOutputParser_Parse(t *testing.T) {
 	parser := &JSONOutputParser{}
 	results, err := parser.Parse(
 		CommandOutput{
-			Out: file,
+			Content: file,
 		},
 		OutputMapping{
 			Level:           render.MustCompile(`{{ .level }}`),

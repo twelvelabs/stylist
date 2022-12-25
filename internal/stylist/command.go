@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/exec"
 	"runtime"
 
 	"github.com/google/shlex"
@@ -86,6 +87,7 @@ func (c *Command) executeBatch(ctx context.Context, paths []string) ([]*Result, 
 
 	cmd := c.client.CommandContext(ctx, args[0], args[1:]...)
 
+	// Setup the IO streams
 	if c.InputType == InputTypeStdin {
 		file, err := os.Open(paths[0])
 		if err != nil {
@@ -93,25 +95,36 @@ func (c *Command) executeBatch(ctx context.Context, paths []string) ([]*Result, 
 		}
 		cmd.Stdin = file
 	}
-
 	stderr := &bytes.Buffer{}
 	stdout := &bytes.Buffer{}
 	cmd.Stderr = stderr
 	cmd.Stdout = stdout
 
+	fmt.Println("[DEBUG] Command:", cmd.String())
+
 	err = cmd.Run()
-	if err != nil {
+
+	// Ignoring ExitError so we can parse the output.
+	var exitErr *exec.ExitError
+	if err != nil && !errors.As(err, &exitErr) {
+		// non-ExitError (binary not found, permissions error, etc).
 		return nil, err
 	}
 
-	return NewOutputParser(c.Output).Parse(
-		CommandOutput{
-		Out:      stdout,
-		Err:      stderr,
+	// Build a CommandOutput struct...
+	content := stdout
+	if c.OutputType == OutputTypeStderr {
+		content = stderr
+	}
+	output := CommandOutput{
+		Content:  content,
 		ExitCode: cmd.ProcessState.ExitCode(),
-		},
-		c.Mapping,
-	)
+	}
+
+	fmt.Println("[DEBUG] Output:", output.String())
+
+	// Then parse the output using the appropriate parser.
+	return NewOutputParser(c.OutputFormat).Parse(output, c.OutputMapping)
 }
 
 func (c *Command) parallelism() int {
@@ -157,7 +170,20 @@ func (c *Command) partition(paths []string) [][]string {
 
 // CommandOutput contains the result of a single command invocation.
 type CommandOutput struct {
-	Out      io.Reader
-	Err      io.Reader
+	Content  io.Reader
 	ExitCode int
+}
+
+func (o *CommandOutput) String() string {
+	// io hijinks to reset the read offset
+	buf := &bytes.Buffer{}
+	reader := io.TeeReader(o.Content, buf)
+	o.Content = buf
+
+	content, _ := io.ReadAll(reader)
+	return fmt.Sprintf(
+		`<CommandOutput Content="%v" ExitCode="%v">`,
+		string(content),
+		o.ExitCode,
+	)
 }

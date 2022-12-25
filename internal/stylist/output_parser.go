@@ -39,7 +39,7 @@ type JSONOutputParser struct {
 // Parse parses command output into a slice of results.
 func (p *JSONOutputParser) Parse(output CommandOutput, mapping OutputMapping) ([]*Result, error) {
 	var items []outputData
-	err := json.NewDecoder(output.Out).Decode(&items)
+	err := json.NewDecoder(output.Content).Decode(&items)
 	if err != nil {
 		return nil, err
 	}
