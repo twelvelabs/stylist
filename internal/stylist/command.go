@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"os"
 	"runtime"
@@ -26,12 +27,13 @@ func NewCommand(client *run.Client) *Command {
 
 // Command represents a check or fix command to be run by a Processor.
 type Command struct {
-	Template    string        `yaml:"template"`
-	Input       InputType     `yaml:"input"`
-	Output      OutputType    `yaml:"output"`
-	Mapping     OutputMapping `yaml:"mapping"`
-	Parallelism int           `yaml:"parallelism"`
-	BatchSize   int           `yaml:"batch_size"`
+	Template      string        `yaml:"template"`
+	InputType     InputType     `yaml:"input"    default:"variadic"`
+	OutputType    OutputType    `yaml:"output"   default:"stdout"`
+	OutputFormat  OutputFormat  `yaml:"format"   default:"none"`
+	OutputMapping OutputMapping `yaml:"mapping"`
+	Parallelism   int           `yaml:"parallelism"`
+	BatchSize     int           `yaml:"batch_size"`
 
 	client *run.Client
 }
@@ -75,16 +77,16 @@ func (c *Command) executeBatch(ctx context.Context, paths []string) ([]*Result, 
 		return nil, ErrCommandEmpty
 	}
 
-	if c.Input == InputTypeArg {
+	if c.InputType == InputTypeArg {
 		args = append(args, paths[0])
 	}
-	if c.Input == InputTypeVariadic {
+	if c.InputType == InputTypeVariadic {
 		args = append(args, paths...)
 	}
 
 	cmd := c.client.CommandContext(ctx, args[0], args[1:]...)
 
-	if c.Input == InputTypeStdin {
+	if c.InputType == InputTypeStdin {
 		file, err := os.Open(paths[0])
 		if err != nil {
 			return nil, err
@@ -104,9 +106,9 @@ func (c *Command) executeBatch(ctx context.Context, paths []string) ([]*Result, 
 
 	return NewOutputParser(c.Output).Parse(
 		CommandOutput{
-			Out:      stdout,
-			Err:      stderr,
-			ExitCode: cmd.ProcessState.ExitCode(),
+		Out:      stdout,
+		Err:      stderr,
+		ExitCode: cmd.ProcessState.ExitCode(),
 		},
 		c.Mapping,
 	)
@@ -121,7 +123,7 @@ func (c *Command) parallelism() int {
 
 // Partitions paths into batches of 10.
 func (c *Command) partition(paths []string) [][]string {
-	if c.Input != InputTypeVariadic {
+	if c.InputType != InputTypeVariadic {
 		// For non-variadic input we just return a slice of single-path batches.
 		// This allows us to have a single code path, but at the expense
 		// of a bunch of useless allocations.

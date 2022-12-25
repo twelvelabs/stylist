@@ -29,7 +29,7 @@ type OutputMapping struct {
 	RuleID          *render.Template `yaml:"rule_id"`
 	RuleName        *render.Template `yaml:"rule_name"`
 	RuleDescription *render.Template `yaml:"rule_description"`
-	RuleURI         *render.Template `yaml:"rule_url"`
+	RuleURI         *render.Template `yaml:"rule_uri"`
 }
 
 // ToResult converts a map of output data to a Result struct.

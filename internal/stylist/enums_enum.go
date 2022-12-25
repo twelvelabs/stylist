@@ -76,23 +76,85 @@ func (x *InputType) UnmarshalText(text []byte) error {
 }
 
 const (
-	// OutputTypeJson is a OutputType of type json.
-	OutputTypeJson OutputType = "json"
-	// OutputTypeNone is a OutputType of type none.
-	OutputTypeNone OutputType = "none"
-	// OutputTypeRegexp is a OutputType of type regexp.
-	OutputTypeRegexp OutputType = "regexp"
-	// OutputTypeSarif is a OutputType of type sarif.
-	OutputTypeSarif OutputType = "sarif"
+	// OutputFormatJson is a OutputFormat of type json.
+	OutputFormatJson OutputFormat = "json"
+	// OutputFormatNone is a OutputFormat of type none.
+	OutputFormatNone OutputFormat = "none"
+	// OutputFormatRegexp is a OutputFormat of type regexp.
+	OutputFormatRegexp OutputFormat = "regexp"
+	// OutputFormatSarif is a OutputFormat of type sarif.
+	OutputFormatSarif OutputFormat = "sarif"
+)
+
+var ErrInvalidOutputFormat = fmt.Errorf("not a valid OutputFormat, try [%s]", strings.Join(_OutputFormatNames, ", "))
+
+var _OutputFormatNames = []string{
+	string(OutputFormatJson),
+	string(OutputFormatNone),
+	string(OutputFormatRegexp),
+	string(OutputFormatSarif),
+}
+
+// OutputFormatNames returns a list of possible string values of OutputFormat.
+func OutputFormatNames() []string {
+	tmp := make([]string, len(_OutputFormatNames))
+	copy(tmp, _OutputFormatNames)
+	return tmp
+}
+
+// String implements the Stringer interface.
+func (x OutputFormat) String() string {
+	return string(x)
+}
+
+// String implements the Stringer interface.
+func (x OutputFormat) IsValid() bool {
+	_, err := ParseOutputFormat(string(x))
+	return err == nil
+}
+
+var _OutputFormatValue = map[string]OutputFormat{
+	"json":   OutputFormatJson,
+	"none":   OutputFormatNone,
+	"regexp": OutputFormatRegexp,
+	"sarif":  OutputFormatSarif,
+}
+
+// ParseOutputFormat attempts to convert a string to a OutputFormat.
+func ParseOutputFormat(name string) (OutputFormat, error) {
+	if x, ok := _OutputFormatValue[name]; ok {
+		return x, nil
+	}
+	return OutputFormat(""), fmt.Errorf("%s is %w", name, ErrInvalidOutputFormat)
+}
+
+// MarshalText implements the text marshaller method.
+func (x OutputFormat) MarshalText() ([]byte, error) {
+	return []byte(string(x)), nil
+}
+
+// UnmarshalText implements the text unmarshaller method.
+func (x *OutputFormat) UnmarshalText(text []byte) error {
+	tmp, err := ParseOutputFormat(string(text))
+	if err != nil {
+		return err
+	}
+	*x = tmp
+	return nil
+}
+
+const (
+	// OutputTypeStdout is a OutputType of type stdout.
+	OutputTypeStdout OutputType = "stdout"
+	// OutputTypeStderr is a OutputType of type stderr.
+	OutputTypeStderr OutputType = "stderr"
 )
 
 var ErrInvalidOutputType = fmt.Errorf("not a valid OutputType, try [%s]", strings.Join(_OutputTypeNames, ", "))
 
 var _OutputTypeNames = []string{
-	string(OutputTypeJson),
-	string(OutputTypeNone),
-	string(OutputTypeRegexp),
-	string(OutputTypeSarif),
+	string(OutputTypeStdout),
+	string(OutputTypeStderr),
 }
 
 // OutputTypeNames returns a list of possible string values of OutputType.
@@ -114,10 +176,8 @@ func (x OutputType) IsValid() bool {
 }
 
 var _OutputTypeValue = map[string]OutputType{
-	"json":   OutputTypeJson,
-	"none":   OutputTypeNone,
-	"regexp": OutputTypeRegexp,
-	"sarif":  OutputTypeSarif,
+	"stdout": OutputTypeStdout,
+	"stderr": OutputTypeStderr,
 }
 
 // ParseOutputType attempts to convert a string to a OutputType.
@@ -136,66 +196,6 @@ func (x OutputType) MarshalText() ([]byte, error) {
 // UnmarshalText implements the text unmarshaller method.
 func (x *OutputType) UnmarshalText(text []byte) error {
 	tmp, err := ParseOutputType(string(text))
-	if err != nil {
-		return err
-	}
-	*x = tmp
-	return nil
-}
-
-const (
-	// ProcessorTypeFormatter is a ProcessorType of type formatter.
-	ProcessorTypeFormatter ProcessorType = "formatter"
-	// ProcessorTypeLinter is a ProcessorType of type linter.
-	ProcessorTypeLinter ProcessorType = "linter"
-)
-
-var ErrInvalidProcessorType = fmt.Errorf("not a valid ProcessorType, try [%s]", strings.Join(_ProcessorTypeNames, ", "))
-
-var _ProcessorTypeNames = []string{
-	string(ProcessorTypeFormatter),
-	string(ProcessorTypeLinter),
-}
-
-// ProcessorTypeNames returns a list of possible string values of ProcessorType.
-func ProcessorTypeNames() []string {
-	tmp := make([]string, len(_ProcessorTypeNames))
-	copy(tmp, _ProcessorTypeNames)
-	return tmp
-}
-
-// String implements the Stringer interface.
-func (x ProcessorType) String() string {
-	return string(x)
-}
-
-// String implements the Stringer interface.
-func (x ProcessorType) IsValid() bool {
-	_, err := ParseProcessorType(string(x))
-	return err == nil
-}
-
-var _ProcessorTypeValue = map[string]ProcessorType{
-	"formatter": ProcessorTypeFormatter,
-	"linter":    ProcessorTypeLinter,
-}
-
-// ParseProcessorType attempts to convert a string to a ProcessorType.
-func ParseProcessorType(name string) (ProcessorType, error) {
-	if x, ok := _ProcessorTypeValue[name]; ok {
-		return x, nil
-	}
-	return ProcessorType(""), fmt.Errorf("%s is %w", name, ErrInvalidProcessorType)
-}
-
-// MarshalText implements the text marshaller method.
-func (x ProcessorType) MarshalText() ([]byte, error) {
-	return []byte(string(x)), nil
-}
-
-// UnmarshalText implements the text unmarshaller method.
-func (x *ProcessorType) UnmarshalText(text []byte) error {
-	tmp, err := ParseProcessorType(string(text))
 	if err != nil {
 		return err
 	}

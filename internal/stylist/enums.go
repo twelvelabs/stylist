@@ -7,15 +7,15 @@ package stylist
 // ENUM(arg, stdin, variadic).
 type InputType string
 
-// OutputType represents how to parse command output.
+// OutputType represents where command output is sent.
 //
-// ENUM(json, none, regexp, sarif).
+// ENUM(stdout, stderr).
 type OutputType string
 
-// ProcessorType represents the type of processor.
+// OutputFormat represents how to parse command output.
 //
-// ENUM(formatter, linter).
-type ProcessorType string
+// ENUM(json, none, regexp, sarif).
+type OutputFormat string
 
 // ResultLevel represents the severity level of the result.
 // These values were chosen to match those in the SARIF specification.

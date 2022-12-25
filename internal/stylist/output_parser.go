@@ -13,18 +13,18 @@ type OutputParser interface {
 }
 
 // NewOutputParser returns the appropriate parser for the given output type.
-func NewOutputParser(ot OutputType) OutputParser { //nolint:ireturn
-	switch ot {
-	case OutputTypeJson:
+func NewOutputParser(format OutputFormat) OutputParser { //nolint:ireturn
+	switch format {
+	case OutputFormatJson:
 		return &JSONOutputParser{}
-	case OutputTypeNone:
+	case OutputFormatNone:
 		return &NoneOutputParser{}
-	case OutputTypeRegexp:
+	case OutputFormatRegexp:
 		return &RegexpOutputParser{}
-	case OutputTypeSarif:
+	case OutputFormatSarif:
 		return &SarifOutputParser{}
 	default:
-		panic(fmt.Sprintf("unknown output type: %s", ot))
+		panic(fmt.Sprintf("unknown output format: %s", format))
 	}
 }
 

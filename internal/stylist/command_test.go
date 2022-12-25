@@ -27,9 +27,9 @@ func TestCommand_Execute(t *testing.T) {
 		{
 			desc: "empty path set is a noop",
 			command: &Command{
-				Template: "test-linter --verbose",
-				Input:    InputTypeArg,
-				Output:   OutputTypeNone,
+				Template:     "test-linter --verbose",
+				InputType:    InputTypeArg,
+				OutputFormat: OutputFormatNone,
 			},
 			paths:    []string{},
 			expected: []*Result{},
@@ -64,9 +64,9 @@ func TestCommand_Execute(t *testing.T) {
 		{
 			desc: "[arg] runs command once per path",
 			command: &Command{
-				Template: "test-linter --verbose",
-				Input:    InputTypeArg,
-				Output:   OutputTypeNone,
+				Template:     "test-linter --verbose",
+				InputType:    InputTypeArg,
+				OutputFormat: OutputFormatNone,
 			},
 			paths: []string{
 				"testdata/txt/aaa.txt",
@@ -89,9 +89,9 @@ func TestCommand_Execute(t *testing.T) {
 		{
 			desc: "[stdin] runs command once per path with content passed to stdin",
 			command: &Command{
-				Template: "test-linter --verbose",
-				Input:    InputTypeStdin,
-				Output:   OutputTypeNone,
+				Template:     "test-linter --verbose",
+				InputType:    InputTypeStdin,
+				OutputFormat: OutputFormatNone,
 			},
 			paths: []string{
 				"testdata/txt/aaa.txt",
@@ -120,9 +120,9 @@ func TestCommand_Execute(t *testing.T) {
 		{
 			desc: "[variadic] runs command once per batch of paths",
 			command: &Command{
-				Template: "test-linter --verbose",
-				Input:    InputTypeVariadic,
-				Output:   OutputTypeNone,
+				Template:     "test-linter --verbose",
+				InputType:    InputTypeVariadic,
+				OutputFormat: OutputFormatNone,
 			},
 			paths: []string{
 				"testdata/txt/aaa.txt",
@@ -189,7 +189,7 @@ func TestCommand_partition(t *testing.T) {
 		{
 			desc: "[arg] partitions into single-item batches",
 			command: &Command{
-				Input: InputTypeArg,
+				InputType: InputTypeArg,
 			},
 			paths: []string{
 				"aaa.txt",
@@ -206,7 +206,7 @@ func TestCommand_partition(t *testing.T) {
 		{
 			desc: "[stdin] partitions into single-item batches",
 			command: &Command{
-				Input: InputTypeStdin,
+				InputType: InputTypeStdin,
 			},
 			paths: []string{
 				"aaa.txt",
@@ -223,7 +223,7 @@ func TestCommand_partition(t *testing.T) {
 		{
 			desc: "[variadic] partitions into batches",
 			command: &Command{
-				Input:     InputTypeVariadic,
+				InputType: InputTypeVariadic,
 				BatchSize: 3,
 			},
 			paths: []string{

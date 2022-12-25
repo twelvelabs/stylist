@@ -12,13 +12,13 @@ import (
 
 func TestNewOutputParser(t *testing.T) {
 	// Ensure a parser exists for each enum value.
-	for _, name := range OutputTypeNames() {
+	for _, name := range OutputFormatNames() {
 		assert.NotPanics(t, func() {
-			_ = NewOutputParser(OutputType(name))
+			_ = NewOutputParser(OutputFormat(name))
 		})
 	}
-	assert.PanicsWithValue(t, "unknown output type: unknown", func() {
-		_ = NewOutputParser(OutputType("unknown"))
+	assert.PanicsWithValue(t, "unknown output format: unknown", func() {
+		_ = NewOutputParser(OutputFormat("unknown"))
 	})
 }
 
