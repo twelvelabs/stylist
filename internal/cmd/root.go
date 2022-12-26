@@ -98,32 +98,18 @@ func (a *RootAction) Run(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	processors := config.Processors
 
-	a.Messenger.Info("Indexing...\n")
+	a.Messenger.Info("Checking...\n")
 
-	err = processors.Index(a.pathSpecs, config.Excludes)
+	pipeline := stylist.NewPipeline(config.Processors, config.Excludes)
+	results, err := pipeline.Check(ctx, a.pathSpecs)
 	if err != nil {
 		return err
 	}
 
 	fmt.Println("")
-	for _, processor := range processors {
-		a.Messenger.Success("%s:\n", processor.Name)
-		fmt.Println("")
-		for _, path := range processor.Paths() {
-			a.Messenger.Info("%s\n", path)
-		}
-		fmt.Println("")
-		results, err := processor.Check(ctx)
-		if err != nil {
-			return err
-		}
-		for _, result := range results {
-			a.App.Logger.Debug(fmt.Sprintf("%#v", result))
-		}
-		// _, _ = processor.Fix(ctx)
-		fmt.Println("")
+	for _, result := range results {
+		a.App.Logger.Debug(fmt.Sprintf("%#v", result))
 	}
 	fmt.Println("")
 

@@ -1,3 +1,29 @@
+refactor NewApp and NewTestApp to take a context arg
+    - move InitContext logic into constructors
+    - change main func to use command.ExecuteContext(ctx)
+
+implement regexp parser
+implement sarif parser
+implement diff parser
+
+implement a result formatter framework
+    sarif
+    text/tty/pretty
+    yaml?
+    template
+add format flag for selecting result formatter
+
+implement different subcommands:
+    [see command notes below]
+
+implement config presets for common tools that can be extended in user config
+support top level .stylist.yml file (vs nested in dir)
+editor config support
+
+implement file type filtering
+    i.e. porting identify.py to golang
+
+
 
 stylist list [linters|formatters]
 stylist check --type [lint|format] --processor [name]
