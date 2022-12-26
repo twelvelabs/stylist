@@ -11,20 +11,12 @@ import (
 	"runtime"
 
 	"github.com/google/shlex"
-	"github.com/twelvelabs/termite/run"
 	"golang.org/x/sync/errgroup"
 )
 
 var (
 	ErrCommandEmpty = errors.New("empty command")
 )
-
-// NewCommand returns a new Command.
-func NewCommand(client *run.Client) *Command {
-	return &Command{
-		client: client,
-	}
-}
 
 // Command represents a check or fix command to be run by a Processor.
 type Command struct {
@@ -35,8 +27,6 @@ type Command struct {
 	OutputMapping OutputMapping `yaml:"mapping"`
 	Parallelism   int           `yaml:"parallelism"`
 	BatchSize     int           `yaml:"batch_size"`
-
-	client *run.Client
 }
 
 // Execute executes paths concurrently in batches of 10.
@@ -69,6 +59,9 @@ func (c *Command) executeBatch(ctx context.Context, paths []string) ([]*Result, 
 		return nil, nil
 	}
 
+	logger := AppLogger(ctx)
+	client := AppCmdClient(ctx)
+
 	// TODO: render template string
 	args, err := shlex.Split(c.Template)
 	if err != nil {
@@ -85,7 +78,7 @@ func (c *Command) executeBatch(ctx context.Context, paths []string) ([]*Result, 
 		args = append(args, paths...)
 	}
 
-	cmd := c.client.CommandContext(ctx, args[0], args[1:]...)
+	cmd := client.CommandContext(ctx, args[0], args[1:]...)
 
 	// Setup the IO streams
 	if c.InputType == InputTypeStdin {
@@ -100,7 +93,7 @@ func (c *Command) executeBatch(ctx context.Context, paths []string) ([]*Result, 
 	cmd.Stderr = stderr
 	cmd.Stdout = stdout
 
-	fmt.Println("[DEBUG] Command:", cmd.String())
+	logger.Debugln("Command:", cmd.String())
 
 	err = cmd.Run()
 
@@ -121,7 +114,7 @@ func (c *Command) executeBatch(ctx context.Context, paths []string) ([]*Result, 
 		ExitCode: cmd.ProcessState.ExitCode(),
 	}
 
-	fmt.Println("[DEBUG] Output:", output.String())
+	logger.Debugln("Output:", output.String())
 
 	// Then parse the output using the appropriate parser.
 	return NewOutputParser(c.OutputFormat).Parse(output, c.OutputMapping)

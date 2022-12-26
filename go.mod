@@ -7,6 +7,7 @@ require (
 	github.com/bmatcuk/doublestar/v4 v4.4.0
 	github.com/deckarep/golang-set/v2 v2.1.0
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
+	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/cobra v1.6.1
 	github.com/stretchr/testify v1.8.1
 	github.com/twelvelabs/termite v0.4.1

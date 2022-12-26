@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/twelvelabs/termite/conf"
 	"github.com/twelvelabs/termite/ioutil"
@@ -36,7 +37,10 @@ func NewRootCmd(app *stylist.App) *cobra.Command {
 		SilenceUsage: true,
 	}
 
-	cmd.Flags().StringVar(&action.ConfigLoader.Path, "config", action.ConfigLoader.Path, "Config path")
+	cmd.Flags().StringVarP(
+		&action.ConfigLoader.Path, "config", "c", action.ConfigLoader.Path, "Config path",
+	)
+	cmd.Flags().CountVarP(&action.Verbosity, "verbose", "v", "Set the log level")
 
 	cmd.Context()
 
@@ -45,6 +49,7 @@ func NewRootCmd(app *stylist.App) *cobra.Command {
 
 func NewRootAction(app *stylist.App) *RootAction {
 	return &RootAction{
+		App:          app,
 		IO:           app.IO,
 		ConfigLoader: app.ConfigLoader,
 		Messenger:    app.Messenger,
@@ -53,15 +58,27 @@ func NewRootAction(app *stylist.App) *RootAction {
 }
 
 type RootAction struct {
+	App          *stylist.App
 	IO           *ioutil.IOStreams
 	ConfigLoader *conf.Loader[*stylist.Config]
 	Messenger    *ui.Messenger
 	CmdClient    *run.Client
 
+	Verbosity int
+
 	pathSpecs []string
 }
 
 func (a *RootAction) Setup(cmd *cobra.Command, args []string) error {
+	// Panic: 0
+	// Fatal: 1
+	// Error: 2  (default)
+	// Warn:  3  -v
+	// Info:  4  -vv
+	// Debug: 5  -vvv
+	// Trace: 6  -vvvv
+	a.App.SetLogLevel(logrus.Level(a.Verbosity + 2))
+
 	a.pathSpecs = args
 	if len(a.pathSpecs) == 0 {
 		a.pathSpecs = []string{"."}
@@ -75,6 +92,8 @@ func (a *RootAction) Validate() error {
 }
 
 func (a *RootAction) Run(ctx context.Context) error {
+	ctx = a.App.InitContext(ctx)
+
 	config, err := a.ConfigLoader.Load()
 	if err != nil {
 		return err
@@ -90,8 +109,6 @@ func (a *RootAction) Run(ctx context.Context) error {
 
 	fmt.Println("")
 	for _, processor := range processors {
-		processor.SetCmdClient(a.CmdClient)
-
 		a.Messenger.Success("%s:\n", processor.Name)
 		fmt.Println("")
 		for _, path := range processor.Paths() {
@@ -103,7 +120,7 @@ func (a *RootAction) Run(ctx context.Context) error {
 			return err
 		}
 		for _, result := range results {
-			fmt.Printf("RESULT: %#v \n", result)
+			a.App.Logger.Debug(fmt.Sprintf("%#v", result))
 		}
 		// _, _ = processor.Fix(ctx)
 		fmt.Println("")

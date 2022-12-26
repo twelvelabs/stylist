@@ -6,7 +6,6 @@ import (
 	"sort"
 
 	"github.com/bmatcuk/doublestar/v4"
-	"github.com/twelvelabs/termite/run"
 )
 
 type Processor struct {
@@ -18,15 +17,6 @@ type Processor struct {
 	FixCommand   *Command `yaml:"fix"`
 
 	paths []string
-}
-
-func (p *Processor) SetCmdClient(client *run.Client) {
-	if p.CheckCommand != nil {
-		p.CheckCommand.client = client
-	}
-	if p.FixCommand != nil {
-		p.FixCommand.client = client
-	}
 }
 
 func (p *Processor) Check(ctx context.Context) ([]*Result, error) {

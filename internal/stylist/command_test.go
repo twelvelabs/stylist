@@ -9,18 +9,12 @@ import (
 	"github.com/twelvelabs/termite/run"
 )
 
-func TestNewCommand(t *testing.T) {
-	client := NewTestApp().CmdClient
-	command := NewCommand(client)
-	assert.Equal(t, client, command.client)
-}
-
 func TestCommand_Execute(t *testing.T) {
 	tests := []struct {
 		desc     string
 		command  *Command
 		paths    []string
-		setup    func(c *Command)
+		setup    func(c *run.Client)
 		expected []*Result
 		err      string
 	}{
@@ -72,12 +66,12 @@ func TestCommand_Execute(t *testing.T) {
 				"testdata/txt/aaa.txt",
 				"testdata/txt/bbb.txt",
 			},
-			setup: func(c *Command) {
-				c.client.RegisterStub(
+			setup: func(c *run.Client) {
+				c.RegisterStub(
 					run.MatchString("test-linter --verbose testdata/txt/aaa.txt"),
 					run.StringResponse(""),
 				)
-				c.client.RegisterStub(
+				c.RegisterStub(
 					run.MatchString("test-linter --verbose testdata/txt/bbb.txt"),
 					run.StringResponse(""),
 				)
@@ -97,15 +91,15 @@ func TestCommand_Execute(t *testing.T) {
 				"testdata/txt/aaa.txt",
 				"testdata/txt/bbb.txt",
 			},
-			setup: func(c *Command) {
-				c.client.RegisterStub(
+			setup: func(c *run.Client) {
+				c.RegisterStub(
 					run.MatchAll(
 						run.MatchString("test-linter --verbose"),
 						run.MatchStdin("aaa content\n"),
 					),
 					run.StringResponse(""),
 				)
-				c.client.RegisterStub(
+				c.RegisterStub(
 					run.MatchAll(
 						run.MatchString("test-linter --verbose"),
 						run.MatchStdin("bbb content\n"),
@@ -128,8 +122,8 @@ func TestCommand_Execute(t *testing.T) {
 				"testdata/txt/aaa.txt",
 				"testdata/txt/bbb.txt",
 			},
-			setup: func(c *Command) {
-				c.client.RegisterStub(
+			setup: func(c *run.Client) {
+				c.RegisterStub(
 					run.MatchString("test-linter --verbose testdata/txt/aaa.txt testdata/txt/bbb.txt"),
 					run.StringResponse(""),
 				)
@@ -140,14 +134,15 @@ func TestCommand_Execute(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.desc, func(t *testing.T) {
-			tt.command.client = NewTestApp().CmdClient
-			defer tt.command.client.VerifyStubs(t)
+			app := NewTestApp()
+			defer app.CmdClient.VerifyStubs(t)
 
 			if tt.setup != nil {
-				tt.setup(tt.command)
+				tt.setup(app.CmdClient)
 			}
 
-			actual, err := tt.command.Execute(context.Background(), tt.paths)
+			ctx := app.InitContext(context.Background())
+			actual, err := tt.command.Execute(ctx, tt.paths)
 
 			if tt.err == "" {
 				assert.NoError(t, err)
