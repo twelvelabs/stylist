@@ -105,3 +105,7 @@ func (p *Pipeline) Check(ctx context.Context, pathSpecs []string) ([]*Result, er
 	}
 	return results, nil
 }
+
+func (p *Pipeline) Fix(ctx context.Context, pathSpecs []string) ([]*Result, error) {
+	return nil, nil
+}

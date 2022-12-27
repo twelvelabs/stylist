@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 
@@ -15,7 +16,8 @@ func main() {
 		os.Exit(1)
 	}
 	command := cmd.NewRootCmd(app)
-	if err := command.Execute(); err != nil {
+	ctx := app.InitContext(context.Background())
+	if err := command.ExecuteContext(ctx); err != nil {
 		os.Exit(1)
 	}
 }

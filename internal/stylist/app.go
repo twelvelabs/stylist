@@ -10,11 +10,12 @@ import (
 	"github.com/twelvelabs/termite/ui"
 )
 
-type CtxKey string
+type ctxKey string
 
 const (
-	CtxLogger    CtxKey = "Logger"
-	CtxCmdClient CtxKey = "CmdClient"
+	ctxCmdClient    ctxKey = "stylist.CmdClient"
+	ctxConfigLoader ctxKey = "stylist.ConfigLoader"
+	ctxLogger       ctxKey = "stylist.Logger"
 )
 
 type App struct {
@@ -27,25 +28,22 @@ type App struct {
 
 // InitContext returns a new context set with app values.
 func (a *App) InitContext(ctx context.Context) context.Context {
-	ctx = context.WithValue(ctx, CtxCmdClient, a.CmdClient)
-	ctx = context.WithValue(ctx, CtxLogger, a.Logger)
+	ctx = context.WithValue(ctx, ctxCmdClient, a.CmdClient)
+	ctx = context.WithValue(ctx, ctxConfigLoader, a.ConfigLoader)
+	ctx = context.WithValue(ctx, ctxLogger, a.Logger)
 	return ctx
 }
 
-func (a *App) SetLogLevel(level logrus.Level) {
-	if level >= logrus.TraceLevel {
-		level = logrus.TraceLevel
-	}
-	a.Logger.SetLevel(level)
-	a.Logger.Debug("Set log level to " + level.String())
+func AppCmdClient(ctx context.Context) *run.Client {
+	return ctx.Value(ctxCmdClient).(*run.Client)
+}
+
+func AppConfigLoader(ctx context.Context) *conf.Loader[*Config] {
+	return ctx.Value(ctxConfigLoader).(*conf.Loader[*Config])
 }
 
 func AppLogger(ctx context.Context) *logrus.Logger {
-	return ctx.Value(CtxLogger).(*logrus.Logger)
-}
-
-func AppCmdClient(ctx context.Context) *run.Client {
-	return ctx.Value(CtxCmdClient).(*run.Client)
+	return ctx.Value(ctxLogger).(*logrus.Logger)
 }
 
 func NewApp() (*App, error) {
@@ -64,7 +62,7 @@ func NewApp() (*App, error) {
 }
 
 func NewTestApp() *App {
-	ios := ioutil.System()
+	ios := ioutil.Test()
 
 	// TODO: use fixture config file
 	loader := conf.NewLoader(&Config{}, ".stylist/stylist.yml")
