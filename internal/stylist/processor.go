@@ -1,6 +1,9 @@
 package stylist
 
 import (
+	"fmt"
+	"strings"
+
 	mapset "github.com/deckarep/golang-set/v2"
 )
 
@@ -21,33 +24,89 @@ func (p *Processor) Paths() []string {
 	return p.paths
 }
 
-type ProcessorList []*Processor
-
-func (pl ProcessorList) All() []*Processor {
-	return pl
+// ProcessorFilter filters processors by name and/or tag.
+type ProcessorFilter struct {
+	Names []string
+	Tags  []string
 }
 
-func (pl ProcessorList) Named(names ...string) []*Processor {
-	found := []*Processor{}
-	for _, p := range pl {
-		for _, name := range names {
-			if p.Name == name {
-				found = append(found, p)
+func (pf *ProcessorFilter) Cardinality() int {
+	return len(pf.Names) + len(pf.Tags)
+}
+
+// Filter returns all processors matching the current name and tag filters,
+// or an error if no processors were found.
+func (pf *ProcessorFilter) Filter(processors []*Processor) ([]*Processor, error) {
+	// Ensure a valid processor list
+	err := pf.validate(processors)
+	if err != nil {
+		return nil, err
+	}
+
+	// If no filter criteria defined, then just return the unfiltered input.
+	if pf.Cardinality() == 0 {
+		return processors, nil
+	}
+
+	byName, byTag := pf.index(processors)
+	found := mapset.NewSet[*Processor]()
+
+	for _, name := range pf.Names {
+		if p, ok := byName[name]; ok {
+			found.Add(p)
+		} else {
+			return nil, fmt.Errorf("no processor named %s", name)
+		}
+	}
+	for _, tag := range pf.Tags {
+		if pSlice, ok := byTag[tag]; ok {
+			for _, p := range pSlice {
+				found.Add(p)
 			}
+		} else {
+			return nil, fmt.Errorf("no processor tagged %s", tag)
 		}
 	}
-	return found
+
+	return found.ToSlice(), nil
 }
 
-func (pl ProcessorList) Tagged(tags ...string) []*Processor {
-	found := []*Processor{}
-	for _, p := range pl {
-		if len(p.Tags) == 0 {
-			continue
-		}
-		if mapset.NewSet(p.Tags...).Contains(tags...) {
-			found = append(found, p)
+func (pf *ProcessorFilter) index(processors []*Processor) (
+	map[string]*Processor,
+	map[string][]*Processor,
+) {
+	byName := map[string]*Processor{}
+	byTag := map[string][]*Processor{}
+
+	for _, p := range processors {
+		byName[p.Name] = p
+		for _, tag := range p.Tags {
+			if _, ok := byTag[tag]; !ok {
+				byTag[tag] = []*Processor{}
+			}
+			byTag[tag] = append(byTag[tag], p)
 		}
 	}
-	return found
+
+	return byName, byTag
+}
+
+func (pf *ProcessorFilter) validate(processors []*Processor) error {
+	if len(processors) == 0 {
+		return fmt.Errorf("no processors defined")
+	}
+
+	names := mapset.NewSet[string]()
+	for idx, p := range processors {
+		name := strings.TrimSpace(p.Name)
+		if len(name) == 0 {
+			return fmt.Errorf("processor at index %v is unnamed", idx)
+		}
+		if names.Contains(name) {
+			return fmt.Errorf("processor at index %v has a duplicate name", idx)
+		}
+		names.Add(name)
+	}
+
+	return nil
 }

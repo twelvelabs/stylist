@@ -2,6 +2,8 @@ implement regexp parser
 implement sarif parser
 implement diff parser
 
+ProcessorFilter flag autocomplete
+
 implement a result formatter framework
     sarif
     text/tty/pretty
@@ -15,25 +17,6 @@ editor config support
 
 implement file type filtering
     i.e. porting identify.py to golang
-
-
-
-stylist list [linters|formatters]
-stylist check --type [lint|format] --processor [name]
-stylist fix --type [lint|format] --processor [name]
-
-pre-commit:
-  stylist check
-
-vscode extension:
-  on command:
-    stylist $action --processor=$name
-  on type:
-    stylist check --type=lint
-  on save:
-    stylist fix
-
-
 
 
 ui.UserInterface

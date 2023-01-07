@@ -28,14 +28,20 @@ func NewCheckCmd(app *stylist.App) *cobra.Command {
 		DisableFlagsInUseLine: true,
 	}
 
+	addProcessorFilterFlags(cmd, action.ProcessorFilter)
+
 	return cmd
 }
 
 func NewCheckAction(app *stylist.App) *CheckAction {
-	return &CheckAction{}
+	return &CheckAction{
+		ProcessorFilter: &stylist.ProcessorFilter{},
+	}
 }
 
 type CheckAction struct {
+	ProcessorFilter *stylist.ProcessorFilter
+
 	pathSpecs []string
 }
 
@@ -55,7 +61,13 @@ func (a *CheckAction) Run(ctx context.Context) error {
 		return err
 	}
 
-	pipeline := stylist.NewPipeline(config.Processors, config.Excludes)
+	excludes := config.Excludes
+	processors, err := a.ProcessorFilter.Filter(config.Processors)
+	if err != nil {
+		return err
+	}
+
+	pipeline := stylist.NewPipeline(processors, excludes)
 	results, err := pipeline.Check(ctx, a.pathSpecs)
 	if err != nil {
 		return err

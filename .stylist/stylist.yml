@@ -4,6 +4,8 @@ excludes:
 
 processors:
   - name: "gofmt"
+    tags:
+      - code
     includes:
       - "**/*.go"
     check:
@@ -19,6 +21,8 @@ processors:
     # check_before_fix: true
 
   - name: "markdownlint"
+    tags:
+      - docs
     includes:
       - "**/*.md"
     check:

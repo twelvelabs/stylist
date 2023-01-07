@@ -27,14 +27,21 @@ func NewFixCmd(app *stylist.App) *cobra.Command {
 		},
 		DisableFlagsInUseLine: true,
 	}
+
+	addProcessorFilterFlags(cmd, action.ProcessorFilter)
+
 	return cmd
 }
 
 func NewFixAction(app *stylist.App) *FixAction {
-	return &FixAction{}
+	return &FixAction{
+		ProcessorFilter: &stylist.ProcessorFilter{},
+	}
 }
 
 type FixAction struct {
+	ProcessorFilter *stylist.ProcessorFilter
+
 	pathSpecs []string
 }
 
@@ -54,7 +61,13 @@ func (a *FixAction) Run(ctx context.Context) error {
 		return err
 	}
 
-	pipeline := stylist.NewPipeline(config.Processors, config.Excludes)
+	excludes := config.Excludes
+	processors, err := a.ProcessorFilter.Filter(config.Processors)
+	if err != nil {
+		return err
+	}
+
+	pipeline := stylist.NewPipeline(processors, excludes)
 	results, err := pipeline.Fix(ctx, a.pathSpecs)
 	if err != nil {
 		return err

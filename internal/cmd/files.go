@@ -26,16 +26,22 @@ func NewFilesCmd(app *stylist.App) *cobra.Command {
 			return nil
 		},
 		DisableFlagsInUseLine: true,
-		// SilenceUsage: true,
 	}
+
+	addProcessorFilterFlags(cmd, action.ProcessorFilter)
+
 	return cmd
 }
 
 func NewFilesAction(app *stylist.App) *FilesAction {
-	return &FilesAction{}
+	return &FilesAction{
+		ProcessorFilter: &stylist.ProcessorFilter{},
+	}
 }
 
 type FilesAction struct {
+	ProcessorFilter *stylist.ProcessorFilter
+
 	pathSpecs []string
 }
 
@@ -56,7 +62,10 @@ func (a *FilesAction) Run(ctx context.Context) error {
 	}
 
 	excludes := config.Excludes
-	processors := config.Processors
+	processors, err := a.ProcessorFilter.Filter(config.Processors)
+	if err != nil {
+		return err
+	}
 
 	pipeline := stylist.NewPipeline(processors, excludes)
 	err = pipeline.Index(ctx, a.pathSpecs)
