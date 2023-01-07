@@ -4,6 +4,7 @@ SHELL := /bin/bash
 APP_NAME := stylist
 BUILD_DIR := ./dist
 DST_DIR := /usr/local/bin
+COMPLETION_DIR := $(shell brew --prefix)/etc/bash_completion.d
 
 ##@ App
 
@@ -16,11 +17,13 @@ coverage: gocovsh ## Show code coverage
 build: ## Build the app
 	go mod tidy
 	go build -o ${BUILD_DIR}/${APP_NAME} ./cmd/${APP_NAME}
+	${BUILD_DIR}/${APP_NAME} completion bash > ${BUILD_DIR}/${APP_NAME}-completion.sh
 
 .PHONY: install
 install: build ## Install the app
 	install -d ${DST_DIR}
 	install -m755 ${BUILD_DIR}/${APP_NAME} ${DST_DIR}/
+	install -m755 ${BUILD_DIR}/${APP_NAME}-completion.sh ${COMPLETION_DIR}/
 
 .PHONY: generate
 generate: go-enum
