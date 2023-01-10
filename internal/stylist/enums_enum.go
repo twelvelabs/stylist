@@ -75,6 +75,23 @@ func (x *InputType) UnmarshalText(text []byte) error {
 	return nil
 }
 
+// Set implements the Golang flag.Value interface func.
+func (x *InputType) Set(val string) error {
+	v, err := ParseInputType(val)
+	*x = v
+	return err
+}
+
+// Get implements the Golang flag.Getter interface func.
+func (x *InputType) Get() interface{} {
+	return *x
+}
+
+// Type implements the github.com/spf13/pFlag Value interface.
+func (x *InputType) Type() string {
+	return "InputType"
+}
+
 const (
 	// OutputFormatJson is a OutputFormat of type json.
 	OutputFormatJson OutputFormat = "json"
@@ -143,6 +160,23 @@ func (x *OutputFormat) UnmarshalText(text []byte) error {
 	return nil
 }
 
+// Set implements the Golang flag.Value interface func.
+func (x *OutputFormat) Set(val string) error {
+	v, err := ParseOutputFormat(val)
+	*x = v
+	return err
+}
+
+// Get implements the Golang flag.Getter interface func.
+func (x *OutputFormat) Get() interface{} {
+	return *x
+}
+
+// Type implements the github.com/spf13/pFlag Value interface.
+func (x *OutputFormat) Type() string {
+	return "OutputFormat"
+}
+
 const (
 	// OutputTypeStdout is a OutputType of type stdout.
 	OutputTypeStdout OutputType = "stdout"
@@ -201,6 +235,100 @@ func (x *OutputType) UnmarshalText(text []byte) error {
 	}
 	*x = tmp
 	return nil
+}
+
+// Set implements the Golang flag.Value interface func.
+func (x *OutputType) Set(val string) error {
+	v, err := ParseOutputType(val)
+	*x = v
+	return err
+}
+
+// Get implements the Golang flag.Getter interface func.
+func (x *OutputType) Get() interface{} {
+	return *x
+}
+
+// Type implements the github.com/spf13/pFlag Value interface.
+func (x *OutputType) Type() string {
+	return "OutputType"
+}
+
+const (
+	// ResultFormatSarif is a ResultFormat of type sarif.
+	ResultFormatSarif ResultFormat = "sarif"
+	// ResultFormatTty is a ResultFormat of type tty.
+	ResultFormatTty ResultFormat = "tty"
+)
+
+var ErrInvalidResultFormat = fmt.Errorf("not a valid ResultFormat, try [%s]", strings.Join(_ResultFormatNames, ", "))
+
+var _ResultFormatNames = []string{
+	string(ResultFormatSarif),
+	string(ResultFormatTty),
+}
+
+// ResultFormatNames returns a list of possible string values of ResultFormat.
+func ResultFormatNames() []string {
+	tmp := make([]string, len(_ResultFormatNames))
+	copy(tmp, _ResultFormatNames)
+	return tmp
+}
+
+// String implements the Stringer interface.
+func (x ResultFormat) String() string {
+	return string(x)
+}
+
+// String implements the Stringer interface.
+func (x ResultFormat) IsValid() bool {
+	_, err := ParseResultFormat(string(x))
+	return err == nil
+}
+
+var _ResultFormatValue = map[string]ResultFormat{
+	"sarif": ResultFormatSarif,
+	"tty":   ResultFormatTty,
+}
+
+// ParseResultFormat attempts to convert a string to a ResultFormat.
+func ParseResultFormat(name string) (ResultFormat, error) {
+	if x, ok := _ResultFormatValue[name]; ok {
+		return x, nil
+	}
+	return ResultFormat(""), fmt.Errorf("%s is %w", name, ErrInvalidResultFormat)
+}
+
+// MarshalText implements the text marshaller method.
+func (x ResultFormat) MarshalText() ([]byte, error) {
+	return []byte(string(x)), nil
+}
+
+// UnmarshalText implements the text unmarshaller method.
+func (x *ResultFormat) UnmarshalText(text []byte) error {
+	tmp, err := ParseResultFormat(string(text))
+	if err != nil {
+		return err
+	}
+	*x = tmp
+	return nil
+}
+
+// Set implements the Golang flag.Value interface func.
+func (x *ResultFormat) Set(val string) error {
+	v, err := ParseResultFormat(val)
+	*x = v
+	return err
+}
+
+// Get implements the Golang flag.Getter interface func.
+func (x *ResultFormat) Get() interface{} {
+	return *x
+}
+
+// Type implements the github.com/spf13/pFlag Value interface.
+func (x *ResultFormat) Type() string {
+	return "ResultFormat"
 }
 
 const (
@@ -269,4 +397,21 @@ func (x *ResultLevel) UnmarshalText(text []byte) error {
 	}
 	*x = tmp
 	return nil
+}
+
+// Set implements the Golang flag.Value interface func.
+func (x *ResultLevel) Set(val string) error {
+	v, err := ParseResultLevel(val)
+	*x = v
+	return err
+}
+
+// Get implements the Golang flag.Getter interface func.
+func (x *ResultLevel) Get() interface{} {
+	return *x
+}
+
+// Type implements the github.com/spf13/pFlag Value interface.
+func (x *ResultLevel) Type() string {
+	return "ResultLevel"
 }

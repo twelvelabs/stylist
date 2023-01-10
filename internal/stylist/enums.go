@@ -1,6 +1,6 @@
 package stylist
 
-//go:generate go-enum -f=$GOFILE --marshal --names
+//go:generate go-enum -f=$GOFILE --marshal --names --flag
 
 // InputType represents how files are passed to a command.
 //
@@ -22,3 +22,8 @@ type OutputFormat string
 //
 // ENUM(none, note, warning, error).
 type ResultLevel string
+
+// ResultFormat represents how to format the results.
+//
+// ENUM(sarif, tty).
+type ResultFormat string

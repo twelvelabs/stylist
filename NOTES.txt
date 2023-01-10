@@ -2,14 +2,8 @@ implement regexp parser
 implement sarif parser
 implement diff parser
 
-ProcessorFilter flag autocomplete
-
-implement a result formatter framework
-    sarif
-    text/tty/pretty
-    yaml?
-    template
-add format flag for selecting result formatter
+implement sarif printer
+implement tty printer
 
 implement config presets for common tools that can be extended in user config
 support top level .stylist.yml file (vs nested in dir)
