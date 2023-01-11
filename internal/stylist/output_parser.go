@@ -46,8 +46,13 @@ func (p *JSONOutputParser) Parse(output CommandOutput, mapping OutputMapping) ([
 		return nil, err
 	}
 
-	// Ensure valid JSON
 	json := buf.String()
+	if json == "" {
+		// No results
+		return nil, nil
+	}
+
+	// Ensure valid JSON
 	if !gjson.Valid(json) {
 		return nil, fmt.Errorf("invalid json: %s", json)
 	}

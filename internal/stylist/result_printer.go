@@ -2,6 +2,7 @@ package stylist
 
 import (
 	"fmt"
+	"sort"
 
 	"github.com/twelvelabs/termite/ioutil"
 )
@@ -48,5 +49,33 @@ type TtyPrinter struct {
 
 // Print writes the TTY formatted results to Stdout.
 func (f *TtyPrinter) Print(ios *ioutil.IOStreams, results []*Result) error {
+	// Maybe this should be controlled by a flag (and done by the caller)?
+	sort.Slice(results, func(i, j int) bool {
+		if results[i].Source != results[j].Source {
+			return results[i].Source < results[j].Source
+		}
+		if results[i].Location.Path != results[j].Location.Path {
+			return results[i].Location.Path < results[j].Location.Path
+		}
+		if results[i].Location.StartLine != results[j].Location.StartLine {
+			return results[i].Location.StartLine < results[j].Location.StartLine
+		}
+		return results[i].Location.StartColumn < results[j].Location.StartColumn
+	})
+
+	formatter := ios.Formatter()
+	for _, result := range results {
+		fmt.Fprintf(
+			ios.Out,
+			"[%s] %s:%d:%d %s (%s)\n",
+			formatter.Bold(result.Source),
+			formatter.Bold(result.Location.Path),
+			result.Location.StartLine,
+			result.Location.StartColumn,
+			formatter.Red(result.Rule.Description),
+			result.Rule.ID,
+		)
+	}
+
 	return nil
 }

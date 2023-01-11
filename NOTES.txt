@@ -3,7 +3,6 @@ implement sarif parser
 implement diff parser
 
 implement sarif printer
-implement tty printer
 
 implement config presets for common tools that can be extended in user config
 support top level .stylist.yml file (vs nested in dir)
