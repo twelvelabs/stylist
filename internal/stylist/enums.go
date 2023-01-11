@@ -4,7 +4,7 @@ package stylist
 
 // InputType represents how files are passed to a command.
 //
-// ENUM(arg, stdin, variadic).
+// ENUM(arg, none, stdin, variadic).
 type InputType string
 
 // OutputType represents where command output is sent.

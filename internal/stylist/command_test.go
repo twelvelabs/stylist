@@ -81,6 +81,27 @@ func TestCommand_Execute(t *testing.T) {
 		},
 
 		{
+			desc: "[none] runs command once without paths",
+			command: &Command{
+				Template:     "test-linter --verbose",
+				InputType:    InputTypeNone,
+				OutputFormat: OutputFormatNone,
+			},
+			paths: []string{
+				"testdata/txt/aaa.txt",
+				"testdata/txt/bbb.txt",
+			},
+			setup: func(c *run.Client) {
+				c.RegisterStub(
+					run.MatchString("test-linter --verbose"),
+					run.StringResponse(""),
+				)
+			},
+			expected: []*Result{},
+			err:      "",
+		},
+
+		{
 			desc: "[stdin] runs command once per path with content passed to stdin",
 			command: &Command{
 				Template:     "test-linter --verbose",

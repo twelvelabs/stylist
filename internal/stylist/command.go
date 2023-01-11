@@ -10,6 +10,7 @@ import (
 	"os/exec"
 	"runtime"
 
+	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/google/shlex"
 	"golang.org/x/sync/errgroup"
 )
@@ -116,8 +117,25 @@ func (c *Command) executeBatch(ctx context.Context, paths []string) ([]*Result, 
 
 	logger.Debugln("Output:", output.String())
 
-	// Then parse the output using the appropriate parser.
-	return NewOutputParser(c.OutputFormat).Parse(output, c.OutputMapping)
+	// Parse the output using the appropriate parser.
+	parsed, err := NewOutputParser(c.OutputFormat).Parse(output, c.OutputMapping)
+	if err != nil {
+		return nil, err
+	}
+
+	// Do a little post processing on the results.
+	pathSet := mapset.NewSet(paths...)
+	transformed := []*Result{}
+	for _, r := range parsed {
+		// Add the command name to the results
+		r.Source = args[0]
+		// InputTypeNone doesn't pass `paths` to the command, so there may
+		// be results for paths we don't care about. Filter those out.
+		if pathSet.Contains(r.Location.Path) || r.Location.Path == "" {
+			transformed = append(transformed, r)
+		}
+	}
+	return transformed, nil
 }
 
 func (c *Command) parallelism() int {
@@ -129,6 +147,11 @@ func (c *Command) parallelism() int {
 
 // Partitions paths into batches of 10.
 func (c *Command) partition(paths []string) [][]string {
+	if c.InputType == InputTypeNone {
+		// InputTypeNone is used when a processor doesn't accept (or want)
+		// individual file paths. Return a single batch containing everything.
+		return [][]string{paths}
+	}
 	if c.InputType != InputTypeVariadic {
 		// For non-variadic input we just return a slice of single-path batches.
 		// This allows us to have a single code path, but at the expense

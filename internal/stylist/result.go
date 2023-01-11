@@ -2,6 +2,7 @@ package stylist
 
 // Result describes a single result detected by a processor.
 type Result struct {
+	Source   string
 	Level    ResultLevel
 	Location ResultLocation
 	Rule     ResultRule

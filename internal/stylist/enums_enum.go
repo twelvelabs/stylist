@@ -14,6 +14,8 @@ import (
 const (
 	// InputTypeArg is a InputType of type arg.
 	InputTypeArg InputType = "arg"
+	// InputTypeNone is a InputType of type none.
+	InputTypeNone InputType = "none"
 	// InputTypeStdin is a InputType of type stdin.
 	InputTypeStdin InputType = "stdin"
 	// InputTypeVariadic is a InputType of type variadic.
@@ -24,6 +26,7 @@ var ErrInvalidInputType = fmt.Errorf("not a valid InputType, try [%s]", strings.
 
 var _InputTypeNames = []string{
 	string(InputTypeArg),
+	string(InputTypeNone),
 	string(InputTypeStdin),
 	string(InputTypeVariadic),
 }
@@ -48,6 +51,7 @@ func (x InputType) IsValid() bool {
 
 var _InputTypeValue = map[string]InputType{
 	"arg":      InputTypeArg,
+	"none":     InputTypeNone,
 	"stdin":    InputTypeStdin,
 	"variadic": InputTypeVariadic,
 }
