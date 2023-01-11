@@ -20,6 +20,29 @@ processors:
     # editor_config: true
     # check_before_fix: true
 
+  - name: "golangci-lint"
+    tags:
+      - code
+    includes:
+      - "**/*.go"
+    check:
+      template: "golangci-lint run --out-format=json"
+      input: none
+      output: stdout
+      format: json
+      mapping:
+        pattern: "Issues"
+        level: '{{ .Severity | default "error" }}'
+        path: "{{ .Pos.Filename }}"
+        start_line: "{{ .Pos.Line }}"
+        start_column: "{{ .Pos.Column }}"
+        end_line: "-1"
+        end_column: "-1"
+        rule_id: "{{ .FromLinter }}"
+        rule_name: "{{ .FromLinter }}"
+        rule_description: "{{ .Text }}"
+        rule_uri: "https://golangci-lint.run/usage/linters/#{{ .FromLinter }}"
+
   - name: "markdownlint"
     tags:
       - docs

@@ -50,3 +50,7 @@ linters-settings:
 
   lll:
     line-length: 100
+
+severity:
+  case-sensitive: false
+  default-severity: error
