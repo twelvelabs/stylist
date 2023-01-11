@@ -52,7 +52,7 @@ func (ts *Template) UnmarshalText(text []byte) error {
 }
 
 // Render renders the template using data.
-func (ts *Template) Render(data map[string]any) (string, error) {
+func (ts *Template) Render(data any) (string, error) {
 	buf := bytes.Buffer{}
 	err := ts.t.Execute(&buf, data)
 	if err != nil {

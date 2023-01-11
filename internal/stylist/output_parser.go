@@ -1,8 +1,10 @@
 package stylist
 
 import (
-	"encoding/json"
+	"bytes"
 	"fmt"
+
+	"github.com/tidwall/gjson"
 )
 
 // OutputParser is the interface that wraps the Parse method.
@@ -38,11 +40,46 @@ type JSONOutputParser struct {
 
 // Parse parses command output into a slice of results.
 func (p *JSONOutputParser) Parse(output CommandOutput, mapping OutputMapping) ([]*Result, error) {
-	var items []outputData
-	err := json.NewDecoder(output.Content).Decode(&items)
+	buf := &bytes.Buffer{}
+	_, err := buf.ReadFrom(output.Content)
 	if err != nil {
 		return nil, err
 	}
+
+	// Ensure valid JSON
+	json := buf.String()
+	if !gjson.Valid(json) {
+		return nil, fmt.Errorf("invalid json: %s", json)
+	}
+
+	// Parse the JSON and return the data @ pattern.
+	// Note: `@this` is how GJSON addresses the root element.
+	pattern := "@this"
+	if mapping.Pattern != "" {
+		pattern = mapping.Pattern
+	}
+	result := gjson.Get(json, pattern)
+
+	// Transform the GJSON results into outputData
+	items := []outputData{}
+	if !result.IsArray() {
+		return nil, fmt.Errorf(
+			"invalid output: pattern=%v is not an array, json=%v",
+			pattern, json,
+		)
+	}
+	for idx, r := range result.Array() {
+		if !r.IsObject() {
+			return nil, fmt.Errorf(
+				"invalid output: pattern=%v.%v is not an object, json=%v",
+				pattern, idx, json,
+			)
+		}
+		item := r.Value().(map[string]any)
+		items = append(items, outputData(item))
+	}
+
+	// Transform the outputData into `Result` structs.
 	return mapping.ToResultSlice(items)
 }
 

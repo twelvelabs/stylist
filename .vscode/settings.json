@@ -11,6 +11,7 @@
         "deckarep",
         "doublestar",
         "errgroup",
+        "gjson",
         "globbing",
         "gofmt",
         "iostreams",
@@ -22,6 +23,7 @@
         "shlex",
         "sirupsen",
         "stretchr",
+        "tidwall",
         "unparam"
     ]
 }

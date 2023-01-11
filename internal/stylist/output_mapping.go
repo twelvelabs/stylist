@@ -20,6 +20,7 @@ type outputData map[string]any
 // Mappings are typically defined in stylist.yml when the output type
 // has been set to "json" or "regexp".
 type OutputMapping struct {
+	Pattern         string           `yaml:"pattern"`
 	Level           *render.Template `yaml:"level"`
 	Path            *render.Template `yaml:"path"`
 	StartLine       *render.Template `yaml:"start_line"`
