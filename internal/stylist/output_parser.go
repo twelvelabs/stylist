@@ -11,7 +11,7 @@ import (
 //
 // Parse parses command output into a slice of results.
 type OutputParser interface {
-	Parse(output CommandOutput, mapping OutputMapping) ([]*Result, error)
+	Parse(output CommandOutput, mapping ResultMapping) ([]*Result, error)
 }
 
 // NewOutputParser returns the appropriate parser for the given output type.
@@ -39,7 +39,7 @@ type JSONOutputParser struct {
 }
 
 // Parse parses command output into a slice of results.
-func (p *JSONOutputParser) Parse(output CommandOutput, mapping OutputMapping) ([]*Result, error) {
+func (p *JSONOutputParser) Parse(output CommandOutput, mapping ResultMapping) ([]*Result, error) {
 	buf := &bytes.Buffer{}
 	_, err := buf.ReadFrom(output.Content)
 	if err != nil {
@@ -65,8 +65,8 @@ func (p *JSONOutputParser) Parse(output CommandOutput, mapping OutputMapping) ([
 	}
 	result := gjson.Get(json, pattern)
 
-	// Transform the GJSON results into outputData
-	items := []outputData{}
+	// Transform the GJSON results into resultData
+	items := []resultData{}
 	if !result.IsArray() {
 		return nil, fmt.Errorf(
 			"invalid output: pattern=%v is not an array, json=%v",
@@ -81,10 +81,10 @@ func (p *JSONOutputParser) Parse(output CommandOutput, mapping OutputMapping) ([
 			)
 		}
 		item := r.Value().(map[string]any)
-		items = append(items, outputData(item))
+		items = append(items, resultData(item))
 	}
 
-	// Transform the outputData into `Result` structs.
+	// Transform the resultData into `Result` structs.
 	return mapping.ToResultSlice(items)
 }
 
@@ -97,7 +97,7 @@ type NoneOutputParser struct {
 }
 
 // Parse parses command output into a slice of results.
-func (p *NoneOutputParser) Parse(output CommandOutput, mapping OutputMapping) ([]*Result, error) {
+func (p *NoneOutputParser) Parse(output CommandOutput, mapping ResultMapping) ([]*Result, error) {
 	return nil, nil
 }
 
@@ -110,7 +110,7 @@ type RegexpOutputParser struct {
 }
 
 // Parse parses command output into a slice of results.
-func (p *RegexpOutputParser) Parse(output CommandOutput, mapping OutputMapping) ([]*Result, error) {
+func (p *RegexpOutputParser) Parse(output CommandOutput, mapping ResultMapping) ([]*Result, error) {
 	return nil, nil
 }
 
@@ -123,6 +123,6 @@ type SarifOutputParser struct {
 }
 
 // Parse parses command output into a slice of results.
-func (p *SarifOutputParser) Parse(output CommandOutput, mapping OutputMapping) ([]*Result, error) {
+func (p *SarifOutputParser) Parse(output CommandOutput, mapping ResultMapping) ([]*Result, error) {
 	return nil, nil
 }

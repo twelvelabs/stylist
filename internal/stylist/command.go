@@ -25,7 +25,7 @@ type Command struct {
 	InputType     InputType     `yaml:"input"    default:"variadic"`
 	OutputType    OutputType    `yaml:"output"   default:"stdout"`
 	OutputFormat  OutputFormat  `yaml:"format"   default:"none"`
-	OutputMapping OutputMapping `yaml:"mapping"`
+	ResultMapping ResultMapping `yaml:"mapping"`
 	Parallelism   int           `yaml:"parallelism"`
 	BatchSize     int           `yaml:"batch_size"`
 }
@@ -118,7 +118,7 @@ func (c *Command) executeBatch(ctx context.Context, paths []string) ([]*Result, 
 	logger.Debugln("Output:", output.String())
 
 	// Parse the output using the appropriate parser.
-	parsed, err := NewOutputParser(c.OutputFormat).Parse(output, c.OutputMapping)
+	parsed, err := NewOutputParser(c.OutputFormat).Parse(output, c.ResultMapping)
 	if err != nil {
 		return nil, err
 	}

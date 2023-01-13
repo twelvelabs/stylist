@@ -11,15 +11,15 @@ const (
 	strNoValue string = "<no value>"
 )
 
-// outputData is a map of key/value pairs parsed from CommandOutput
-// and passed to an OutputMapping to be converted into a Result.
-type outputData map[string]any
+// resultData is a map of key/value pairs parsed from CommandOutput
+// and passed to a ResultMapping to be converted into a Result.
+type resultData map[string]any
 
-// OutputMapping is a set of rules for how to map command output to a result.
+// ResultMapping is a set of rules for how to map command output to a result.
 //
 // Mappings are typically defined in stylist.yml when the output type
 // has been set to "json" or "regexp".
-type OutputMapping struct {
+type ResultMapping struct {
 	Pattern         string           `yaml:"pattern"`
 	Level           *render.Template `yaml:"level"`
 	Path            *render.Template `yaml:"path"`
@@ -34,7 +34,7 @@ type OutputMapping struct {
 }
 
 // ToResult converts a map of output data to a Result struct.
-func (m OutputMapping) ToResult(item outputData) (*Result, error) {
+func (m ResultMapping) ToResult(item resultData) (*Result, error) {
 	var err error
 
 	result := &Result{
@@ -89,7 +89,7 @@ func (m OutputMapping) ToResult(item outputData) (*Result, error) {
 }
 
 // ToResultSlice converts a slice of output data to a slice of results.
-func (m OutputMapping) ToResultSlice(items []outputData) ([]*Result, error) {
+func (m ResultMapping) ToResultSlice(items []resultData) ([]*Result, error) {
 	results := []*Result{}
 
 	for _, item := range items {
@@ -106,7 +106,7 @@ func (m OutputMapping) ToResultSlice(items []outputData) ([]*Result, error) {
 // RenderLevel renders the Level template using item.
 // The rendered value will be normalized to one of the valid ResultLevel
 // enum values.
-func (m OutputMapping) RenderLevel(item outputData) (ResultLevel, error) {
+func (m ResultMapping) RenderLevel(item resultData) (ResultLevel, error) {
 	rendered, err := m.RenderString(m.Level, item)
 	if err != nil {
 		return ResultLevel(rendered), err
@@ -128,7 +128,7 @@ func (m OutputMapping) RenderLevel(item outputData) (ResultLevel, error) {
 
 // RenderInt renders a template with the given output data and returns
 // the rendered value as an int.
-func (m OutputMapping) RenderInt(t *render.Template, item outputData) (int, error) {
+func (m ResultMapping) RenderInt(t *render.Template, item resultData) (int, error) {
 	if t == nil {
 		return 0, nil
 	}
@@ -148,7 +148,7 @@ func (m OutputMapping) RenderInt(t *render.Template, item outputData) (int, erro
 
 // RenderString renders a template with the given output data and returns
 // the rendered value as a string.
-func (m OutputMapping) RenderString(t *render.Template, item outputData) (string, error) {
+func (m ResultMapping) RenderString(t *render.Template, item resultData) (string, error) {
 	if t == nil {
 		return strEmpty, nil
 	}

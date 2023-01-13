@@ -8,8 +8,8 @@ import (
 	"github.com/twelvelabs/stylist/internal/render"
 )
 
-func newOutputDataFixture() outputData {
-	return outputData{
+func newResultDataFixture() resultData {
+	return resultData{
 		"level":            "warning",
 		"path":             "<path>",
 		"start_line":       1,
@@ -22,8 +22,8 @@ func newOutputDataFixture() outputData {
 		"rule_uri":         "<uri>",
 	}
 }
-func newOutputMappingFixture() OutputMapping {
-	return OutputMapping{
+func newResultMappingFixture() ResultMapping {
+	return ResultMapping{
 		Level:           render.MustCompile(`{{ .level }}`),
 		Path:            render.MustCompile(`{{ .path }}`),
 		StartLine:       render.MustCompile(`{{ .start_line }}`),
@@ -56,25 +56,25 @@ func newResultFixture() *Result {
 	}
 }
 
-func TestOutputMapping_ToResult(t *testing.T) {
+func TestResultMapping_ToResult(t *testing.T) {
 	tests := []struct {
 		desc     string
-		data     outputData
-		mapping  OutputMapping
+		data     resultData
+		mapping  ResultMapping
 		expected *Result
-		setup    func(d *outputData, m *OutputMapping, r *Result)
+		setup    func(d *resultData, m *ResultMapping, r *Result)
 		err      string
 	}{
 		{
 			desc:     "should convert data into a result struct",
-			data:     newOutputDataFixture(),
-			mapping:  newOutputMappingFixture(),
+			data:     newResultDataFixture(),
+			mapping:  newResultMappingFixture(),
 			expected: newResultFixture(),
 		},
 		{
 			desc:    "should return an empty result when data is empty",
 			data:    nil,
-			mapping: newOutputMappingFixture(),
+			mapping: newResultMappingFixture(),
 			expected: &Result{
 				Level:    ResultLevelNone,
 				Location: ResultLocation{},
@@ -83,8 +83,8 @@ func TestOutputMapping_ToResult(t *testing.T) {
 		},
 		{
 			desc:    "should return an empty result when mapping is empty",
-			data:    newOutputDataFixture(),
-			mapping: OutputMapping{},
+			data:    newResultDataFixture(),
+			mapping: ResultMapping{},
 			expected: &Result{
 				Level:    ResultLevelNone,
 				Location: ResultLocation{},
@@ -93,60 +93,60 @@ func TestOutputMapping_ToResult(t *testing.T) {
 		},
 		{
 			desc:     "should handle error when rendering Level",
-			data:     newOutputDataFixture(),
-			mapping:  newOutputMappingFixture(),
+			data:     newResultDataFixture(),
+			mapping:  newResultMappingFixture(),
 			expected: nil,
-			setup: func(d *outputData, m *OutputMapping, r *Result) {
+			setup: func(d *resultData, m *ResultMapping, r *Result) {
 				m.Level = render.MustCompile(`{{ fail "boom" }}`)
 			},
 			err: "fail: boom",
 		},
 		{
 			desc:     "should handle error when rendering Path",
-			data:     newOutputDataFixture(),
-			mapping:  newOutputMappingFixture(),
+			data:     newResultDataFixture(),
+			mapping:  newResultMappingFixture(),
 			expected: nil,
-			setup: func(d *outputData, m *OutputMapping, r *Result) {
+			setup: func(d *resultData, m *ResultMapping, r *Result) {
 				m.Path = render.MustCompile(`{{ fail "boom" }}`)
 			},
 			err: "fail: boom",
 		},
 		{
 			desc:     "should handle error when rendering StartLine",
-			data:     newOutputDataFixture(),
-			mapping:  newOutputMappingFixture(),
+			data:     newResultDataFixture(),
+			mapping:  newResultMappingFixture(),
 			expected: nil,
-			setup: func(d *outputData, m *OutputMapping, r *Result) {
+			setup: func(d *resultData, m *ResultMapping, r *Result) {
 				m.StartLine = render.MustCompile(`{{ fail "boom" }}`)
 			},
 			err: "fail: boom",
 		},
 		{
 			desc:     "should handle error when rendering StartColumn",
-			data:     newOutputDataFixture(),
-			mapping:  newOutputMappingFixture(),
+			data:     newResultDataFixture(),
+			mapping:  newResultMappingFixture(),
 			expected: nil,
-			setup: func(d *outputData, m *OutputMapping, r *Result) {
+			setup: func(d *resultData, m *ResultMapping, r *Result) {
 				m.StartColumn = render.MustCompile(`{{ fail "boom" }}`)
 			},
 			err: "fail: boom",
 		},
 		{
 			desc:     "should handle error when rendering EndLine",
-			data:     newOutputDataFixture(),
-			mapping:  newOutputMappingFixture(),
+			data:     newResultDataFixture(),
+			mapping:  newResultMappingFixture(),
 			expected: nil,
-			setup: func(d *outputData, m *OutputMapping, r *Result) {
+			setup: func(d *resultData, m *ResultMapping, r *Result) {
 				m.EndLine = render.MustCompile(`{{ fail "boom" }}`)
 			},
 			err: "fail: boom",
 		},
 		{
 			desc:     "should handle error when rendering EndColumn",
-			data:     newOutputDataFixture(),
-			mapping:  newOutputMappingFixture(),
+			data:     newResultDataFixture(),
+			mapping:  newResultMappingFixture(),
 			expected: nil,
-			setup: func(d *outputData, m *OutputMapping, r *Result) {
+			setup: func(d *resultData, m *ResultMapping, r *Result) {
 				m.EndColumn = render.MustCompile(`{{ fail "boom" }}`)
 			},
 			err: "fail: boom",
@@ -154,40 +154,40 @@ func TestOutputMapping_ToResult(t *testing.T) {
 
 		{
 			desc:     "should handle error when rendering RuleID",
-			data:     newOutputDataFixture(),
-			mapping:  newOutputMappingFixture(),
+			data:     newResultDataFixture(),
+			mapping:  newResultMappingFixture(),
 			expected: nil,
-			setup: func(d *outputData, m *OutputMapping, r *Result) {
+			setup: func(d *resultData, m *ResultMapping, r *Result) {
 				m.RuleID = render.MustCompile(`{{ fail "boom" }}`)
 			},
 			err: "fail: boom",
 		},
 		{
 			desc:     "should handle error when rendering RuleName",
-			data:     newOutputDataFixture(),
-			mapping:  newOutputMappingFixture(),
+			data:     newResultDataFixture(),
+			mapping:  newResultMappingFixture(),
 			expected: nil,
-			setup: func(d *outputData, m *OutputMapping, r *Result) {
+			setup: func(d *resultData, m *ResultMapping, r *Result) {
 				m.RuleName = render.MustCompile(`{{ fail "boom" }}`)
 			},
 			err: "fail: boom",
 		},
 		{
 			desc:     "should handle error when rendering RuleDescription",
-			data:     newOutputDataFixture(),
-			mapping:  newOutputMappingFixture(),
+			data:     newResultDataFixture(),
+			mapping:  newResultMappingFixture(),
 			expected: nil,
-			setup: func(d *outputData, m *OutputMapping, r *Result) {
+			setup: func(d *resultData, m *ResultMapping, r *Result) {
 				m.RuleDescription = render.MustCompile(`{{ fail "boom" }}`)
 			},
 			err: "fail: boom",
 		},
 		{
 			desc:     "should handle error when rendering RuleURI",
-			data:     newOutputDataFixture(),
-			mapping:  newOutputMappingFixture(),
+			data:     newResultDataFixture(),
+			mapping:  newResultMappingFixture(),
 			expected: nil,
-			setup: func(d *outputData, m *OutputMapping, r *Result) {
+			setup: func(d *resultData, m *ResultMapping, r *Result) {
 				m.RuleURI = render.MustCompile(`{{ fail "boom" }}`)
 			},
 			err: "fail: boom",
@@ -213,19 +213,19 @@ func TestOutputMapping_ToResult(t *testing.T) {
 	}
 }
 
-func TestOutputMapping_ToResultSlice(t *testing.T) {
+func TestResultMapping_ToResultSlice(t *testing.T) {
 	// happy path
-	items := []outputData{
-		newOutputDataFixture(),
-		newOutputDataFixture(),
+	items := []resultData{
+		newResultDataFixture(),
+		newResultDataFixture(),
 	}
-	mapping := newOutputMappingFixture()
+	mapping := newResultMappingFixture()
 	results, err := mapping.ToResultSlice(items)
 	assert.NoError(t, err)
 	assert.Equal(t, 2, len(results))
 
 	// error path
-	mapping = OutputMapping{
+	mapping = ResultMapping{
 		Level: render.MustCompile(`{{ fail "boom" }}`),
 	}
 	results, err = mapping.ToResultSlice(items)
@@ -233,18 +233,18 @@ func TestOutputMapping_ToResultSlice(t *testing.T) {
 	assert.Equal(t, 0, len(results))
 }
 
-func TestOutputMapping_RenderLevel(t *testing.T) {
+func TestResultMapping_RenderLevel(t *testing.T) {
 	tests := []struct {
 		desc     string
 		template *render.Template
-		data     outputData
+		data     resultData
 		expected ResultLevel
 		err      string
 	}{
 		{
 			desc:     "enum values should be accepted",
 			template: render.MustCompile(`{{ .level }}`),
-			data: outputData{
+			data: resultData{
 				"level": "error",
 			},
 			expected: ResultLevelError,
@@ -253,19 +253,19 @@ func TestOutputMapping_RenderLevel(t *testing.T) {
 		{
 			desc:     "missing template should be normalized to none",
 			template: nil,
-			data:     outputData{},
+			data:     resultData{},
 			expected: ResultLevelNone,
 		},
 		{
 			desc:     "missing key should be normalized to none",
 			template: render.MustCompile(`{{ .level }}`),
-			data:     outputData{},
+			data:     resultData{},
 			expected: ResultLevelNone,
 		},
 		{
 			desc:     "empty string should be normalized to none",
 			template: render.MustCompile(`{{ .level }}`),
-			data: outputData{
+			data: resultData{
 				"level": "",
 			},
 			expected: ResultLevelNone,
@@ -273,7 +273,7 @@ func TestOutputMapping_RenderLevel(t *testing.T) {
 		{
 			desc:     "info should be normalized to note",
 			template: render.MustCompile(`{{ .level }}`),
-			data: outputData{
+			data: resultData{
 				"level": "info",
 			},
 			expected: ResultLevelNote,
@@ -281,7 +281,7 @@ func TestOutputMapping_RenderLevel(t *testing.T) {
 		{
 			desc:     "warn should be normalized to warning",
 			template: render.MustCompile(`{{ .level }}`),
-			data: outputData{
+			data: resultData{
 				"level": "warn",
 			},
 			expected: ResultLevelWarning,
@@ -289,7 +289,7 @@ func TestOutputMapping_RenderLevel(t *testing.T) {
 		{
 			desc:     "err should be normalized to error",
 			template: render.MustCompile(`{{ .level }}`),
-			data: outputData{
+			data: resultData{
 				"level": "err",
 			},
 			expected: ResultLevelError,
@@ -298,7 +298,7 @@ func TestOutputMapping_RenderLevel(t *testing.T) {
 		{
 			desc:     "should return an error when not an enum or normalized value",
 			template: render.MustCompile(`{{ .level }}`),
-			data: outputData{
+			data: resultData{
 				"level": "unknown",
 			},
 			expected: ResultLevel(""),
@@ -307,7 +307,7 @@ func TestOutputMapping_RenderLevel(t *testing.T) {
 		{
 			desc:     "should return an error when template fails to render",
 			template: render.MustCompile(`{{ fail "boom" }}`),
-			data: outputData{
+			data: resultData{
 				"level": "unknown",
 			},
 			expected: ResultLevel(""),
@@ -316,7 +316,7 @@ func TestOutputMapping_RenderLevel(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.desc, func(t *testing.T) {
-			mapping := OutputMapping{
+			mapping := ResultMapping{
 				Level: tt.template,
 			}
 			actual, err := mapping.RenderLevel(tt.data)
@@ -332,18 +332,18 @@ func TestOutputMapping_RenderLevel(t *testing.T) {
 	}
 }
 
-func TestOutputMapping_RenderString(t *testing.T) {
+func TestResultMapping_RenderString(t *testing.T) {
 	tests := []struct {
 		desc     string
 		template *render.Template
-		data     outputData
+		data     resultData
 		expected string
 		err      string
 	}{
 		{
 			desc:     "normal values should be rendered",
 			template: render.MustCompile(`{{ .something }}`),
-			data: outputData{
+			data: resultData{
 				"something": "foo",
 			},
 			expected: "foo",
@@ -371,7 +371,7 @@ func TestOutputMapping_RenderString(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.desc, func(t *testing.T) {
-			mapping := OutputMapping{}
+			mapping := ResultMapping{}
 			actual, err := mapping.RenderString(tt.template, tt.data)
 
 			if tt.err == "" {
@@ -385,18 +385,18 @@ func TestOutputMapping_RenderString(t *testing.T) {
 	}
 }
 
-func TestOutputMapping_RenderInt(t *testing.T) {
+func TestResultMapping_RenderInt(t *testing.T) {
 	tests := []struct {
 		desc     string
 		template *render.Template
-		data     outputData
+		data     resultData
 		expected int
 		err      string
 	}{
 		{
 			desc:     "normal values should be rendered",
 			template: render.MustCompile(`{{ .something }}`),
-			data: outputData{
+			data: resultData{
 				"something": 12,
 			},
 			expected: 12,
@@ -423,7 +423,7 @@ func TestOutputMapping_RenderInt(t *testing.T) {
 		{
 			desc:     "should return an error when value fails to cast",
 			template: render.MustCompile(`{{ .something }}`),
-			data: outputData{
+			data: resultData{
 				"something": "not-an-int",
 			},
 			expected: 0,
@@ -433,7 +433,7 @@ func TestOutputMapping_RenderInt(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.desc, func(t *testing.T) {
-			mapping := OutputMapping{}
+			mapping := ResultMapping{}
 			actual, err := mapping.RenderInt(tt.template, tt.data)
 
 			if tt.err == "" {

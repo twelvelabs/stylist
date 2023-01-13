@@ -31,7 +31,7 @@ func TestJSONOutputParser_Parse(t *testing.T) {
 		CommandOutput{
 			Content: file,
 		},
-		OutputMapping{
+		ResultMapping{
 			Level:           render.MustCompile(`{{ .level }}`),
 			Path:            render.MustCompile(`{{ .file }}`),
 			StartLine:       render.MustCompile(`{{ .line }}`),
