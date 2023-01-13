@@ -37,7 +37,7 @@ func NewCheckCmd(app *stylist.App) *cobra.Command {
 func NewCheckAction(app *stylist.App) *CheckAction {
 	return &CheckAction{
 		App:             app,
-		Format:          stylist.ResultFormatTty,
+		Format:          app.Config.Output.Format,
 		ProcessorFilter: &stylist.ProcessorFilter{},
 	}
 }

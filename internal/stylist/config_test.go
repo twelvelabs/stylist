@@ -11,33 +11,34 @@ func TestNewConfigFromArgs(t *testing.T) {
 	validConfigPath := filepath.Join(".", "testdata", "config", "valid.yml")
 	invalidConfigPath := filepath.Join(".", "testdata", "config", "invalid.yml")
 	tests := []struct {
-		desc     string
-		args     []string
-		expected *Config
-		err      string
+		desc        string
+		args        []string
+		expectation func(t *testing.T, config *Config)
+		err         string
 	}{
 		{
 			desc: "returns defaults when no args",
 			args: []string{},
-			expected: &Config{
-				ConfigPath: DefaultConfigPath,
-				LogLevel:   DefaultLogLevel,
+			expectation: func(t *testing.T, config *Config) {
+				t.Helper()
+				assert.Equal(t, DefaultConfigPath, config.ConfigPath)
+				assert.Equal(t, DefaultLogLevel, config.LogLevel)
 			},
 		},
 		{
-			desc:     "returns error when unable to parse args",
-			args:     []string{"---"},
-			expected: nil,
-			err:      "unable to parse",
+			desc: "returns error when unable to parse args",
+			args: []string{"---"},
+			err:  "unable to parse",
 		},
 		{
 			desc: "uses a custom config path if supplied",
 			args: []string{
 				"--config=" + validConfigPath,
 			},
-			expected: &Config{
-				ConfigPath: validConfigPath,
-				LogLevel:   LogLevelDebug,
+			expectation: func(t *testing.T, config *Config) {
+				t.Helper()
+				assert.Equal(t, validConfigPath, config.ConfigPath)
+				assert.Equal(t, LogLevelDebug, config.LogLevel)
 			},
 		},
 		{
@@ -46,9 +47,10 @@ func TestNewConfigFromArgs(t *testing.T) {
 				"--config=" + validConfigPath,
 				"--log-level=info",
 			},
-			expected: &Config{
-				ConfigPath: validConfigPath,
-				LogLevel:   LogLevelInfo,
+			expectation: func(t *testing.T, config *Config) {
+				t.Helper()
+				assert.Equal(t, validConfigPath, config.ConfigPath)
+				assert.Equal(t, LogLevelInfo, config.LogLevel)
 			},
 		},
 		{
@@ -56,9 +58,10 @@ func TestNewConfigFromArgs(t *testing.T) {
 			args: []string{
 				"--log-level=nope",
 			},
-			expected: &Config{
-				ConfigPath: DefaultConfigPath,
-				LogLevel:   DefaultLogLevel,
+			expectation: func(t *testing.T, config *Config) {
+				t.Helper()
+				assert.Equal(t, DefaultConfigPath, config.ConfigPath)
+				assert.Equal(t, DefaultLogLevel, config.LogLevel)
 			},
 		},
 		{
@@ -66,8 +69,7 @@ func TestNewConfigFromArgs(t *testing.T) {
 			args: []string{
 				"--config=" + invalidConfigPath,
 			},
-			expected: nil,
-			err:      "yaml: unmarshal errors",
+			err: "yaml: unmarshal errors",
 		},
 	}
 	for _, tt := range tests {
@@ -80,7 +82,9 @@ func TestNewConfigFromArgs(t *testing.T) {
 				assert.ErrorContains(t, err, tt.err)
 			}
 
-			assert.Equal(t, tt.expected, actual)
+			if tt.expectation != nil {
+				tt.expectation(t, actual)
+			}
 		})
 	}
 }

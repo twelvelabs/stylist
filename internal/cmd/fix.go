@@ -37,7 +37,7 @@ func NewFixCmd(app *stylist.App) *cobra.Command {
 func NewFixAction(app *stylist.App) *FixAction {
 	return &FixAction{
 		App:             app,
-		Format:          stylist.ResultFormatTty,
+		Format:          app.Config.Output.Format,
 		ProcessorFilter: &stylist.ProcessorFilter{},
 	}
 }

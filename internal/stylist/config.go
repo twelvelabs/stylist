@@ -9,22 +9,31 @@ import (
 )
 
 const (
-	DefaultConfigPath string   = ".stylist/stylist.yml"
-	DefaultLogLevel   LogLevel = LogLevelWarn
+	DefaultConfigPath   string       = ".stylist/stylist.yml"
+	DefaultLogLevel     LogLevel     = LogLevelWarn
+	DefaultResultFormat ResultFormat = ResultFormatTty
 )
 
 type Config struct {
-	ConfigPath string   `yaml:"config_path" validate:"required"`
-	LogLevel   LogLevel `yaml:"log_level" validate:"required"`
+	ConfigPath string       `yaml:"config_path"`
+	LogLevel   LogLevel     `yaml:"log_level"`
+	Output     OutputConfig `yaml:"output"`
 
 	Excludes   []string
 	Processors []*Processor
+}
+
+type OutputConfig struct {
+	Format ResultFormat `yaml:"format"`
 }
 
 func NewConfig() *Config {
 	return &Config{
 		ConfigPath: DefaultConfigPath,
 		LogLevel:   DefaultLogLevel,
+		Output: OutputConfig{
+			Format: DefaultResultFormat,
+		},
 	}
 }
 
