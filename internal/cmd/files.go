@@ -35,11 +35,14 @@ func NewFilesCmd(app *stylist.App) *cobra.Command {
 
 func NewFilesAction(app *stylist.App) *FilesAction {
 	return &FilesAction{
+		App:             app,
 		ProcessorFilter: &stylist.ProcessorFilter{},
 	}
 }
 
 type FilesAction struct {
+	*stylist.App
+
 	ProcessorFilter *stylist.ProcessorFilter
 
 	pathSpecs []string
@@ -53,16 +56,8 @@ func (a *FilesAction) Validate(args []string) error {
 	return nil
 }
 func (a *FilesAction) Run(ctx context.Context) error {
-	configLoader := stylist.AppConfigLoader(ctx)
-	// logger := stylist.AppLogger(ctx)
-
-	config, err := configLoader.Load()
-	if err != nil {
-		return err
-	}
-
-	excludes := config.Excludes
-	processors, err := a.ProcessorFilter.Filter(config.Processors)
+	excludes := a.Config.Excludes
+	processors, err := a.ProcessorFilter.Filter(a.Config.Processors)
 	if err != nil {
 		return err
 	}

@@ -97,6 +97,91 @@ func (x *InputType) Type() string {
 }
 
 const (
+	// LogLevelError is a LogLevel of type error.
+	LogLevelError LogLevel = "error"
+	// LogLevelWarn is a LogLevel of type warn.
+	LogLevelWarn LogLevel = "warn"
+	// LogLevelInfo is a LogLevel of type info.
+	LogLevelInfo LogLevel = "info"
+	// LogLevelDebug is a LogLevel of type debug.
+	LogLevelDebug LogLevel = "debug"
+)
+
+var ErrInvalidLogLevel = fmt.Errorf("not a valid LogLevel, try [%s]", strings.Join(_LogLevelNames, ", "))
+
+var _LogLevelNames = []string{
+	string(LogLevelError),
+	string(LogLevelWarn),
+	string(LogLevelInfo),
+	string(LogLevelDebug),
+}
+
+// LogLevelNames returns a list of possible string values of LogLevel.
+func LogLevelNames() []string {
+	tmp := make([]string, len(_LogLevelNames))
+	copy(tmp, _LogLevelNames)
+	return tmp
+}
+
+// String implements the Stringer interface.
+func (x LogLevel) String() string {
+	return string(x)
+}
+
+// String implements the Stringer interface.
+func (x LogLevel) IsValid() bool {
+	_, err := ParseLogLevel(string(x))
+	return err == nil
+}
+
+var _LogLevelValue = map[string]LogLevel{
+	"error": LogLevelError,
+	"warn":  LogLevelWarn,
+	"info":  LogLevelInfo,
+	"debug": LogLevelDebug,
+}
+
+// ParseLogLevel attempts to convert a string to a LogLevel.
+func ParseLogLevel(name string) (LogLevel, error) {
+	if x, ok := _LogLevelValue[name]; ok {
+		return x, nil
+	}
+	return LogLevel(""), fmt.Errorf("%s is %w", name, ErrInvalidLogLevel)
+}
+
+// MarshalText implements the text marshaller method.
+func (x LogLevel) MarshalText() ([]byte, error) {
+	return []byte(string(x)), nil
+}
+
+// UnmarshalText implements the text unmarshaller method.
+func (x *LogLevel) UnmarshalText(text []byte) error {
+	tmp, err := ParseLogLevel(string(text))
+	if err != nil {
+		return err
+	}
+	*x = tmp
+	return nil
+}
+
+// Set implements the Golang flag.Value interface func.
+func (x *LogLevel) Set(val string) error {
+	v, err := ParseLogLevel(val)
+	*x = v
+	return err
+}
+
+// Get implements the Golang flag.Getter interface func.
+func (x *LogLevel) Get() interface{} {
+	return *x
+}
+
+// Type implements the github.com/spf13/pFlag Value interface.
+func (x *LogLevel) Type() string {
+	return "LogLevel"
+}
+
+const (
 	// OutputFormatJson is a OutputFormat of type json.
 	OutputFormatJson OutputFormat = "json"
 	// OutputFormatNone is a OutputFormat of type none.

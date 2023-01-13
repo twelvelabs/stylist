@@ -1,0 +1,3 @@
+---
+config_path: "should/be/overwritten.yaml"
+log_level: "debug"

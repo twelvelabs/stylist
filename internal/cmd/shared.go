@@ -12,7 +12,7 @@ import (
 
 func addFormatFlag(cmd *cobra.Command, format *stylist.ResultFormat) {
 	formatNames := stylist.ResultFormatNames()
-	formatHelp := fmt.Sprintf("Result format [%s]", strings.Join(formatNames, ", "))
+	formatHelp := fmt.Sprintf("Output format [`FORMAT`: %s]", strings.Join(formatNames, ", "))
 	// Since go-enum generates `flag.Value` methods we can use it directly,
 	// and the generated `.Set()` method will take care of validation and type casting.
 	cmd.Flags().VarP(format, "format", "f", formatHelp)
@@ -34,10 +34,7 @@ func addProcessorFilterFlags(cmd *cobra.Command, filter *stylist.ProcessorFilter
 	namesCompFunc := func(cmd *cobra.Command, args []string, toComplete string) (
 		[]string, cobra.ShellCompDirective,
 	) {
-		names, _, err := processorFilterFlagValues(cmd)
-		if err != nil {
-			return nil, cobra.ShellCompDirectiveError
-		}
+		names, _ := processorFilterFlagValues(cmd)
 		return names, cobra.ShellCompDirectiveNoFileComp
 	}
 	if err := cmd.RegisterFlagCompletionFunc("names", namesCompFunc); err != nil {
@@ -50,10 +47,7 @@ func addProcessorFilterFlags(cmd *cobra.Command, filter *stylist.ProcessorFilter
 	tagsCompFunc := func(cmd *cobra.Command, args []string, toComplete string) (
 		[]string, cobra.ShellCompDirective,
 	) {
-		_, tags, err := processorFilterFlagValues(cmd)
-		if err != nil {
-			return nil, cobra.ShellCompDirectiveError
-		}
+		_, tags := processorFilterFlagValues(cmd)
 		return tags, cobra.ShellCompDirectiveNoFileComp
 	}
 	if err := cmd.RegisterFlagCompletionFunc("tags", tagsCompFunc); err != nil {
@@ -62,16 +56,11 @@ func addProcessorFilterFlags(cmd *cobra.Command, filter *stylist.ProcessorFilter
 }
 
 // Returns all the processor names and tags defined in the config file.
-func processorFilterFlagValues(cmd *cobra.Command) ([]string, []string, error) {
-	loader := stylist.AppConfigLoader(cmd.Context())
-	config, err := loader.Load()
-	if err != nil {
-		return nil, nil, err
-	}
-
+func processorFilterFlagValues(cmd *cobra.Command) ([]string, []string) {
 	names := mapset.NewSet[string]()
 	tags := mapset.NewSet[string]()
 
+	config := stylist.AppConfig(cmd.Context())
 	for _, p := range config.Processors {
 		names.Add(p.Name)
 		for _, tag := range p.Tags {
@@ -79,5 +68,5 @@ func processorFilterFlagValues(cmd *cobra.Command) ([]string, []string, error) {
 		}
 	}
 
-	return names.ToSlice(), tags.ToSlice(), nil
+	return names.ToSlice(), tags.ToSlice()
 }

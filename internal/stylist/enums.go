@@ -27,3 +27,8 @@ type ResultLevel string
 //
 // ENUM(sarif, tty).
 type ResultFormat string
+
+// LogLevel controls the log level.
+//
+// ENUM(error, warn, info, debug).
+type LogLevel string

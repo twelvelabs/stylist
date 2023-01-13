@@ -2,9 +2,11 @@ package stylist
 
 import (
 	"context"
+	"fmt"
+	"os"
+	"time"
 
 	"github.com/sirupsen/logrus"
-	"github.com/twelvelabs/termite/conf"
 	"github.com/twelvelabs/termite/ioutil"
 	"github.com/twelvelabs/termite/run"
 	"github.com/twelvelabs/termite/ui"
@@ -13,23 +15,23 @@ import (
 type ctxKey string
 
 const (
-	ctxCmdClient    ctxKey = "stylist.CmdClient"
-	ctxConfigLoader ctxKey = "stylist.ConfigLoader"
-	ctxLogger       ctxKey = "stylist.Logger"
+	ctxCmdClient ctxKey = "stylist.CmdClient"
+	ctxConfig    ctxKey = "stylist.Config"
+	ctxLogger    ctxKey = "stylist.Logger"
 )
 
 type App struct {
-	IO           *ioutil.IOStreams
-	ConfigLoader *conf.Loader[*Config]
-	Messenger    *ui.Messenger
-	CmdClient    *run.Client
-	Logger       *logrus.Logger
+	IO        *ioutil.IOStreams
+	Config    *Config
+	Messenger *ui.Messenger
+	CmdClient *run.Client
+	Logger    *logrus.Logger
 }
 
 // InitContext returns a new context set with app values.
 func (a *App) InitContext(ctx context.Context) context.Context {
 	ctx = context.WithValue(ctx, ctxCmdClient, a.CmdClient)
-	ctx = context.WithValue(ctx, ctxConfigLoader, a.ConfigLoader)
+	ctx = context.WithValue(ctx, ctxConfig, a.Config)
 	ctx = context.WithValue(ctx, ctxLogger, a.Logger)
 	return ctx
 }
@@ -38,8 +40,8 @@ func AppCmdClient(ctx context.Context) *run.Client {
 	return ctx.Value(ctxCmdClient).(*run.Client)
 }
 
-func AppConfigLoader(ctx context.Context) *conf.Loader[*Config] {
-	return ctx.Value(ctxConfigLoader).(*conf.Loader[*Config])
+func AppConfig(ctx context.Context) *Config {
+	return ctx.Value(ctxConfig).(*Config)
 }
 
 func AppLogger(ctx context.Context) *logrus.Logger {
@@ -47,44 +49,71 @@ func AppLogger(ctx context.Context) *logrus.Logger {
 }
 
 func NewApp() (*App, error) {
+	startedAt := time.Now()
+
+	config, err := NewConfigFromArgs(os.Args)
+	if err != nil {
+		return nil, err
+	}
+
 	ios := ioutil.System()
-	loader := conf.NewLoader(&Config{}, ".stylist/stylist.yml")
+	logger := newLogger(ios, config.LogLevel)
+	logger.Debugf(
+		"Initializing app: config=%v log-level=%v",
+		config.ConfigPath,
+		config.LogLevel,
+	)
 
 	app := &App{
-		IO:           ios,
-		ConfigLoader: loader,
-		Messenger:    ui.NewMessenger(ios),
-		CmdClient:    run.NewClient(),
-		Logger:       newLogger(ios),
+		IO:        ios,
+		Config:    config,
+		Messenger: ui.NewMessenger(ios),
+		CmdClient: run.NewClient(),
+		Logger:    logger,
 	}
+
+	logger.Debugf("Initialized app in %s", time.Since(startedAt))
 
 	return app, nil
 }
 
 func NewTestApp() *App {
-	ios := ioutil.Test()
+	config := NewConfig()
 
-	// TODO: use fixture config file
-	loader := conf.NewLoader(&Config{}, ".stylist/stylist.yml")
+	ios := ioutil.Test()
+	logger := newLogger(ios, LogLevelDebug)
 
 	app := &App{
-		IO:           ios,
-		ConfigLoader: loader,
-		Messenger:    ui.NewMessenger(ios),
-		CmdClient:    run.NewClient().WithStubbing(),
-		Logger:       newLogger(ios),
+		IO:        ios,
+		Config:    config,
+		Messenger: ui.NewMessenger(ios),
+		CmdClient: run.NewClient().WithStubbing(),
+		Logger:    logger,
 	}
 
 	return app
 }
 
-func newLogger(ios *ioutil.IOStreams) *logrus.Logger {
+func newLogger(ios *ioutil.IOStreams, level LogLevel) *logrus.Logger {
 	logger := logrus.New()
 	logger.SetOutput(ios.Err)
-	logger.SetLevel(logrus.ErrorLevel)
 	logger.SetFormatter(&logrus.TextFormatter{
-		ForceColors:  true,
+		ForceColors:  ios.IsColorEnabled(),
 		PadLevelText: true,
 	})
+
+	switch level {
+	case LogLevelError:
+		logger.SetLevel(logrus.ErrorLevel)
+	case LogLevelWarn:
+		logger.SetLevel(logrus.WarnLevel)
+	case LogLevelInfo:
+		logger.SetLevel(logrus.InfoLevel)
+	case LogLevelDebug:
+		logger.SetLevel(logrus.DebugLevel)
+	default:
+		panic(fmt.Sprintf("unknown log level: %v", level))
+	}
+
 	return logger
 }

@@ -4,9 +4,24 @@ implement diff parser
 
 implement sarif printer
 
+oc = app.Conf.Output
+flag(&co.Format, "format", "f")
+flag(&co.ShowContext, "show-context")
+.NoValueDefault = true
+
+printer := NewResultPrinter(a.Conf.Output.Format)
+err = printer.Print(a.IO, a.Conf, results)
+
+tty printer:
+    only show Rule.Description and Rule.ID if present
+    support optional context
+        will require adding to Result
+
 implement config presets for common tools that can be extended in user config
 support top level .stylist.yml file (vs nested in dir)
 editor config support
+add app version, date, and revision vars
+setup go-releaser
 
 implement file type filtering
     i.e. porting identify.py to golang

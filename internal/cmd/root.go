@@ -1,50 +1,38 @@
 package cmd
 
 import (
-	"github.com/sirupsen/logrus"
+	"fmt"
+	"strings"
+
 	"github.com/spf13/cobra"
 
 	"github.com/twelvelabs/stylist/internal/stylist"
 )
 
 func NewRootCmd(app *stylist.App) *cobra.Command {
-	// Panic: 0
-	// Fatal: 1
-	// Error: 2  (default)
-	// Warn:  3  -v
-	// Info:  4  -vv
-	// Debug: 5  -vvv
-	// Trace: 6  -vvvv
-	verbosity := 0
-
 	cmd := &cobra.Command{
-		Use:   "stylist",
-		Short: "Lint and format with style",
-		Args:  cobra.ArbitraryArgs,
-		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-			level := logrus.Level(verbosity + 2)
-			if level >= logrus.TraceLevel {
-				level = logrus.TraceLevel
-			}
-			app.Logger.SetLevel(level)
-			app.Logger.Debug("Set log level to " + level.String())
-
-			app.Logger.Debug("Loading config from " + app.ConfigLoader.Path)
-			_, err := app.ConfigLoader.Load()
-			if err != nil {
-				return err
-			}
-			return nil
-		},
+		Use:          "stylist",
+		Short:        "Lint and format with style",
 		Version:      "X.X.X",
 		SilenceUsage: true,
 	}
 
+	cfg := app.Config
 	flags := cmd.PersistentFlags()
-	flags.StringVarP(
-		&app.ConfigLoader.Path, "config", "c", app.ConfigLoader.Path, "Config path",
-	)
-	flags.CountVarP(&verbosity, "verbose", "v", "Set the log level")
+	flags.StringVarP(&cfg.ConfigPath, "config", "c", cfg.ConfigPath, "Config path")
+
+	levelNames := stylist.LogLevelNames()
+	levelHelp := fmt.Sprintf("Log level [`LEVEL`: %s]", strings.Join(levelNames, ", "))
+	flags.Var(&cfg.LogLevel, "log-level", levelHelp)
+
+	levelCompFunc := func(cmd *cobra.Command, args []string, toComplete string) (
+		[]string, cobra.ShellCompDirective,
+	) {
+		return levelNames, cobra.ShellCompDirectiveNoFileComp
+	}
+	if err := cmd.RegisterFlagCompletionFunc("log-level", levelCompFunc); err != nil {
+		panic(err)
+	}
 
 	cmd.AddCommand(NewCheckCmd(app))
 	cmd.AddCommand(NewFixCmd(app))

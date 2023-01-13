@@ -59,16 +59,8 @@ func (a *CheckAction) Validate(args []string) error {
 	return nil
 }
 func (a *CheckAction) Run(ctx context.Context) error {
-	configLoader := stylist.AppConfigLoader(ctx)
-	logger := stylist.AppLogger(ctx)
-
-	config, err := configLoader.Load()
-	if err != nil {
-		return err
-	}
-
-	excludes := config.Excludes
-	processors, err := a.ProcessorFilter.Filter(config.Processors)
+	excludes := a.Config.Excludes
+	processors, err := a.ProcessorFilter.Filter(a.Config.Processors)
 	if err != nil {
 		return err
 	}
@@ -80,7 +72,7 @@ func (a *CheckAction) Run(ctx context.Context) error {
 	}
 
 	for _, result := range results {
-		logger.Debug(fmt.Sprintf("%#v", result))
+		a.Logger.Debug(fmt.Sprintf("%#v", result))
 	}
 
 	err = stylist.NewResultPrinter(a.Format).Print(a.App.IO, results)
