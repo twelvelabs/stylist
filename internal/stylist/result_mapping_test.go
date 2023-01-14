@@ -20,6 +20,7 @@ func newResultDataFixture() resultData {
 		"rule_name":        "<name>",
 		"rule_description": "<description>",
 		"rule_uri":         "<uri>",
+		"context":          "one\ntwo\nthree\n",
 	}
 }
 func newResultMappingFixture() ResultMapping {
@@ -34,6 +35,7 @@ func newResultMappingFixture() ResultMapping {
 		RuleName:        render.MustCompile(`{{ .rule_name }}`),
 		RuleDescription: render.MustCompile(`{{ .rule_description }}`),
 		RuleURI:         render.MustCompile(`{{ .rule_uri }}`),
+		Context:         render.MustCompile(`{{ .context }}`),
 	}
 }
 
@@ -52,6 +54,11 @@ func newResultFixture() *Result {
 			Name:        "<name>",
 			Description: "<description>",
 			URI:         "<uri>",
+		},
+		ContextLines: []string{
+			"one",
+			"two",
+			"three",
 		},
 	}
 }
@@ -189,6 +196,16 @@ func TestResultMapping_ToResult(t *testing.T) {
 			expected: nil,
 			setup: func(d *resultData, m *ResultMapping, r *Result) {
 				m.RuleURI = render.MustCompile(`{{ fail "boom" }}`)
+			},
+			err: "fail: boom",
+		},
+		{
+			desc:     "should handle error when rendering Context",
+			data:     newResultDataFixture(),
+			mapping:  newResultMappingFixture(),
+			expected: nil,
+			setup: func(d *resultData, m *ResultMapping, r *Result) {
+				m.Context = render.MustCompile(`{{ fail "boom" }}`)
 			},
 			err: "fail: boom",
 		},

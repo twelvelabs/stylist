@@ -2,6 +2,7 @@ package stylist
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/twelvelabs/stylist/internal/render"
 )
@@ -31,6 +32,7 @@ type ResultMapping struct {
 	RuleName        *render.Template `yaml:"rule_name"`
 	RuleDescription *render.Template `yaml:"rule_description"`
 	RuleURI         *render.Template `yaml:"rule_uri"`
+	Context         *render.Template `yaml:"context"`
 }
 
 // ToResult converts a map of output data to a Result struct.
@@ -81,6 +83,10 @@ func (m ResultMapping) ToResult(item resultData) (*Result, error) {
 		return nil, err
 	}
 	result.Rule.URI, err = m.RenderString(m.RuleURI, item)
+	if err != nil {
+		return nil, err
+	}
+	result.ContextLines, err = m.RenderStringSlice(m.Context, item)
 	if err != nil {
 		return nil, err
 	}
@@ -160,4 +166,20 @@ func (m ResultMapping) RenderString(t *render.Template, item resultData) (string
 		return strEmpty, nil
 	}
 	return rendered, nil
+}
+
+// RenderStringSlice renders a template with the given output data and returns
+// the rendered value as a slice of strings.
+func (m ResultMapping) RenderStringSlice(t *render.Template, item resultData) ([]string, error) {
+	if t == nil {
+		return nil, nil
+	}
+	rendered, err := t.Render(item)
+	if err != nil {
+		return nil, err
+	}
+	if rendered == strEmpty || rendered == strNoValue {
+		return nil, nil
+	}
+	return strings.Split(strings.TrimSuffix(rendered, "\n"), "\n"), nil
 }

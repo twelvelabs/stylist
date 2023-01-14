@@ -65,16 +65,47 @@ func (f *TtyPrinter) Print(ios *ioutil.IOStreams, results []*Result) error {
 
 	formatter := ios.Formatter()
 	for _, result := range results {
+		msg := ""
+		if result.Rule.Description != "" {
+			msg = formatter.Red(result.Rule.Description)
+		}
+
+		rule := ""
+		if result.Rule.ID != "" {
+			rule = fmt.Sprintf("(%s)", result.Rule.ID)
+		}
+
 		fmt.Fprintf(
 			ios.Out,
-			"[%s] %s:%d:%d %s (%s)\n",
+			"[%s] %s %s %s\n",
 			formatter.Bold(result.Source),
-			formatter.Bold(result.Location.Path),
-			result.Location.StartLine,
-			result.Location.StartColumn,
-			formatter.Red(result.Rule.Description),
-			result.Rule.ID,
+			formatter.Bold(result.Location.String()),
+			msg,
+			rule,
 		)
+
+		if len(result.ContextLines) > 0 {
+			for _, line := range result.ContextLines {
+				fmt.Fprintln(ios.Out, line)
+			}
+		}
+
+		if len(result.ContextLines) != 1 || result.Location.StartColumn == 0 {
+			continue
+		}
+
+		// Copied from golangci-lint
+		col0 := result.Location.StartColumn - 1
+		line := result.ContextLines[0]
+		prefixRunes := make([]rune, 0, len(line))
+		for j := 0; j < len(line) && j < col0; j++ {
+			if line[j] == '\t' {
+				prefixRunes = append(prefixRunes, '\t')
+			} else {
+				prefixRunes = append(prefixRunes, ' ')
+			}
+		}
+		fmt.Fprintf(ios.Out, "%s%s\n", string(prefixRunes), formatter.Yellow("^"))
 	}
 
 	return nil

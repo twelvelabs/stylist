@@ -42,6 +42,7 @@ processors:
         rule_name: "{{ .FromLinter }}"
         rule_description: "{{ .Text }}"
         rule_uri: "https://golangci-lint.run/usage/linters/#{{ .FromLinter }}"
+        context: '{{ if .SourceLines }}{{ join "\n" .SourceLines }}{{ end }}'
 
   - name: "markdownlint"
     tags:
