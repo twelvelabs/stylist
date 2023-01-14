@@ -103,9 +103,26 @@ func (p *Pipeline) Check(ctx context.Context, pathSpecs []string) ([]*Result, er
 		}
 		results = append(results, pr...)
 	}
-	return results, nil
+	return p.transform(results), nil
 }
 
 func (p *Pipeline) Fix(ctx context.Context, pathSpecs []string) ([]*Result, error) {
 	return nil, nil
+}
+
+func (p *Pipeline) transform(results []*Result) []*Result {
+	// Maybe this should be controlled by a flag (and done by the caller)?
+	sort.Slice(results, func(i, j int) bool {
+		if results[i].Source != results[j].Source {
+			return results[i].Source < results[j].Source
+		}
+		if results[i].Location.Path != results[j].Location.Path {
+			return results[i].Location.Path < results[j].Location.Path
+		}
+		if results[i].Location.StartLine != results[j].Location.StartLine {
+			return results[i].Location.StartLine < results[j].Location.StartLine
+		}
+		return results[i].Location.StartColumn < results[j].Location.StartColumn
+	})
+	return results
 }

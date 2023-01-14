@@ -28,7 +28,7 @@ func NewCheckCmd(app *stylist.App) *cobra.Command {
 		DisableFlagsInUseLine: true,
 	}
 
-	addFormatFlag(cmd, &action.Format)
+	addFormatFlag(cmd, &app.Config.Output.Format)
 	addProcessorFilterFlags(cmd, action.ProcessorFilter)
 
 	return cmd
@@ -37,7 +37,6 @@ func NewCheckCmd(app *stylist.App) *cobra.Command {
 func NewCheckAction(app *stylist.App) *CheckAction {
 	return &CheckAction{
 		App:             app,
-		Format:          app.Config.Output.Format,
 		ProcessorFilter: &stylist.ProcessorFilter{},
 	}
 }
@@ -45,7 +44,6 @@ func NewCheckAction(app *stylist.App) *CheckAction {
 type CheckAction struct {
 	*stylist.App
 
-	Format          stylist.ResultFormat
 	ProcessorFilter *stylist.ProcessorFilter
 
 	pathSpecs []string
@@ -75,7 +73,7 @@ func (a *CheckAction) Run(ctx context.Context) error {
 		a.Logger.Debug(fmt.Sprintf("%#v", result))
 	}
 
-	err = stylist.NewResultPrinter(a.Format).Print(a.App.IO, results)
+	err = stylist.NewResultPrinter(a.IO, a.Config).Print(results)
 	if err != nil {
 		return err
 	}

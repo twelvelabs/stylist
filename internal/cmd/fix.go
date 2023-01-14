@@ -28,7 +28,7 @@ func NewFixCmd(app *stylist.App) *cobra.Command {
 		DisableFlagsInUseLine: true,
 	}
 
-	addFormatFlag(cmd, &action.Format)
+	addFormatFlag(cmd, &app.Config.Output.Format)
 	addProcessorFilterFlags(cmd, action.ProcessorFilter)
 
 	return cmd
@@ -37,7 +37,6 @@ func NewFixCmd(app *stylist.App) *cobra.Command {
 func NewFixAction(app *stylist.App) *FixAction {
 	return &FixAction{
 		App:             app,
-		Format:          app.Config.Output.Format,
 		ProcessorFilter: &stylist.ProcessorFilter{},
 	}
 }
@@ -45,7 +44,6 @@ func NewFixAction(app *stylist.App) *FixAction {
 type FixAction struct {
 	*stylist.App
 
-	Format          stylist.ResultFormat
 	ProcessorFilter *stylist.ProcessorFilter
 
 	pathSpecs []string
@@ -75,7 +73,7 @@ func (a *FixAction) Run(ctx context.Context) error {
 		a.Logger.Debug(fmt.Sprintf("%#v", result))
 	}
 
-	err = stylist.NewResultPrinter(a.Format).Print(a.App.IO, results)
+	err = stylist.NewResultPrinter(a.IO, a.Config).Print(results)
 	if err != nil {
 		return err
 	}
