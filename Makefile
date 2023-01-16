@@ -31,6 +31,11 @@ lint: actionlint golangci-lint ## Lint the app
 	actionlint
 	golangci-lint run
 
+.PHONY: format
+format: pin-github-action ## Format the app
+	gofmt -w .
+	pin-github-action .github/workflows/*.yml
+
 .PHONY: test
 test: ## Test the app
 	go mod tidy
@@ -73,3 +78,6 @@ gocovsh:
 golangci-lint:
 	@if ! command -v golangci-lint >/dev/null 2>&1; then go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest; fi
 
+.PHONY: pin-github-action
+pin-github-action:
+	@if ! command -v pin-github-action >/dev/null 2>&1; then npm install -g pin-github-action; fi
