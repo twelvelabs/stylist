@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	DefaultConfigPath   string       = ".stylist/stylist.yml"
+	DefaultConfigPath   string       = ".stylist.yml"
 	DefaultLogLevel     LogLevel     = LogLevelWarn
 	DefaultResultFormat ResultFormat = ResultFormatTty
 	DefaultShowContext  bool         = true
