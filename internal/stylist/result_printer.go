@@ -91,7 +91,7 @@ func (p *TtyPrinter) printContext(result *Result) {
 	}
 }
 
-// Copied from golangci-lint
+// Copied from golangci-lint.
 func (p *TtyPrinter) printUnderLinePointer(result *Result, formatter *ioutil.Formatter) {
 	// StartColumn == 0 means "unknown".
 	if len(result.ContextLines) != 1 || result.Location.StartColumn == 0 {
