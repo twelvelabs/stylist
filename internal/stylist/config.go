@@ -12,6 +12,7 @@ const (
 	DefaultConfigPath   string       = ".stylist/stylist.yml"
 	DefaultLogLevel     LogLevel     = LogLevelWarn
 	DefaultResultFormat ResultFormat = ResultFormatTty
+	DefaultShowContext  bool         = true
 )
 
 type Config struct {
@@ -24,7 +25,8 @@ type Config struct {
 }
 
 type OutputConfig struct {
-	Format ResultFormat `yaml:"format"`
+	Format      ResultFormat `yaml:"format"`
+	ShowContext bool         `yaml:"show_context"`
 }
 
 func NewConfig() *Config {
@@ -32,7 +34,8 @@ func NewConfig() *Config {
 		ConfigPath: DefaultConfigPath,
 		LogLevel:   DefaultLogLevel,
 		Output: OutputConfig{
-			Format: DefaultResultFormat,
+			Format:      DefaultResultFormat,
+			ShowContext: DefaultShowContext,
 		},
 	}
 }

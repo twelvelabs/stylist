@@ -10,12 +10,12 @@ import (
 	"github.com/twelvelabs/stylist/internal/stylist"
 )
 
-func addFormatFlag(cmd *cobra.Command, format *stylist.ResultFormat) {
+func addOutputFlags(cmd *cobra.Command, oc *stylist.OutputConfig) {
 	formatNames := stylist.ResultFormatNames()
 	formatHelp := fmt.Sprintf("Output format [`FORMAT`: %s]", strings.Join(formatNames, ", "))
 	// Since go-enum generates `flag.Value` methods we can use it directly,
 	// and the generated `.Set()` method will take care of validation and type casting.
-	cmd.Flags().VarP(format, "format", "f", formatHelp)
+	cmd.Flags().VarP(&oc.Format, "format", "f", formatHelp)
 
 	compFunc := func(cmd *cobra.Command, args []string, toComplete string) (
 		[]string, cobra.ShellCompDirective,
@@ -25,6 +25,10 @@ func addFormatFlag(cmd *cobra.Command, format *stylist.ResultFormat) {
 	if err := cmd.RegisterFlagCompletionFunc("format", compFunc); err != nil {
 		panic(err)
 	}
+
+	cmd.Flags().BoolVar(
+		&oc.ShowContext, "show-context", oc.ShowContext, "Show the lines of code affected",
+	)
 }
 
 func addProcessorFilterFlags(cmd *cobra.Command, filter *stylist.ProcessorFilter) {

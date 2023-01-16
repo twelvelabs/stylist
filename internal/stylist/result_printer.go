@@ -56,8 +56,10 @@ func (p *TtyPrinter) Print(results []*Result) error {
 	formatter := p.ios.Formatter()
 	for _, result := range results {
 		p.printLocation(result, formatter)
-		p.printContext(result)
-		p.printUnderLinePointer(result, formatter)
+		if p.config.Output.ShowContext {
+			p.printContext(result)
+			p.printUnderLinePointer(result, formatter)
+		}
 	}
 	return nil
 }

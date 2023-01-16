@@ -22,6 +22,16 @@ type ResultLocation struct {
 	EndColumn   int
 }
 
+// Returns the start and end lines.
+// If the end line is 0, then it defaults to the start line.
+func (r ResultLocation) LineRange() (int, int) {
+	if r.EndLine != 0 {
+		return r.StartLine, r.EndLine
+	}
+	return r.StartLine, r.StartLine
+}
+
+// Returns a display string in the form of "path:line:col".
 func (r ResultLocation) String() string {
 	path := r.Path
 	if path == "" {

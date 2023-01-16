@@ -103,14 +103,14 @@ func (p *Pipeline) Check(ctx context.Context, pathSpecs []string) ([]*Result, er
 		}
 		results = append(results, pr...)
 	}
-	return p.transform(results), nil
+	return p.transform(results)
 }
 
 func (p *Pipeline) Fix(ctx context.Context, pathSpecs []string) ([]*Result, error) {
 	return nil, nil
 }
 
-func (p *Pipeline) transform(results []*Result) []*Result {
+func (p *Pipeline) transform(results []*Result) ([]*Result, error) {
 	// Maybe this should be controlled by a flag (and done by the caller)?
 	sort.Slice(results, func(i, j int) bool {
 		if results[i].Source != results[j].Source {
@@ -124,5 +124,17 @@ func (p *Pipeline) transform(results []*Result) []*Result {
 		}
 		return results[i].Location.StartColumn < results[j].Location.StartColumn
 	})
-	return results
+
+	loader := NewContextLineLoader()
+	for _, result := range results {
+		if result.ContextLines == nil {
+			lines, err := loader.Load(result.Location)
+			if err != nil {
+				return nil, err
+			}
+			result.ContextLines = lines
+		}
+	}
+
+	return results, nil
 }

@@ -12,6 +12,7 @@
         "deckarep",
         "doublestar",
         "errgroup",
+        "fsutils",
         "gjson",
         "globbing",
         "gofmt",

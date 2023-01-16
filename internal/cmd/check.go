@@ -28,7 +28,7 @@ func NewCheckCmd(app *stylist.App) *cobra.Command {
 		DisableFlagsInUseLine: true,
 	}
 
-	addFormatFlag(cmd, &app.Config.Output.Format)
+	addOutputFlags(cmd, &app.Config.Output)
 	addProcessorFilterFlags(cmd, action.ProcessorFilter)
 
 	return cmd
