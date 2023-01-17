@@ -27,34 +27,27 @@ type Pipeline struct {
 // any global exclude patterns; then matched against each processor's
 // individual type, include, and exclude patterns.
 func (p *Pipeline) Index(ctx context.Context, pathSpecs []string) error {
-	// Aggregate each processor's file types and include patterns
-	fileTypes := []string{}
+	// Aggregate each processor's include patterns
 	includes := []string{}
 	for _, processor := range p.processors {
-		fileTypes = append(fileTypes, processor.Types...)
 		includes = append(includes, processor.Includes...)
 	}
 
 	// TODO: support passing Context to the indexer
 	// Create an index of paths (resolved from the path specs),
-	// matching any of the types and include patterns used by our processors.
+	// matching any of the include patterns used by our processors.
 	// Doing this once is _much_ faster than once per-processor,
 	// especially when dealing w/ very large projects and many processors or patterns.
-	indexer := NewPathIndexer(fileTypes, includes, p.excludes)
+	indexer := NewPathIndexer(includes, p.excludes)
 	if err := indexer.Index(pathSpecs...); err != nil {
 		return err
 	}
 
 	// For each processor...
 	for _, processor := range p.processors {
-		// Gather all paths matching the file types and include patterns
+		// Gather all paths matching the include patterns
 		// configured for this processor.
 		pathSet := NewPathSet()
-		for _, ft := range processor.Types {
-			if ftPaths, ok := indexer.PathsByFileType[ft]; ok {
-				pathSet = pathSet.Union(ftPaths)
-			}
-		}
 		for _, inc := range processor.Includes {
 			if incPaths, ok := indexer.PathsByInclude[inc]; ok {
 				pathSet = pathSet.Union(incPaths)

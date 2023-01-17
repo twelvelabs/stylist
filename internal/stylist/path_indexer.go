@@ -37,16 +37,11 @@ func NewPathSet(paths ...string) PathSet { //nolint:ireturn
 type PathSet mapset.Set[string]
 
 // NewPathIndexer returns a new path index.
-func NewPathIndexer(fileTypes, includes, excludes []string) *PathIndexer {
+func NewPathIndexer(includes, excludes []string) *PathIndexer {
 	indexer := &PathIndexer{
-		FileTypes:       mapset.NewSet(fileTypes...),
-		Includes:        mapset.NewSet(includes...),
-		Excludes:        mapset.NewSet(excludes...),
-		PathsByFileType: map[string]PathSet{},
-		PathsByInclude:  map[string]PathSet{},
-	}
-	for ft := range indexer.FileTypes.Iter() {
-		indexer.PathsByFileType[ft] = NewPathSet()
+		Includes:       mapset.NewSet(includes...),
+		Excludes:       mapset.NewSet(excludes...),
+		PathsByInclude: map[string]PathSet{},
 	}
 	for p := range indexer.Includes.Iter() {
 		indexer.PathsByInclude[p] = NewPathSet()
@@ -54,29 +49,22 @@ func NewPathIndexer(fileTypes, includes, excludes []string) *PathIndexer {
 	return indexer
 }
 
-// PathIndexer is a utility for indexing paths,
-// grouping them by file type and wildcard pattern.
+// PathIndexer is a utility for indexing paths and grouping them by wildcard pattern.
 type PathIndexer struct {
-	// The set of file types we are interested in.
-	FileTypes mapset.Set[string]
-
-	// Set of patterns to always include in the index (regardless of file type).
+	// Set of patterns to include in the index.
 	Includes mapset.Set[string]
 
-	// Set of patterns to always exclude from the index (even if a path would normally match).
+	// Set of patterns to exclude from the index (even if a path would normally match).
 	Excludes mapset.Set[string]
-
-	// Paths grouped by file type.
-	PathsByFileType map[string]PathSet
 
 	// Paths grouped by wildcard pattern.
 	PathsByInclude map[string]PathSet
 }
 
-// Cardinality returns the total number of file types and patterns
+// Cardinality returns the total number of patterns
 // that the indexer is configured to match.
 func (pi *PathIndexer) Cardinality() int {
-	return pi.FileTypes.Cardinality() + pi.Includes.Cardinality()
+	return pi.Includes.Cardinality()
 }
 
 // Index resolves each pathSpec (a path or a wildcard pattern)
@@ -195,12 +183,9 @@ func (pi *PathIndexer) indexPath(path string) error {
 	}
 
 	// Check if it matches
-	matchedFileTypes, matchedPatterns, err := pi.match(path)
+	matchedPatterns, err := pi.match(path)
 	if err != nil {
 		return err
-	}
-	for _, ft := range matchedFileTypes {
-		pi.PathsByFileType[ft].Add(path)
 	}
 	for _, p := range matchedPatterns {
 		pi.PathsByInclude[p].Add(path)
@@ -223,28 +208,24 @@ func (pi *PathIndexer) exclude(path string) (bool, error) {
 	return false, nil
 }
 
-// match returns the filetypes and patterns that match path.
-func (pi *PathIndexer) match(path string) ([]string, []string, error) {
-	var matchedFileTypes []string
+// match returns the patterns that match path.
+func (pi *PathIndexer) match(path string) ([]string, error) {
 	var matchedPatterns []string
 
-	// Optimization: nothing to match, so don't bother checking excludes.
+	// Optimization: nothing to match, so don't bother checking.
 	if pi.Cardinality() == 0 {
-		return matchedFileTypes, matchedPatterns, nil
+		return matchedPatterns, nil
 	}
-
-	// TODO: implement file type matching
-	matchedFileTypes = []string{}
 
 	for pattern := range pi.Includes.Iter() {
 		ok, err := matchPattern(pattern, path)
 		if err != nil {
-			return matchedFileTypes, matchedPatterns, err
+			return matchedPatterns, err
 		}
 		if ok {
 			matchedPatterns = append(matchedPatterns, pattern)
 		}
 	}
 
-	return matchedFileTypes, matchedPatterns, nil
+	return matchedPatterns, nil
 }

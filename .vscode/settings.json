@@ -17,6 +17,7 @@
         "globbing",
         "gofmt",
         "golangci",
+        "imdario",
         "iostreams",
         "ireturn",
         "logrus",

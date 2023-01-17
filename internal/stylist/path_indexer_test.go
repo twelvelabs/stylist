@@ -8,36 +8,29 @@ import (
 
 func TestNewPathIndexer(t *testing.T) {
 	indexer := NewPathIndexer(
-		[]string{"go", "shell", "yaml"},
 		[]string{"**/Dockerfile"},
 		[]string{},
 	)
 
-	assert.Equal(t, 3, indexer.FileTypes.Cardinality())
 	assert.Equal(t, 1, indexer.Includes.Cardinality())
 	assert.Equal(t, 0, indexer.Excludes.Cardinality())
 }
 
 func TestPathIndexer_Index(t *testing.T) {
 	tests := []struct {
-		desc                    string
-		indexer                 *PathIndexer
-		pathSpec                string
-		expectedPathsByFileType map[string][]string
-		expectedPathsByInclude  map[string][]string
-		err                     string
+		desc                   string
+		indexer                *PathIndexer
+		pathSpec               string
+		expectedPathsByInclude map[string][]string
+		err                    string
 	}{
 		{
 			desc: "accepts a path as pathSpec",
 			indexer: NewPathIndexer(
-				[]string{"text"},
 				[]string{"**/*.md", "**/*.txt"},
 				[]string{},
 			),
 			pathSpec: "testdata/txt/aaa.txt",
-			expectedPathsByFileType: map[string][]string{
-				"text": {}, // TODO
-			},
 			expectedPathsByInclude: map[string][]string{
 				"**/*.md": {},
 				"**/*.txt": {
@@ -50,14 +43,10 @@ func TestPathIndexer_Index(t *testing.T) {
 		{
 			desc: "accepts a dir as pathSpec",
 			indexer: NewPathIndexer(
-				[]string{"text"},
 				[]string{"**/*.md", "**/*.txt"},
 				[]string{},
 			),
 			pathSpec: "testdata/txt/001/011",
-			expectedPathsByFileType: map[string][]string{
-				"text": {}, // TODO
-			},
 			expectedPathsByInclude: map[string][]string{
 				"**/*.md": {},
 				"**/*.txt": {
@@ -75,14 +64,10 @@ func TestPathIndexer_Index(t *testing.T) {
 		{
 			desc: "accepts a pattern as pathSpec",
 			indexer: NewPathIndexer(
-				[]string{"text"},
 				[]string{"**/*.md", "**/*.txt"},
 				[]string{},
 			),
 			pathSpec: "testdata/txt/**/aaa.txt",
-			expectedPathsByFileType: map[string][]string{
-				"text": {}, // TODO
-			},
 			expectedPathsByInclude: map[string][]string{
 				"**/*.md": {},
 				"**/*.txt": {
@@ -103,14 +88,10 @@ func TestPathIndexer_Index(t *testing.T) {
 		{
 			desc: "does not match excluded patterns",
 			indexer: NewPathIndexer(
-				[]string{"text"},
 				[]string{"**/*.md", "**/*.txt"},
 				[]string{"testdata/txt/aaa.txt", "testdata/txt/003/**"},
 			),
 			pathSpec: "testdata/txt/**/aaa.txt",
-			expectedPathsByFileType: map[string][]string{
-				"text": {}, // TODO
-			},
 			expectedPathsByInclude: map[string][]string{
 				"**/*.md": {},
 				"**/*.txt": {
@@ -130,24 +111,18 @@ func TestPathIndexer_Index(t *testing.T) {
 			indexer: NewPathIndexer(
 				[]string{},
 				[]string{},
-				[]string{},
 			),
-			pathSpec:                "testdata/txt/**/aaa.txt",
-			expectedPathsByFileType: map[string][]string{},
-			expectedPathsByInclude:  map[string][]string{},
-			err:                     "",
+			pathSpec:               "testdata/txt/**/aaa.txt",
+			expectedPathsByInclude: map[string][]string{},
+			err:                    "",
 		},
 		{
 			desc: "returns an error if the pathSpec pattern base does not exist",
 			indexer: NewPathIndexer(
-				[]string{"text"},
 				[]string{"**/*.md", "**/*.txt"},
 				[]string{},
 			),
 			pathSpec: "does/not/exist/**/aaa.txt",
-			expectedPathsByFileType: map[string][]string{
-				"text": {},
-			},
 			expectedPathsByInclude: map[string][]string{
 				"**/*.md":  {},
 				"**/*.txt": {},
@@ -157,14 +132,10 @@ func TestPathIndexer_Index(t *testing.T) {
 		{
 			desc: "but no error if pathSpec pattern simply fails to match",
 			indexer: NewPathIndexer(
-				[]string{"text"},
 				[]string{"**/*.md", "**/*.txt"},
 				[]string{},
 			),
 			pathSpec: "testdata/txt/**/nope/*.txt",
-			expectedPathsByFileType: map[string][]string{
-				"text": {},
-			},
 			expectedPathsByInclude: map[string][]string{
 				"**/*.md":  {},
 				"**/*.txt": {},
@@ -174,14 +145,10 @@ func TestPathIndexer_Index(t *testing.T) {
 		{
 			desc: "returns an error if any configured patterns are malformed",
 			indexer: NewPathIndexer(
-				[]string{"text"},
 				[]string{"**/*.{txt,,"},
 				[]string{},
 			),
 			pathSpec: "testdata/txt/**/aaa.txt",
-			expectedPathsByFileType: map[string][]string{
-				"text": {},
-			},
 			expectedPathsByInclude: map[string][]string{
 				"**/*.{txt,,": {},
 			},
@@ -198,9 +165,6 @@ func TestPathIndexer_Index(t *testing.T) {
 				assert.ErrorContains(t, err, tt.err)
 			}
 
-			for ft, expected := range tt.expectedPathsByFileType {
-				assert.ElementsMatch(t, expected, tt.indexer.PathsByFileType[ft].ToSlice())
-			}
 			for p, expected := range tt.expectedPathsByInclude {
 				assert.ElementsMatch(t, expected, tt.indexer.PathsByInclude[p].ToSlice())
 			}
@@ -210,42 +174,36 @@ func TestPathIndexer_Index(t *testing.T) {
 
 func TestPathIndexer_Match(t *testing.T) {
 	tests := []struct {
-		desc              string
-		indexer           *PathIndexer
-		path              string
-		expectedFileTypes []string
-		expectedPatterns  []string
-		err               string
+		desc             string
+		indexer          *PathIndexer
+		path             string
+		expectedPatterns []string
+		err              string
 	}{
 		{
 			desc: "matches a single pattern",
 			indexer: NewPathIndexer(
-				[]string{},
 				[]string{"**/*.md", "**/*.txt"},
 				[]string{},
 			),
-			path:              "foo/bar/baz.txt",
-			expectedFileTypes: []string(nil),
-			expectedPatterns:  []string{"**/*.txt"},
-			err:               "",
+			path:             "foo/bar/baz.txt",
+			expectedPatterns: []string{"**/*.txt"},
+			err:              "",
 		},
 		{
 			desc: "matches multiple patterns",
 			indexer: NewPathIndexer(
-				[]string{},
 				[]string{"**/*.txt", "**/baz.*"},
 				[]string{},
 			),
-			path:              "foo/bar/baz.txt",
-			expectedFileTypes: []string(nil),
-			expectedPatterns:  []string{"**/*.txt", "**/baz.*"},
-			err:               "",
+			path:             "foo/bar/baz.txt",
+			expectedPatterns: []string{"**/*.txt", "**/baz.*"},
+			err:              "",
 		},
-		// TODO: add filetype assertions
 	}
 	for _, tt := range tests {
 		t.Run(tt.desc, func(t *testing.T) {
-			actualFileTypes, actualPatterns, err := tt.indexer.match(tt.path)
+			actualPatterns, err := tt.indexer.match(tt.path)
 
 			if tt.err == "" {
 				assert.NoError(t, err)
@@ -253,7 +211,6 @@ func TestPathIndexer_Match(t *testing.T) {
 				assert.ErrorContains(t, err, tt.err)
 			}
 
-			assert.ElementsMatch(t, tt.expectedFileTypes, actualFileTypes)
 			assert.ElementsMatch(t, tt.expectedPatterns, actualPatterns)
 		})
 	}

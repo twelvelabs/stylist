@@ -148,12 +148,10 @@ func TestPipeline_Index(t *testing.T) {
 			desc: "should filter files for each processor",
 			processors: []*Processor{
 				{
-					Types:    []string{"text"},
 					Includes: []string{"testdata/txt/**/*.txt"},
 					Excludes: []string{"testdata/txt/002/**"},
 				},
 				{
-					Types:    []string{"text"},
 					Includes: []string{"testdata/txt/**/*.txt"},
 					Excludes: []string{"testdata/txt/003/**"},
 				},

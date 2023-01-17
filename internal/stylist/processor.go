@@ -11,7 +11,6 @@ import (
 type Processor struct {
 	Name         string   `yaml:"name,omitempty"`
 	Tags         []string `yaml:"tags,omitempty"`
-	Types        []string `yaml:"types,omitempty"`
 	Includes     []string `yaml:"includes,omitempty"`
 	Excludes     []string `yaml:"excludes,omitempty"`
 	CheckCommand *Command `yaml:"check,omitempty"`

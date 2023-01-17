@@ -3,7 +3,6 @@ MVP:
     implement init command (generates an initial config w/ suggested presets)
     implement fix command
     non-zero exit code when results
-    prune "file type" logic from indexer and processor
     change Command.Template yaml field to "command"
 
     add app version, date, and revision vars
