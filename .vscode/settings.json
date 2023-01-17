@@ -21,6 +21,7 @@
         "ireturn",
         "logrus",
         "mapset",
+        "mergo",
         "pflag",
         "renderable",
         "shellcheck",

@@ -5,18 +5,30 @@ import (
 	"strings"
 
 	mapset "github.com/deckarep/golang-set/v2"
+	"github.com/imdario/mergo"
 )
 
 type Processor struct {
-	Name         string   `yaml:"name"`
-	Tags         []string `yaml:"tags"`
-	Types        []string `yaml:"types"`
-	Includes     []string `yaml:"includes"`
-	Excludes     []string `yaml:"excludes"`
-	CheckCommand *Command `yaml:"check"`
-	FixCommand   *Command `yaml:"fix"`
+	Name         string   `yaml:"name,omitempty"`
+	Tags         []string `yaml:"tags,omitempty"`
+	Types        []string `yaml:"types,omitempty"`
+	Includes     []string `yaml:"includes,omitempty"`
+	Excludes     []string `yaml:"excludes,omitempty"`
+	CheckCommand *Command `yaml:"check,omitempty"`
+	FixCommand   *Command `yaml:"fix,omitempty"`
 
 	paths []string
+}
+
+// Merge merges the receiver and arguments and returns a new processor.
+// Only exported fields are merged.
+func (p *Processor) Merge(others ...*Processor) *Processor {
+	dst := &Processor{}
+	_ = mergo.Merge(dst, p)
+	for _, other := range others {
+		_ = mergo.Merge(dst, other, mergo.WithOverride)
+	}
+	return dst
 }
 
 // Paths returns all paths matched by the processor.

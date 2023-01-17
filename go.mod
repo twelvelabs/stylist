@@ -7,6 +7,7 @@ require (
 	github.com/bmatcuk/doublestar/v4 v4.4.0
 	github.com/deckarep/golang-set/v2 v2.1.0
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
+	github.com/imdario/mergo v0.3.13
 	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/pflag v1.0.5
@@ -30,7 +31,6 @@ require (
 	github.com/go-playground/validator/v10 v10.11.1 // indirect
 	github.com/google/uuid v1.1.1 // indirect
 	github.com/huandu/xstrings v1.3.3 // indirect
-	github.com/imdario/mergo v0.3.11 // indirect
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect

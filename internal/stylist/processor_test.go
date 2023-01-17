@@ -4,7 +4,54 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	"github.com/twelvelabs/stylist/internal/render"
 )
+
+func TestProcessor_Merge(t *testing.T) {
+	p1 := &Processor{
+		Name: "p1",
+		Includes: []string{
+			"**/*.sh",
+			"**/*.txt",
+		},
+		CheckCommand: &Command{
+			Template:     "p1 check --something",
+			InputType:    InputTypeNone,
+			OutputType:   OutputTypeStdout,
+			OutputFormat: OutputFormatJson,
+			ResultMapping: ResultMapping{
+				Level: render.MustCompile("p1-level"),
+				Path:  render.MustCompile("p1-path"),
+			},
+		},
+	}
+	p2 := &Processor{
+		Name: "p2",
+		Includes: []string{
+			"**/*.yml",
+		},
+		CheckCommand: &Command{
+			Template: "p2 --foo",
+			ResultMapping: ResultMapping{
+				Level: render.MustCompile("p2-level"),
+			},
+		},
+	}
+	p3 := p1.Merge(p2)
+	assert.Equal(t, "p2", p3.Name)
+	assert.Equal(t, []string{"**/*.yml"}, p3.Includes)
+	assert.Equal(t, "p2 --foo", p3.CheckCommand.Template)
+	assert.Equal(t, InputTypeNone, p3.CheckCommand.InputType)
+	assert.Equal(t, OutputTypeStdout, p3.CheckCommand.OutputType)
+	assert.Equal(t, OutputFormatJson, p3.CheckCommand.OutputFormat)
+
+	level, _ := p3.CheckCommand.ResultMapping.Level.Render(nil)
+	assert.Equal(t, "p2-level", level)
+
+	path, _ := p3.CheckCommand.ResultMapping.Path.Render(nil)
+	assert.Equal(t, "p1-path", path)
+}
 
 func TestProcessorFilter_Filter(t *testing.T) {
 	tests := []struct {
