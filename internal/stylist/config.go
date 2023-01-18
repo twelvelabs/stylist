@@ -8,16 +8,9 @@ import (
 	"github.com/twelvelabs/termite/conf"
 )
 
-const (
-	DefaultConfigPath   string       = ".stylist.yml"
-	DefaultLogLevel     LogLevel     = LogLevelWarn
-	DefaultResultFormat ResultFormat = ResultFormatTty
-	DefaultShowContext  bool         = true
-)
-
 type Config struct {
-	ConfigPath string       `yaml:"config_path"`
-	LogLevel   LogLevel     `yaml:"log_level"`
+	ConfigPath string       `yaml:"config_path" default:".stylist.yml"`
+	LogLevel   LogLevel     `yaml:"log_level"   default:"warn"`
 	Output     OutputConfig `yaml:"output"`
 
 	Excludes   []string
@@ -25,19 +18,16 @@ type Config struct {
 }
 
 type OutputConfig struct {
-	Format      ResultFormat `yaml:"format"`
-	ShowContext bool         `yaml:"show_context"`
+	Format      ResultFormat `yaml:"format"       default:"tty"`
+	ShowContext bool         `yaml:"show_context" default:"true"`
 }
 
 func NewConfig() *Config {
-	return &Config{
-		ConfigPath: DefaultConfigPath,
-		LogLevel:   DefaultLogLevel,
-		Output: OutputConfig{
-			Format:      DefaultResultFormat,
-			ShowContext: DefaultShowContext,
-		},
+	config, err := conf.NewLoader(&Config{}, "").Load()
+	if err != nil {
+		panic(err)
 	}
+	return config
 }
 
 // NewConfigFromArgs creates a new config from the given args.

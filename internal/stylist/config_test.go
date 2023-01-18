@@ -7,9 +7,18 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestNewDefaultConfig(t *testing.T) {
+	config := NewConfig()
+	assert.Equal(t, ".stylist.yml", config.ConfigPath)
+	assert.Equal(t, LogLevelWarn, config.LogLevel)
+	assert.Equal(t, ResultFormatTty, config.Output.Format)
+	assert.Equal(t, true, config.Output.ShowContext)
+}
+
 func TestNewConfigFromArgs(t *testing.T) {
 	validConfigPath := filepath.Join(".", "testdata", "config", "valid.yml")
 	invalidConfigPath := filepath.Join(".", "testdata", "config", "invalid.yml")
+
 	tests := []struct {
 		desc        string
 		args        []string
@@ -21,8 +30,9 @@ func TestNewConfigFromArgs(t *testing.T) {
 			args: []string{},
 			expectation: func(t *testing.T, config *Config) {
 				t.Helper()
-				assert.Equal(t, DefaultConfigPath, config.ConfigPath)
-				assert.Equal(t, DefaultLogLevel, config.LogLevel)
+				defaultConfig := NewConfig()
+				assert.Equal(t, defaultConfig.ConfigPath, config.ConfigPath)
+				assert.Equal(t, defaultConfig.LogLevel, config.LogLevel)
 			},
 		},
 		{
@@ -60,8 +70,9 @@ func TestNewConfigFromArgs(t *testing.T) {
 			},
 			expectation: func(t *testing.T, config *Config) {
 				t.Helper()
-				assert.Equal(t, DefaultConfigPath, config.ConfigPath)
-				assert.Equal(t, DefaultLogLevel, config.LogLevel)
+				defaultConfig := NewConfig()
+				assert.Equal(t, defaultConfig.ConfigPath, config.ConfigPath)
+				assert.Equal(t, defaultConfig.LogLevel, config.LogLevel)
 			},
 		},
 		{
