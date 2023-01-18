@@ -40,8 +40,6 @@ format: pin-github-action ## Format the app
 test: ## Test the app
 	go mod tidy
 	go test --coverprofile=coverage.out ./...
-	@cat coverage.out | grep -v "_mock.go" | grep -v "_enum.go" > coverage.out.new
-	@mv coverage.out.new coverage.out
 
 
 ##@ Other
