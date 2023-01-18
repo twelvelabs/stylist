@@ -67,14 +67,6 @@ aaa:
 	assert.Nil(t, preset)
 }
 
-func TestPresetStore_Candidates(t *testing.T) {
-	store, err := NewPresetStore()
-	require.NoError(t, err)
-
-	// TODO: implement
-	_ = store.Candidates("testdata/...")
-}
-
 func TestResolvePresets(t *testing.T) {
 	processors := []*Processor{
 		{

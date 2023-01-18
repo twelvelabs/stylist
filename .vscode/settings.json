@@ -19,6 +19,7 @@
         "gofmt",
         "golangci",
         "imdario",
+        "Infof",
         "iostreams",
         "ireturn",
         "logrus",

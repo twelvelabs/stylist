@@ -3,6 +3,7 @@ package stylist
 import (
 	"context"
 	"sort"
+	"time"
 
 	"github.com/bmatcuk/doublestar/v4"
 )
@@ -27,11 +28,20 @@ type Pipeline struct {
 // any global exclude patterns; then matched against each processor's
 // individual type, include, and exclude patterns.
 func (p *Pipeline) Index(ctx context.Context, pathSpecs []string) error {
+	logger := AppLogger(ctx)
+
 	// Aggregate each processor's include patterns
 	includes := []string{}
 	for _, processor := range p.processors {
 		includes = append(includes, processor.Includes...)
 	}
+
+	startedAt := time.Now()
+	logger.Debugf(
+		"Indexing: includes=%v excludes=%v",
+		includes,
+		p.excludes,
+	)
 
 	// TODO: support passing Context to the indexer
 	// Create an index of paths (resolved from the path specs),
@@ -77,16 +87,32 @@ func (p *Pipeline) Index(ctx context.Context, pathSpecs []string) error {
 		processor.paths = paths
 	}
 
+	logger.Debugf("Indexed in %s", time.Since(startedAt))
 	return nil
+}
+
+// Match returns all processors that match the given path specs.
+func (p *Pipeline) Match(ctx context.Context, pathSpecs []string) ([]*Processor, error) {
+	if err := p.Index(ctx, pathSpecs); err != nil {
+		return nil, err
+	}
+	matches := []*Processor{}
+	for _, processor := range p.processors {
+		if len(processor.Paths()) > 0 {
+			matches = append(matches, processor)
+		}
+	}
+	return matches, nil
 }
 
 // Check executes the check command for each processor in the pipeline.
 func (p *Pipeline) Check(ctx context.Context, pathSpecs []string) ([]*Result, error) {
-	if err := p.Index(ctx, pathSpecs); err != nil {
+	processors, err := p.Match(ctx, pathSpecs)
+	if err != nil {
 		return nil, err
 	}
 	results := []*Result{}
-	for _, processor := range p.processors {
+	for _, processor := range processors {
 		if processor.CheckCommand == nil {
 			continue
 		}

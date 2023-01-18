@@ -13,8 +13,8 @@ type Config struct {
 	LogLevel   LogLevel     `yaml:"log_level"   default:"warn"`
 	Output     OutputConfig `yaml:"output"`
 
-	Excludes   []string
-	Processors []*Processor
+	Excludes   []string     `yaml:"excludes"    default:"[\".git\", \"node_modules\"]"`
+	Processors []*Processor `yaml:"processors"`
 }
 
 type OutputConfig struct {

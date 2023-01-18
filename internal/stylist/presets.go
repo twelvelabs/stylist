@@ -70,14 +70,6 @@ func (s *PresetStore) All() []*Processor {
 	return processors
 }
 
-// Candidates returns all presets relevant to the given dir.
-// A preset is relevant if there are files in the directory that match
-// the preset's include patterns (and do not match any exclude pattern).
-func (s *PresetStore) Candidates(dir string) []*Processor {
-	// TODO: implement
-	return s.All()
-}
-
 // Get returns the named processor.
 func (s *PresetStore) Get(name string) (*Processor, error) {
 	if preset, ok := s.presets[name]; ok {
