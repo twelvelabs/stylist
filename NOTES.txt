@@ -1,5 +1,4 @@
 MVP:
-    implement config presets for common tools that can be extended in user config
     implement init command (generates an initial config w/ suggested presets)
     implement fix command
     non-zero exit code when results
@@ -15,6 +14,8 @@ V1:
     implement sarif parser
     implement diff parser
     implement sarif printer
+    add more presets
 
 V?
+    devcontainer setup
     editor config support

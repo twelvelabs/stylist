@@ -10,6 +10,7 @@ import (
 
 type Processor struct {
 	Name         string   `yaml:"name,omitempty"`
+	Preset       string   `yaml:"preset,omitempty"`
 	Tags         []string `yaml:"tags,omitempty"`
 	Includes     []string `yaml:"includes,omitempty"`
 	Excludes     []string `yaml:"excludes,omitempty"`

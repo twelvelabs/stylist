@@ -76,5 +76,10 @@ func NewConfigFromArgs(args []string) (*Config, error) {
 		}
 	}
 
+	config.Processors, err = ResolvePresets(config.Processors)
+	if err != nil {
+		return nil, err
+	}
+
 	return config, nil
 }

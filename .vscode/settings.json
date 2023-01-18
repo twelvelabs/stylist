@@ -11,6 +11,7 @@
         "Debugln",
         "deckarep",
         "doublestar",
+        "errcheck",
         "errgroup",
         "fsutils",
         "gjson",
