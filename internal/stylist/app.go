@@ -24,6 +24,7 @@ type App struct {
 	IO        *ioutil.IOStreams
 	Config    *Config
 	Messenger *ui.Messenger
+	Prompter  ui.Prompter
 	CmdClient *run.Client
 	Logger    *logrus.Logger
 }
@@ -68,6 +69,7 @@ func NewApp() (*App, error) {
 		IO:        ios,
 		Config:    config,
 		Messenger: ui.NewMessenger(ios),
+		Prompter:  ui.NewSurveyPrompter(ios.In, ios.Out, ios.Err, ios),
 		CmdClient: run.NewClient(),
 		Logger:    logger,
 	}
@@ -87,6 +89,7 @@ func NewTestApp() *App {
 		IO:        ios,
 		Config:    config,
 		Messenger: ui.NewMessenger(ios),
+		Prompter:  ui.NewPrompterMock(),
 		CmdClient: run.NewClient().WithStubbing(),
 		Logger:    logger,
 	}

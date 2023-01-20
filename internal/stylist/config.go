@@ -1,25 +1,29 @@
 package stylist
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
+	"os"
+	"regexp"
 
 	"github.com/spf13/pflag"
 	"github.com/twelvelabs/termite/conf"
+	"gopkg.in/yaml.v3"
 )
 
 type Config struct {
-	ConfigPath string       `yaml:"config_path" default:".stylist.yml"`
-	LogLevel   LogLevel     `yaml:"log_level"   default:"warn"`
-	Output     OutputConfig `yaml:"output"`
+	ConfigPath string       `yaml:"config_path,omitempty" default:".stylist.yml"`
+	LogLevel   LogLevel     `yaml:"log_level,omitempty"   default:"warn"`
+	Output     OutputConfig `yaml:"output,omitempty"`
 
-	Excludes   []string     `yaml:"excludes"    default:"[\".git\", \"node_modules\"]"`
-	Processors []*Processor `yaml:"processors"`
+	Excludes   []string     `yaml:"excludes,omitempty"    default:"[\".git\", \"node_modules\"]"`
+	Processors []*Processor `yaml:"processors,omitempty"`
 }
 
 type OutputConfig struct {
-	Format      ResultFormat `yaml:"format"       default:"tty"`
-	ShowContext bool         `yaml:"show_context" default:"true"`
+	Format      ResultFormat `yaml:"format,omitempty"       default:"tty"`
+	ShowContext bool         `yaml:"show_context,omitempty" default:"true"`
 }
 
 func NewConfig() *Config {
@@ -82,4 +86,45 @@ func NewConfigFromArgs(args []string) (*Config, error) {
 	}
 
 	return config, nil
+}
+
+// WriteConfig serializes the config to yaml and writes it to path.
+func WriteConfig(config *Config, path string) error {
+	file, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+
+	encoder := yaml.NewEncoder(file)
+	encoder.SetIndent(2)
+	if err := encoder.Encode(config); err != nil {
+		return err
+	}
+	if err := encoder.Close(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func CommentOutConfigPresets(path string) error {
+	fileBytes, err := os.ReadFile(path)
+	if err != nil {
+		return err
+	}
+
+	newline := []byte("\n")
+	presetIndentRegexp := regexp.MustCompile(`(^\s{4})`)
+	indentPlusComment := []byte("    # ")
+
+	lines := bytes.Split(fileBytes, newline)
+	for idx, line := range lines {
+		lines[idx] = presetIndentRegexp.ReplaceAll(line, indentPlusComment)
+	}
+	fileBytes = bytes.Join(lines, newline)
+
+	if err := os.WriteFile(path, fileBytes, 0600); err != nil {
+		return err
+	}
+	return nil
 }

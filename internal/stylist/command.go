@@ -21,13 +21,13 @@ var (
 
 // Command represents a check or fix command to be run by a Processor.
 type Command struct {
-	Template      string        `yaml:"template"`
-	InputType     InputType     `yaml:"input"    default:"variadic"`
-	OutputType    OutputType    `yaml:"output"   default:"stdout"`
-	OutputFormat  OutputFormat  `yaml:"format"   default:"none"`
-	ResultMapping ResultMapping `yaml:"mapping"`
-	Parallelism   int           `yaml:"parallelism"`
-	BatchSize     int           `yaml:"batch_size"`
+	Template      string        `yaml:"template,omitempty"`
+	InputType     InputType     `yaml:"input,omitempty"    default:"variadic"`
+	OutputType    OutputType    `yaml:"output,omitempty"   default:"stdout"`
+	OutputFormat  OutputFormat  `yaml:"format,omitempty"   default:"none"`
+	ResultMapping ResultMapping `yaml:"mapping,omitempty"`
+	Parallelism   int           `yaml:"parallelism,omitempty"`
+	BatchSize     int           `yaml:"batch_size,omitempty"`
 }
 
 // Execute executes paths concurrently in batches of 10.

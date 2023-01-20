@@ -1,0 +1,43 @@
+processors:
+  - preset: golangci-lint
+    # name: golangci-lint
+    # includes:
+    #   - "**/*.go"
+    # check:
+    #   template: golangci-lint run --out-format=json
+    #   input: none
+    #   output: stdout
+    #   format: json
+    #   mapping:
+    #     pattern: Issues
+    #     level: '{{ .Severity | default "error" }}'
+    #     path: "{{ .Pos.Filename }}"
+    #     start_line: "{{ .Pos.Line }}"
+    #     start_column: "{{ .Pos.Column }}"
+    #     end_line: "0"
+    #     end_column: "0"
+    #     rule_id: "{{ .FromLinter }}"
+    #     rule_name: "{{ .FromLinter }}"
+    #     rule_description: "{{ .Text }}"
+    #     rule_uri: https://golangci-lint.run/usage/linters/#{{ .FromLinter }}
+    #     context: '{{ if .SourceLines }}{{ join "\n" .SourceLines }}{{ end }}'
+  - preset: markdownlint
+    # name: markdownlint
+    # includes:
+    #   - "**/*.md"
+    # check:
+    #   template: markdownlint --json
+    #   input: variadic
+    #   output: stderr
+    #   format: json
+    #   mapping:
+    #     level: error
+    #     path: "{{ .fileName }}"
+    #     start_line: "{{ .lineNumber }}"
+    #     start_column: "{{ if .errorRange }}{{ index .errorRange 0 }}{{ end }}"
+    #     end_line: "{{ .lineNumber }}"
+    #     end_column: "{{ if .errorRange }}{{ add (index .errorRange 0) (index .errorRange 1) }}{{ end }}"
+    #     rule_id: "{{ index .ruleNames 0 }}"
+    #     rule_name: "{{ index .ruleNames 1 }}"
+    #     rule_description: "{{ .ruleDescription }} {{ if .errorDetail }}[{{ .errorDetail }}]{{ end }}"
+    #     rule_uri: "{{ .ruleInformation }}"

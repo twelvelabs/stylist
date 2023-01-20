@@ -31,6 +31,7 @@
         "shlex",
         "sirupsen",
         "stretchr",
+        "testutil",
         "tidwall",
         "unparam"
     ]

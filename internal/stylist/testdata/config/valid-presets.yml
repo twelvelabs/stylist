@@ -1,3 +1,4 @@
+---
 processors:
   - preset: golangci-lint
   - preset: markdownlint

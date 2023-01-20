@@ -2,10 +2,11 @@ package cmd
 
 import (
 	"context"
-	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 
+	"github.com/twelvelabs/stylist/internal/fsutils"
 	"github.com/twelvelabs/stylist/internal/stylist"
 )
 
@@ -46,24 +47,52 @@ func (a *InitAction) Validate(args []string) error {
 
 func (a *InitAction) Run(ctx context.Context) error {
 	config := stylist.NewConfig()
-	excludes := config.Excludes
+	configPath := config.ConfigPath
+	verb := "Created"
 
+	// Handle existing config file.
+	if fsutils.PathExists(configPath) {
+		verb = "Replaced"
+		a.Messenger.Warning("%s already exists\n", configPath)
+		ok, err := a.Prompter.Confirm("Overwrite?", false, "")
+		if err != nil {
+			return err
+		}
+		if !ok {
+			return nil // user said "no", so bail
+		}
+		err = os.Remove(configPath)
+		if err != nil {
+			return err
+		}
+	}
+
+	// Find all presets that match files in the current working dir.
 	store, err := stylist.NewPresetStore()
 	if err != nil {
 		return err
 	}
-
-	pipeline := stylist.NewPipeline(store.All(), excludes)
+	presets := store.All()
+	excludes := config.Excludes
+	pipeline := stylist.NewPipeline(presets, excludes)
 	processors, err := pipeline.Match(ctx, []string{"."})
 	if err != nil {
 		return err
 	}
 
-	fmt.Fprintf(a.IO.Out, "Found %d matching presets:\n", len(processors))
-	for _, p := range processors {
-		fmt.Fprintf(a.IO.Out, "- %s\n", p.Name)
+	// Generate a new config file containing all matching presets.
+	// Commenting out everything but the `preset: foo` line so that
+	// users can see what the preset is doing and how to override.
+	config = &stylist.Config{
+		Processors: processors,
 	}
-	fmt.Fprintf(a.IO.Out, "\n")
+	if err := stylist.WriteConfig(config, configPath); err != nil {
+		return err
+	}
+	if err := stylist.CommentOutConfigPresets(configPath); err != nil {
+		return err
+	}
 
+	a.Messenger.Success("%s %s\n", verb, configPath)
 	return nil
 }

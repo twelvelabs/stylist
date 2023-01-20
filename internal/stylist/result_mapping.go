@@ -21,18 +21,18 @@ type resultData map[string]any
 // Mappings are typically defined in stylist.yml when the output type
 // has been set to "json" or "regexp".
 type ResultMapping struct {
-	Pattern         string           `yaml:"pattern"`
-	Level           *render.Template `yaml:"level"`
-	Path            *render.Template `yaml:"path"`
-	StartLine       *render.Template `yaml:"start_line"`
-	StartColumn     *render.Template `yaml:"start_column"`
-	EndLine         *render.Template `yaml:"end_line"`
-	EndColumn       *render.Template `yaml:"end_column"`
-	RuleID          *render.Template `yaml:"rule_id"`
-	RuleName        *render.Template `yaml:"rule_name"`
-	RuleDescription *render.Template `yaml:"rule_description"`
-	RuleURI         *render.Template `yaml:"rule_uri"`
-	Context         *render.Template `yaml:"context"`
+	Pattern         string           `yaml:"pattern,omitempty"`
+	Level           *render.Template `yaml:"level,omitempty"`
+	Path            *render.Template `yaml:"path,omitempty"`
+	StartLine       *render.Template `yaml:"start_line,omitempty"`
+	StartColumn     *render.Template `yaml:"start_column,omitempty"`
+	EndLine         *render.Template `yaml:"end_line,omitempty"`
+	EndColumn       *render.Template `yaml:"end_column,omitempty"`
+	RuleID          *render.Template `yaml:"rule_id,omitempty"`
+	RuleName        *render.Template `yaml:"rule_name,omitempty"`
+	RuleDescription *render.Template `yaml:"rule_description,omitempty"`
+	RuleURI         *render.Template `yaml:"rule_uri,omitempty"`
+	Context         *render.Template `yaml:"context,omitempty"`
 }
 
 // ToResult converts a map of output data to a Result struct.

@@ -1,5 +1,4 @@
 MVP:
-    implement init command (generates an initial config w/ suggested presets)
     implement fix command
     non-zero exit code when results
     change Command.Template yaml field to "command"
