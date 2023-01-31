@@ -1,7 +1,6 @@
 MVP:
     implement fix command
     non-zero exit code when results
-    change Command.Template yaml field to "command"
 
     add app version, date, and revision vars
     setup go-releaser

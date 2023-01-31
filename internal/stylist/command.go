@@ -21,7 +21,7 @@ var (
 
 // Command represents a check or fix command to be run by a Processor.
 type Command struct {
-	Template      string        `yaml:"template,omitempty"`
+	Template      string        `yaml:"command,omitempty"`
 	InputType     InputType     `yaml:"input,omitempty"    default:"variadic"`
 	OutputType    OutputType    `yaml:"output,omitempty"   default:"stdout"`
 	OutputFormat  OutputFormat  `yaml:"format,omitempty"   default:"none"`

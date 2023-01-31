@@ -6,7 +6,7 @@ golangci-lint:
   includes:
     - "**/*.go"
   check:
-    template: "golangci-lint run --out-format=json"
+    command: "golangci-lint run --out-format=json"
     input: none
     output: stdout
     format: json
@@ -31,7 +31,7 @@ markdownlint:
   includes:
     - "**/*.md"
   check:
-    template: "markdownlint --json"
+    command: "markdownlint --json"
     input: variadic
     output: stderr
     format: json

@@ -4,7 +4,7 @@ processors:
     includes:
       - "**/*.go"
     check:
-      template: golangci-lint run --out-format=json
+      command: golangci-lint run --out-format=json
       input: none
       output: stdout
       format: json
@@ -26,7 +26,7 @@ processors:
     includes:
       - "**/*.md"
     check:
-      template: markdownlint --json
+      command: markdownlint --json
       input: variadic
       output: stderr
       format: json
