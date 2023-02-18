@@ -112,7 +112,7 @@ func (c *Command) executeBatch(ctx context.Context, paths []string) ([]*Result, 
 	}
 	output := CommandOutput{
 		Content:  content,
-		ExitCode: cmd.ProcessState.ExitCode(),
+		ExitCode: cmd.ExitCode(),
 	}
 
 	logger.Debugln("Output:", output.String())

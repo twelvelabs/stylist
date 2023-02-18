@@ -78,5 +78,5 @@ func (a *FixAction) Run(ctx context.Context) error {
 		return err
 	}
 
-	return nil
+	return stylist.NewResultsError(results)
 }

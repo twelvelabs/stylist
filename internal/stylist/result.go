@@ -47,3 +47,23 @@ type ResultRule struct {
 	Description string
 	URI         string
 }
+
+// NewResultsError returns a new error when the results slice is non-empty.
+func NewResultsError(results []*Result) error {
+	if len(results) == 0 {
+		return nil
+	}
+	return &ResultsError{
+		results: results,
+	}
+}
+
+// ResultsError is a sentinel type returned by actions when there are results.
+type ResultsError struct {
+	results []*Result
+}
+
+// Error implements the error interface.
+func (re *ResultsError) Error() string {
+	return fmt.Sprintf("%d issue(s)", len(re.results))
+}

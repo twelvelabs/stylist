@@ -1,6 +1,8 @@
 MVP:
     implement fix command
-    non-zero exit code when results
+
+    explicitly pass processor name to the Command
+        (vs inferring it from the command name)
 
     add app version, date, and revision vars
     setup go-releaser
