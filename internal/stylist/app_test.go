@@ -2,6 +2,7 @@ package stylist
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -20,8 +21,8 @@ func TestNewTestApp(t *testing.T) {
 }
 
 func TestNewAppMeta(t *testing.T) {
-	meta := NewAppMeta("1.2.3", "9b11774", "1676781982")
+	meta := NewAppMeta("1.2.3", "9b11774", "2023-02-19T00:57:51-06:00")
 	assert.Equal(t, "9b11774", meta.BuildCommit)
-	assert.Equal(t, "2023-02-18 22:46", meta.BuildTime.Format("2006-01-02 15:04"))
+	assert.Equal(t, "2023-02-19T00:57:51-06:00", meta.BuildTime.Format(time.RFC3339))
 	assert.Equal(t, "1.2.3", meta.Version)
 }

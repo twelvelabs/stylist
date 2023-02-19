@@ -6,7 +6,6 @@ import (
 	"os"
 	"runtime"
 	"runtime/debug"
-	"strconv"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -129,12 +128,11 @@ func newLogger(ios *ioutil.IOStreams, level LogLevel) *logrus.Logger {
 }
 
 func NewAppMeta(version, commit, date string) *AppMeta {
-	ts, _ := strconv.ParseInt(date, 10, 0)
-	t := time.Unix(ts, 0)
+	buildTime, _ := time.Parse(time.RFC3339, date)
 
 	meta := &AppMeta{
 		BuildCommit: commit,
-		BuildTime:   t,
+		BuildTime:   buildTime,
 		Version:     version,
 		GOOS:        runtime.GOOS,
 		GOARCH:      runtime.GOARCH,

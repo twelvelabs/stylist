@@ -1,6 +1,5 @@
 MVP:
     setup go-releaser
-    github repo setup
 
 V1:
     implement regexp parser
