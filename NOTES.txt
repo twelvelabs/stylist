@@ -1,6 +1,4 @@
 MVP:
-    implement fix command
-
     explicitly pass processor name to the Command
         (vs inferring it from the command name)
 

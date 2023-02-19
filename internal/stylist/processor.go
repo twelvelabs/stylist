@@ -1,6 +1,7 @@
 package stylist
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -20,7 +21,29 @@ type Processor struct {
 	paths []string
 }
 
-// Merge merges the receiver and arguments and returns a new processor.
+// Execute runs the given command for the current set of paths.
+func (p *Processor) Execute(ctx context.Context, ct CommandType) ([]*Result, error) {
+	// Resolve the command to execute.
+	var cmd *Command
+	switch ct {
+	case CommandTypeCheck:
+		cmd = p.CheckCommand
+	case CommandTypeFix:
+		cmd = p.FixCommand
+	default:
+		panic(fmt.Sprintf("unknown command type '%s'", ct.String()))
+	}
+
+	if cmd == nil {
+		// Command not implemented - nothing to do.
+		return nil, nil
+	}
+
+	// Delegate to the command.
+	return cmd.Execute(ctx, p.Paths())
+}
+
+// Merge merges the receiver and arguments and returns a new processor
 // Only exported fields are merged.
 func (p *Processor) Merge(others ...*Processor) *Processor {
 	dst := &Processor{}

@@ -23,6 +23,11 @@ golangci-lint:
       rule_description: "{{ .Text }}"
       rule_uri: "https://golangci-lint.run/usage/linters/#{{ .FromLinter }}"
       context: '{{ if .SourceLines }}{{ join "\n" .SourceLines }}{{ end }}'
+  fix:
+    command: "golangci-lint run --fix"
+    input: none
+    output: stdout
+    format: none
 
 markdownlint:
   name: "markdownlint"
@@ -46,3 +51,8 @@ markdownlint:
       rule_name: "{{ index .ruleNames 1 }}"
       rule_description: "{{ .ruleDescription }} {{ if .errorDetail }}[{{ .errorDetail }}]{{ end }}"
       rule_uri: "{{ .ruleInformation }}"
+  fix:
+    command: "markdownlint --fix"
+    input: variadic
+    output: stderr
+    format: none

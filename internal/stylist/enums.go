@@ -2,6 +2,11 @@ package stylist
 
 //go:generate go-enum -f=$GOFILE --marshal --names --flag
 
+// CommandType represents the type of command.
+//
+// ENUM(check, fix).
+type CommandType string
+
 // InputType represents how files are passed to a command.
 //
 // ENUM(arg, none, stdin, variadic).

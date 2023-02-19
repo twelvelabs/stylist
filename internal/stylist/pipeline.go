@@ -2,10 +2,12 @@ package stylist
 
 import (
 	"context"
+	"runtime"
 	"sort"
 	"time"
 
 	"github.com/bmatcuk/doublestar/v4"
+	"golang.org/x/sync/errgroup"
 )
 
 func NewPipeline(processors []*Processor, excludes []string) *Pipeline {
@@ -107,26 +109,57 @@ func (p *Pipeline) Match(ctx context.Context, pathSpecs []string) ([]*Processor,
 
 // Check executes the check command for each processor in the pipeline.
 func (p *Pipeline) Check(ctx context.Context, pathSpecs []string) ([]*Result, error) {
+	return p.execute(ctx, pathSpecs, CommandTypeCheck)
+}
+
+// Check executes the fix command for each processor in the pipeline.
+func (p *Pipeline) Fix(ctx context.Context, pathSpecs []string) ([]*Result, error) {
+	return p.execute(ctx, pathSpecs, CommandTypeFix)
+}
+
+func (p *Pipeline) execute(
+	ctx context.Context, pathSpecs []string, ct CommandType,
+) ([]*Result, error) {
+	// Get all the processors that match the pathSpecs.
 	processors, err := p.Match(ctx, pathSpecs)
 	if err != nil {
 		return nil, err
 	}
+
+	// Setup an errgroup w/ the correct level of parallelism.
+	// Fix commands mutate files, so each processor needs to run serially.
+	group, ctx := errgroup.WithContext(ctx)
+	if ct == CommandTypeFix {
+		group.SetLimit(1)
+	} else {
+		// TODO: once we have a good test case (lots of processors and files),
+		// check to see whether this can be safely removed.
+		// Might run better un-throttled.
+		group.SetLimit(runtime.NumCPU())
+	}
+
+	// Execute the processors in goroutines and aggregate their results.
 	results := []*Result{}
 	for _, processor := range processors {
-		if processor.CheckCommand == nil {
-			continue
-		}
-		pr, err := processor.CheckCommand.Execute(ctx, processor.Paths())
-		if err != nil {
-			return nil, err
-		}
-		results = append(results, pr...)
+		processor := processor
+		group.Go(func() error {
+			pr, err := processor.Execute(ctx, ct)
+			if err != nil {
+				return err
+			}
+			// TODO: add mutex
+			results = append(results, pr...)
+			return nil
+		})
 	}
-	return p.transform(results)
-}
 
-func (p *Pipeline) Fix(ctx context.Context, pathSpecs []string) ([]*Result, error) {
-	return nil, nil
+	err = group.Wait()
+	if err != nil {
+		return nil, err
+	}
+
+	// Return the transformed results.
+	return p.transform(results)
 }
 
 func (p *Pipeline) transform(results []*Result) ([]*Result, error) {

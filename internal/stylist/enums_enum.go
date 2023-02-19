@@ -12,6 +12,83 @@ import (
 )
 
 const (
+	// CommandTypeCheck is a CommandType of type check.
+	CommandTypeCheck CommandType = "check"
+	// CommandTypeFix is a CommandType of type fix.
+	CommandTypeFix CommandType = "fix"
+)
+
+var ErrInvalidCommandType = fmt.Errorf("not a valid CommandType, try [%s]", strings.Join(_CommandTypeNames, ", "))
+
+var _CommandTypeNames = []string{
+	string(CommandTypeCheck),
+	string(CommandTypeFix),
+}
+
+// CommandTypeNames returns a list of possible string values of CommandType.
+func CommandTypeNames() []string {
+	tmp := make([]string, len(_CommandTypeNames))
+	copy(tmp, _CommandTypeNames)
+	return tmp
+}
+
+// String implements the Stringer interface.
+func (x CommandType) String() string {
+	return string(x)
+}
+
+// String implements the Stringer interface.
+func (x CommandType) IsValid() bool {
+	_, err := ParseCommandType(string(x))
+	return err == nil
+}
+
+var _CommandTypeValue = map[string]CommandType{
+	"check": CommandTypeCheck,
+	"fix":   CommandTypeFix,
+}
+
+// ParseCommandType attempts to convert a string to a CommandType.
+func ParseCommandType(name string) (CommandType, error) {
+	if x, ok := _CommandTypeValue[name]; ok {
+		return x, nil
+	}
+	return CommandType(""), fmt.Errorf("%s is %w", name, ErrInvalidCommandType)
+}
+
+// MarshalText implements the text marshaller method.
+func (x CommandType) MarshalText() ([]byte, error) {
+	return []byte(string(x)), nil
+}
+
+// UnmarshalText implements the text unmarshaller method.
+func (x *CommandType) UnmarshalText(text []byte) error {
+	tmp, err := ParseCommandType(string(text))
+	if err != nil {
+		return err
+	}
+	*x = tmp
+	return nil
+}
+
+// Set implements the Golang flag.Value interface func.
+func (x *CommandType) Set(val string) error {
+	v, err := ParseCommandType(val)
+	*x = v
+	return err
+}
+
+// Get implements the Golang flag.Getter interface func.
+func (x *CommandType) Get() interface{} {
+	return *x
+}
+
+// Type implements the github.com/spf13/pFlag Value interface.
+func (x *CommandType) Type() string {
+	return "CommandType"
+}
+
+const (
 	// InputTypeArg is a InputType of type arg.
 	InputTypeArg InputType = "arg"
 	// InputTypeNone is a InputType of type none.
