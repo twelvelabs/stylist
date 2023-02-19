@@ -40,7 +40,7 @@ func (p *Processor) Execute(ctx context.Context, ct CommandType) ([]*Result, err
 	}
 
 	// Delegate to the command.
-	return cmd.Execute(ctx, p.Paths())
+	return cmd.Execute(ctx, p.Name, p.Paths())
 }
 
 // Merge merges the receiver and arguments and returns a new processor

@@ -30,8 +30,8 @@ type Command struct {
 	BatchSize     int           `yaml:"batch_size,omitempty"`
 }
 
-// Execute executes paths concurrently in batches of 10.
-func (c *Command) Execute(ctx context.Context, paths []string) ([]*Result, error) {
+// Execute executes paths concurrently in batches on behalf of the named processor.
+func (c *Command) Execute(ctx context.Context, name string, paths []string) ([]*Result, error) {
 	results := []*Result{}
 
 	group, ctx := errgroup.WithContext(ctx)
@@ -40,7 +40,7 @@ func (c *Command) Execute(ctx context.Context, paths []string) ([]*Result, error
 	for _, batch := range c.partition(paths) {
 		batch := batch
 		group.Go(func() error {
-			batchResults, err := c.executeBatch(ctx, batch)
+			batchResults, err := c.executeBatch(ctx, name, batch)
 			if err != nil {
 				return err
 			}
@@ -55,7 +55,9 @@ func (c *Command) Execute(ctx context.Context, paths []string) ([]*Result, error
 }
 
 // executes a single batch of paths.
-func (c *Command) executeBatch(ctx context.Context, paths []string) ([]*Result, error) {
+func (c *Command) executeBatch(
+	ctx context.Context, name string, paths []string,
+) ([]*Result, error) {
 	if len(paths) == 0 {
 		return nil, nil
 	}
@@ -127,8 +129,8 @@ func (c *Command) executeBatch(ctx context.Context, paths []string) ([]*Result, 
 	pathSet := mapset.NewSet(paths...)
 	transformed := []*Result{}
 	for _, r := range parsed {
-		// Add the command name to the results
-		r.Source = args[0]
+		// Add the processor name to the results
+		r.Source = name
 		// InputTypeNone doesn't pass `paths` to the command, so there may
 		// be results for paths we don't care about. Filter those out.
 		if pathSet.Contains(r.Location.Path) || r.Location.Path == "" {

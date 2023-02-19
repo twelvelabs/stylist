@@ -1,7 +1,4 @@
 MVP:
-    explicitly pass processor name to the Command
-        (vs inferring it from the command name)
-
     add app version, date, and revision vars
     setup go-releaser
 
