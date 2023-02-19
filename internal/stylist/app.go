@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -23,6 +24,7 @@ const (
 type App struct {
 	IO        *ioutil.IOStreams
 	Config    *Config
+	Meta      *AppMeta
 	Messenger *ui.Messenger
 	Prompter  ui.Prompter
 	CmdClient *run.Client
@@ -49,7 +51,7 @@ func AppLogger(ctx context.Context) *logrus.Logger {
 	return ctx.Value(ctxLogger).(*logrus.Logger)
 }
 
-func NewApp() (*App, error) {
+func NewApp(meta *AppMeta) (*App, error) {
 	startedAt := time.Now()
 
 	config, err := NewConfigFromArgs(os.Args)
@@ -68,6 +70,7 @@ func NewApp() (*App, error) {
 	app := &App{
 		IO:        ios,
 		Config:    config,
+		Meta:      meta,
 		Messenger: ui.NewMessenger(ios),
 		Prompter:  ui.NewSurveyPrompter(ios.In, ios.Out, ios.Err, ios),
 		CmdClient: run.NewClient(),
@@ -80,6 +83,7 @@ func NewApp() (*App, error) {
 }
 
 func NewTestApp() *App {
+	meta := NewAppMeta("test", "", "0")
 	config := NewConfig()
 
 	ios := ioutil.Test()
@@ -88,6 +92,7 @@ func NewTestApp() *App {
 	app := &App{
 		IO:        ios,
 		Config:    config,
+		Meta:      meta,
 		Messenger: ui.NewMessenger(ios),
 		Prompter:  ui.NewPrompterMock(),
 		CmdClient: run.NewClient().WithStubbing(),
@@ -119,4 +124,21 @@ func newLogger(ios *ioutil.IOStreams, level LogLevel) *logrus.Logger {
 	}
 
 	return logger
+}
+
+func NewAppMeta(version, commit, date string) *AppMeta {
+	ts, _ := strconv.ParseInt(date, 10, 0)
+	t := time.Unix(ts, 0)
+
+	return &AppMeta{
+		BuildCommit: commit,
+		BuildTime:   t,
+		Version:     version,
+	}
+}
+
+type AppMeta struct {
+	BuildCommit string
+	BuildTime   time.Time
+	Version     string
 }

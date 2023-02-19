@@ -9,8 +9,15 @@ import (
 	"github.com/twelvelabs/stylist/internal/stylist"
 )
 
+var (
+	version = "dev"
+	commit  = ""
+	date    = ""
+)
+
 func main() {
-	app, err := stylist.NewApp()
+	meta := stylist.NewAppMeta(version, commit, date)
+	app, err := stylist.NewApp(meta)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)

@@ -13,7 +13,7 @@ func NewRootCmd(app *stylist.App) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:          "stylist",
 		Short:        "Lint and format with style",
-		Version:      "X.X.X",
+		Version:      app.Meta.Version,
 		SilenceUsage: true,
 	}
 

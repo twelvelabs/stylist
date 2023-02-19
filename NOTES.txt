@@ -1,7 +1,5 @@
 MVP:
-    add app version, date, and revision vars
     setup go-releaser
-
     github repo setup
 
 V1:
