@@ -38,6 +38,7 @@ func NewRootCmd(app *stylist.App) *cobra.Command {
 	cmd.AddCommand(NewFixCmd(app))
 	cmd.AddCommand(NewFilesCmd(app))
 	cmd.AddCommand(NewInitCmd(app))
+	cmd.AddCommand(NewVersionCmd(app))
 
 	return cmd
 }

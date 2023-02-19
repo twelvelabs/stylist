@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"runtime"
+	"runtime/debug"
 	"strconv"
 	"time"
 
@@ -130,15 +132,30 @@ func NewAppMeta(version, commit, date string) *AppMeta {
 	ts, _ := strconv.ParseInt(date, 10, 0)
 	t := time.Unix(ts, 0)
 
-	return &AppMeta{
+	meta := &AppMeta{
 		BuildCommit: commit,
 		BuildTime:   t,
 		Version:     version,
+		GOOS:        runtime.GOOS,
+		GOARCH:      runtime.GOARCH,
 	}
+
+	if info, ok := debug.ReadBuildInfo(); ok {
+		meta.BuildGoVersion = info.GoVersion
+		meta.BuildVersion = info.Main.Version
+		meta.BuildChecksum = info.Main.Sum
+	}
+
+	return meta
 }
 
 type AppMeta struct {
-	BuildCommit string
-	BuildTime   time.Time
-	Version     string
+	BuildCommit    string
+	BuildTime      time.Time
+	BuildGoVersion string
+	BuildVersion   string
+	BuildChecksum  string
+	Version        string
+	GOOS           string
+	GOARCH         string
 }

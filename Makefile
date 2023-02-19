@@ -5,6 +5,9 @@ APP_NAME := stylist
 BUILD_DIR := ./dist
 DST_DIR := /usr/local/bin
 
+CURRENT_SHA = $(shell git rev-parse --short HEAD)
+CURRENT_TS = $(shell date +%s)
+
 ##@ App
 
 .PHONY: coverage
@@ -15,7 +18,7 @@ coverage: gocovsh ## Show code coverage
 .PHONY: build
 build: ## Build the app
 	go mod tidy
-	go build -o ${BUILD_DIR}/${APP_NAME} .
+	go build -ldflags='-X main.version=dev -X main.commit=$(CURRENT_SHA) -X main.date=$(CURRENT_TS)' -o ${BUILD_DIR}/${APP_NAME} .
 
 .PHONY: install
 install: build ## Install the app
