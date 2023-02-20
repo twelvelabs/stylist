@@ -44,6 +44,12 @@ test: ## Test the app
 	go mod tidy
 	go test --coverprofile=coverage.out ./...
 
+.PHONY: release
+release: svu ## Create a new release tag
+	git fetch --all --tags
+	@if [[ "$$(svu next)" == "$$(svu current)" ]]; then echo "Nothing to release!" && exit 1; fi
+	git tag -a "$$(svu next)" -m "Release version $$(svu next)" && git push origin --tags
+
 
 ##@ Other
 
@@ -82,3 +88,7 @@ golangci-lint:
 .PHONY: pin-github-action
 pin-github-action:
 	@if ! command -v pin-github-action >/dev/null 2>&1; then npm install -g pin-github-action; fi
+
+.PHONY: svu
+svu:
+	@if ! command -v svu >/dev/null 2>&1; then go install github.com/caarlos0/svu@latest; fi

@@ -1,6 +1,3 @@
-MVP:
-    setup go-releaser
-
 V1:
     implement regexp parser
     implement sarif parser
