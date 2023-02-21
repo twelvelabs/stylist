@@ -1,4 +1,24 @@
 ---
+gitleaks:
+  name: "gitleaks"
+  preset: "gitleaks"
+  tags: []
+  includes:
+    - "**/*"
+  check:
+    command: "gitleaks detect --no-banner --no-git --redact --verbose"
+    input: none
+    output: stdout
+    format: regexp
+    mapping:
+      pattern: '(?m)Secret:\s+(?P<secret>.*)\nRuleID:\s+(?P<rule_id>.*)\nEntropy:\s+(?P<entropy>.*)\nFile:\s+(?P<file>.*)\nLine:\s+(?P<line>.*)'
+      level: "error"
+      path: "{{ .file }}"
+      start_line: "{{ .line }}"
+      rule_id: "{{ .rule_id }}"
+      rule_name: "{{ .rule_id }}"
+      rule_description: "Secret detected"
+
 golangci-lint:
   name: "golangci-lint"
   preset: "golangci-lint"

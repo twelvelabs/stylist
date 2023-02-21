@@ -14,6 +14,7 @@
         "errcheck",
         "errgroup",
         "fsutils",
+        "gitleaks",
         "gjson",
         "globbing",
         "gofmt",
@@ -34,5 +35,6 @@
         "testutil",
         "tidwall",
         "unparam"
-    ]
+    ],
+    "sarif-viewer.connectToGithubCodeScanning": "off"
 }
