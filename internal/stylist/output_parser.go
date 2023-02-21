@@ -3,8 +3,17 @@ package stylist
 import (
 	"bytes"
 	"fmt"
+	"io"
+	"regexp"
 
 	"github.com/tidwall/gjson"
+)
+
+var (
+	ansiRegexpStr = "[\u001B\u009B][[\\]()#;?]*(?:" +
+		"(?:(?:[a-zA-Z\\d]*(?:;[a-zA-Z\\d]*)*)?\u0007)|" +
+		"(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PRZcf-ntqry=><~]))"
+	ansiRegexp = regexp.MustCompile(ansiRegexpStr)
 )
 
 // OutputParser is the interface that wraps the Parse method.
@@ -111,7 +120,44 @@ type RegexpOutputParser struct {
 
 // Parse parses command output into a slice of results.
 func (p *RegexpOutputParser) Parse(output CommandOutput, mapping ResultMapping) ([]*Result, error) {
-	return nil, nil
+	// Validate the regexp pattern.
+	if mapping.Pattern == "" {
+		return nil, fmt.Errorf("mapping pattern is required when output format is regexp")
+	}
+	r, err := regexp.Compile(mapping.Pattern)
+	if err != nil {
+		return nil, fmt.Errorf("mapping pattern: %w", err)
+	}
+
+	// Read the content.
+	buf, err := io.ReadAll(output.Content)
+	if err != nil {
+		return nil, err
+	}
+	content := ansiRegexp.ReplaceAllString(string(buf), "")
+	if content == "" {
+		return nil, nil // nothing to parse
+	}
+
+	// Run the regexp
+	matches := r.FindAllStringSubmatch(content, -1)
+	if len(matches) == 0 {
+		return nil, nil // nothing found
+	}
+	keys := r.SubexpNames()
+
+	// Convert the regexp matches into a slice of resultData maps.
+	items := []resultData{}
+	for _, match := range matches {
+		item := resultData{}
+		for i := 1; i < len(keys); i++ {
+			item[keys[i]] = match[i]
+		}
+		items = append(items, item)
+	}
+
+	// Transform the resultData into `Result` structs.
+	return mapping.ToResultSlice(items)
 }
 
 /*
