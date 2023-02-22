@@ -1,4 +1,25 @@
 ---
+cspell:
+  name: cspell
+  preset: cspell
+  tags: []
+  includes:
+    - "**/*"
+  check:
+    command: "cspell --cache --dot --no-must-find-files --relative --show-suggestions --no-progress --no-summary ."
+    input: none
+    output: stdout
+    format: regexp
+    mapping:
+      pattern: '(?P<file>.*):(?P<line>\d+):(?P<column>\d+)\s-\s(?P<message>.*)'
+      level: "error"
+      path: '{{ trimPrefix "./" .file }}'
+      start_line: "{{ .line }}"
+      start_column: "{{ .column }}"
+      rule_id: "spelling"
+      rule_name: "spelling"
+      rule_description: "{{ .message }}"
+
 gitleaks:
   name: "gitleaks"
   preset: "gitleaks"

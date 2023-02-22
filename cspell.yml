@@ -1,0 +1,63 @@
+---
+version: "0.2"
+language: en
+dictionaries:
+  - bash
+  - cpp
+  - fullstack
+  - golang
+ignorePaths:
+  - .git/
+  - .gitattributes
+  - .gitignore
+  - .golangci.yml
+  - dist
+  - coverage.out
+  - cspell.yml
+  - go.mod
+  - go.sum
+  - Makefile
+  - "**/testdata"
+words:
+  - bmatcuk
+  - codecov
+  - debugf
+  - debugln
+  - deckarep
+  - devcontainer
+  - doublestar
+  - errcheck
+  - errgroup
+  - fsutils
+  - gitleaks
+  - gjson
+  - globbing
+  - GOFILE
+  - gofmt
+  - golangci
+  - gopls
+  - gomod
+  - goreleaser
+  - imdario
+  - infof
+  - iostreams
+  - ireturn
+  - logrus
+  - linecache
+  - mapset
+  - markdownlint
+  - mergo
+  - nolint
+  - pflag
+  - renderable
+  - sarif
+  - shellcheck
+  - shlex
+  - sirupsen
+  - stretchr
+  - testdata
+  - testutil
+  - tidwall
+  - twelvelabs
+  - unmarshaller
+  - unparam

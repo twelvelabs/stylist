@@ -1,4 +1,5 @@
 processors:
+  - preset: cspell
   - preset: gitleaks
   - preset: golangci-lint
   - preset: markdownlint
