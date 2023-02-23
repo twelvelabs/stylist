@@ -109,3 +109,25 @@ markdownlint:
     input: variadic
     output: stderr
     format: none
+
+shellcheck:
+  name: shellcheck
+  preset: shellcheck
+  includes:
+    - "**/*.{bash,sh,shell}"
+  check:
+    command: "shellcheck --check-sourced --color=never --format=json --source-path=SOURCEPATHS --external-sources"
+    input: variadic
+    output: stdout
+    format: json
+    mapping:
+      level: "{{ .level }}"
+      path: "{{ .file }}"
+      start_line: "{{ .line }}"
+      start_column: "{{ .column }}"
+      end_line: "{{ .endLine }}"
+      end_column: "{{ .endColumn }}"
+      rule_id: "SC{{ .code }}"
+      rule_name: "SC{{ .code }}"
+      rule_description: "{{ .message }}"
+      rule_uri: "https://www.shellcheck.net/wiki/SC{{ .code }}"
