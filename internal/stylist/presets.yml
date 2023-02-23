@@ -70,6 +70,18 @@ golangci-lint:
     output: stdout
     format: none
 
+hadolint:
+  name: hadolint
+  preset: hadolint
+  tags: []
+  includes:
+    - "**/Dockerfile"
+  check:
+    command: "hadolint --format=sarif --no-color"
+    input: variadic
+    output: stdout
+    format: sarif
+
 markdownlint:
   name: "markdownlint"
   preset: "markdownlint"

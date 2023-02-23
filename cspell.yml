@@ -7,6 +7,7 @@ dictionaries:
   - fullstack
   - golang
 ignorePaths:
+  - .cspellcache
   - .git/
   - .gitattributes
   - .gitignore
@@ -18,12 +19,12 @@ ignorePaths:
   - go.sum
   - Makefile
   - "**/testdata"
+ignoreRegExpList:
+  - '/import \([^)]+\)/g'
 words:
-  - bmatcuk
   - codecov
   - debugf
   - debugln
-  - deckarep
   - devcontainer
   - doublestar
   - errcheck
@@ -38,7 +39,7 @@ words:
   - gopls
   - gomod
   - goreleaser
-  - imdario
+  - hadolint
   - infof
   - iostreams
   - ireturn
@@ -53,11 +54,8 @@ words:
   - sarif
   - shellcheck
   - shlex
-  - sirupsen
-  - stretchr
   - testdata
   - testutil
-  - tidwall
   - twelvelabs
   - unmarshaller
   - unparam

@@ -113,6 +113,73 @@ func TestResultLevel(t *testing.T) {
 	require.Error(t, err)
 }
 
+func TestCoerceResultLevel(t *testing.T) {
+	tests := []struct {
+		desc     string
+		expected ResultLevel
+		err      string
+	}{
+		{
+			desc:     "",
+			expected: ResultLevelNone,
+			err:      "",
+		},
+		{
+			desc:     "<no value>",
+			expected: ResultLevelNone,
+			err:      "",
+		},
+		{
+			desc:     "info",
+			expected: ResultLevelNote,
+			err:      "",
+		},
+		{
+			desc:     "note",
+			expected: ResultLevelNote,
+			err:      "",
+		},
+		{
+			desc:     "warn",
+			expected: ResultLevelWarning,
+			err:      "",
+		},
+		{
+			desc:     "warning",
+			expected: ResultLevelWarning,
+			err:      "",
+		},
+		{
+			desc:     "err",
+			expected: ResultLevelError,
+			err:      "",
+		},
+		{
+			desc:     "error",
+			expected: ResultLevelError,
+			err:      "",
+		},
+		{
+			desc:     "unknown",
+			expected: ResultLevel(""),
+			err:      "unknown is not a valid ResultLevel",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.desc, func(t *testing.T) {
+			actual, err := CoerceResultLevel(tt.desc)
+
+			if tt.err == "" {
+				require.NoError(t, err)
+			} else {
+				require.ErrorContains(t, err, tt.err)
+			}
+
+			require.Equal(t, tt.expected, actual)
+		})
+	}
+}
+
 func TestResultFormat(t *testing.T) {
 	names := ResultFormatNames()
 	require.True(t, len(names) > 0)

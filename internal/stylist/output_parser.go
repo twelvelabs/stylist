@@ -6,7 +6,10 @@ import (
 	"io"
 	"regexp"
 
+	"github.com/owenrumney/go-sarif/sarif"
 	"github.com/tidwall/gjson"
+
+	"github.com/twelvelabs/stylist/internal/fsutils"
 )
 
 var (
@@ -170,5 +173,79 @@ type SarifOutputParser struct {
 
 // Parse parses command output into a slice of results.
 func (p *SarifOutputParser) Parse(output CommandOutput, mapping ResultMapping) ([]*Result, error) {
-	return nil, nil
+	// Read the content.
+	buf, err := io.ReadAll(output.Content)
+	if err != nil {
+		return nil, err
+	}
+	content := ansiRegexp.ReplaceAllString(string(buf), "")
+	if content == "" {
+		return nil, nil // nothing to parse
+	}
+
+	// Parse.
+	report, err := sarif.FromString(content)
+	if err != nil {
+		return nil, fmt.Errorf("invalid sarif: %w", err)
+	}
+
+	// Map the report to a slice of `Result` structs.
+	issues := []*Result{}
+	for _, run := range report.Runs {
+		for _, result := range run.Results {
+			level, err := CoerceResultLevel(*result.Level)
+			if err != nil {
+				return nil, fmt.Errorf("invalid sarif level: %w", err)
+			}
+
+			rule := ResultRule{}
+			rule.ID = *result.RuleID
+			rule.Name = *result.RuleID
+			rule.Description = *result.Message.Text
+
+			loc := ResultLocation{}
+			if len(result.Locations) > 0 {
+				loc, err = resultLocationFromSarif(result.Locations[0])
+				if err != nil {
+					return nil, fmt.Errorf("invalid sarif location: %w", err)
+				}
+			}
+
+			issue := &Result{
+				Level:    level,
+				Location: loc,
+				Rule:     rule,
+			}
+
+			issues = append(issues, issue)
+		}
+	}
+
+	return issues, nil
+}
+
+func resultLocationFromSarif(loc *sarif.Location) (ResultLocation, error) {
+	var err error
+
+	resultLocation := ResultLocation{}
+
+	pl := loc.PhysicalLocation
+	if pl != nil {
+		al := pl.ArtifactLocation
+		if al != nil {
+			resultLocation.Path, err = fsutils.RelativePath(*al.URI)
+			if err != nil {
+				return resultLocation, err
+			}
+		}
+	}
+	reg := pl.Region
+	if reg != nil {
+		resultLocation.StartLine = *reg.StartLine
+		resultLocation.StartColumn = *reg.StartColumn
+		resultLocation.EndLine = *reg.EndLine
+		resultLocation.EndColumn = *reg.EndColumn
+	}
+
+	return resultLocation, nil
 }
