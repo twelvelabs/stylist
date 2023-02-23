@@ -13,6 +13,14 @@ import (
 	"github.com/twelvelabs/stylist/internal/render"
 )
 
+func mustOpenFile(path string) *os.File {
+	f, err := os.Open(path)
+	if err != nil {
+		panic(err)
+	}
+	return f
+}
+
 func TestNewOutputParser(t *testing.T) {
 	// Ensure a parser exists for each enum value.
 	for _, name := range OutputFormatNames() {
@@ -69,14 +77,6 @@ func TestJSONOutputParser_Parse(t *testing.T) {
 }
 
 func TestRegexpOutputParser_Parse(t *testing.T) {
-	fixtureFile := func(path string) io.Reader {
-		f, err := os.Open(path)
-		if err != nil {
-			panic(err)
-		}
-		return f
-	}
-
 	mapping := ResultMapping{
 		Pattern: strings.Join([]string{
 			`(?m)`,
@@ -103,7 +103,7 @@ func TestRegexpOutputParser_Parse(t *testing.T) {
 	}{
 		{
 			desc:    "returns an error if pattern is missing",
-			content: fixtureFile("testdata/output/gitleaks.txt"),
+			content: mustOpenFile("testdata/output/gitleaks.txt"),
 			mapping: ResultMapping{
 				Pattern: "",
 			},
@@ -112,7 +112,7 @@ func TestRegexpOutputParser_Parse(t *testing.T) {
 		},
 		{
 			desc:    "returns an error if pattern is malformed",
-			content: fixtureFile("testdata/output/gitleaks.txt"),
+			content: mustOpenFile("testdata/output/gitleaks.txt"),
 			mapping: ResultMapping{
 				Pattern: "(?lol)",
 			},
@@ -135,7 +135,7 @@ func TestRegexpOutputParser_Parse(t *testing.T) {
 		},
 		{
 			desc:    "parses text using a regexp pattern",
-			content: fixtureFile("testdata/output/gitleaks.txt"),
+			content: mustOpenFile("testdata/output/gitleaks.txt"),
 			mapping: mapping,
 			expected: []*Result{
 				{
@@ -185,6 +185,86 @@ func TestRegexpOutputParser_Parse(t *testing.T) {
 					Content: tt.content,
 				},
 				tt.mapping,
+			)
+
+			if tt.err == "" {
+				assert.NoError(t, err)
+			} else {
+				assert.ErrorContains(t, err, tt.err)
+			}
+
+			assert.Equal(t, tt.expected, actual)
+		})
+	}
+}
+
+func TestSarifOutputParser_Parse(t *testing.T) {
+	tests := []struct {
+		desc     string
+		content  io.Reader
+		expected []*Result
+		err      string
+	}{
+		{
+			desc:     "returns an empty slice when no content",
+			content:  bytes.NewBufferString(""),
+			expected: nil,
+			err:      "",
+		},
+		{
+			desc:     "returns an error when not sarif content",
+			content:  bytes.NewBufferString("blah"),
+			expected: nil,
+			err:      "invalid sarif",
+		},
+		{
+			desc:    "parses sarif output",
+			content: mustOpenFile("testdata/output/hadolint.sarif"),
+			expected: []*Result{
+				{
+					Level: ResultLevelWarning,
+					Location: ResultLocation{
+						Path:        "Dockerfile",
+						StartLine:   44,
+						StartColumn: 1,
+						EndLine:     44,
+						EndColumn:   1,
+					},
+					Rule: ResultRule{
+						ID:   "DL4006",
+						Name: "DL4006",
+						Description: "Set the SHELL option -o pipefail before RUN with a pipe in it. " +
+							"If you are using /bin/sh in an alpine image or if your shell is " +
+							"symlinked to busybox then consider explicitly setting your SHELL " +
+							"to /bin/ash, or disable this check",
+					},
+				},
+				{
+					Level: ResultLevelWarning,
+					Location: ResultLocation{
+						Path:        "Dockerfile",
+						StartLine:   44,
+						StartColumn: 1,
+						EndLine:     44,
+						EndColumn:   1,
+					},
+					Rule: ResultRule{
+						ID:          "SC3044",
+						Name:        "SC3044",
+						Description: "In POSIX sh, 'popd' is undefined.",
+					},
+				},
+			},
+			err: "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.desc, func(t *testing.T) {
+			actual, err := (&SarifOutputParser{}).Parse(
+				CommandOutput{
+					Content: tt.content,
+				},
+				ResultMapping{},
 			)
 
 			if tt.err == "" {

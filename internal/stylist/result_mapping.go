@@ -118,18 +118,7 @@ func (m ResultMapping) RenderLevel(item resultData) (ResultLevel, error) {
 		return ResultLevel(rendered), err
 	}
 
-	switch rendered {
-	case "", strNoValue:
-		return ResultLevelNone, nil
-	case "info":
-		return ResultLevelNote, nil
-	case "warn":
-		return ResultLevelWarning, nil
-	case "err":
-		return ResultLevelError, nil
-	default:
-		return ParseResultLevel(rendered)
-	}
+	return CoerceResultLevel(rendered)
 }
 
 // RenderInt renders a template with the given output data and returns

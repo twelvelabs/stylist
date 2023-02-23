@@ -28,6 +28,22 @@ type OutputFormat string
 // ENUM(none, note, warning, error).
 type ResultLevel string
 
+// CoerceResultLevel returns the correct enum for the given value.
+func CoerceResultLevel(value string) (ResultLevel, error) {
+	switch value {
+	case "", "<no value>":
+		return ResultLevelNone, nil
+	case "info":
+		return ResultLevelNote, nil
+	case "warn":
+		return ResultLevelWarning, nil
+	case "err":
+		return ResultLevelError, nil
+	default:
+		return ParseResultLevel(value)
+	}
+}
+
 // ResultFormat represents how to format the results.
 //
 // ENUM(sarif, tty).

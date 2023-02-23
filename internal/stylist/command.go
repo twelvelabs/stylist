@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
+	"time"
 
 	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/google/shlex"
@@ -98,7 +99,9 @@ func (c *Command) executeBatch(
 
 	logger.Debugln("Command:", cmd.String())
 
+	startedAt := time.Now()
 	err = cmd.Run()
+	duration := time.Since(startedAt)
 
 	// Ignoring ExitError so we can parse the output.
 	var exitErr *exec.ExitError
@@ -113,8 +116,11 @@ func (c *Command) executeBatch(
 		content = stderr
 	}
 	output := CommandOutput{
-		Content:  content,
-		ExitCode: cmd.ExitCode(),
+		Processor: name,
+		Command:   cmd.String(),
+		Content:   content,
+		Duration:  duration,
+		ExitCode:  cmd.ExitCode(),
 	}
 
 	logger.Debugln("Output:", output.String())
@@ -188,8 +194,11 @@ func (c *Command) partition(paths []string) [][]string {
 
 // CommandOutput contains the result of a single command invocation.
 type CommandOutput struct {
-	Content  io.Reader
-	ExitCode int
+	Processor string
+	Command   string
+	Content   io.Reader
+	Duration  time.Duration
+	ExitCode  int
 }
 
 func (o *CommandOutput) String() string {
@@ -200,8 +209,10 @@ func (o *CommandOutput) String() string {
 
 	content, _ := io.ReadAll(reader)
 	return fmt.Sprintf(
-		`<CommandOutput Content="%v" ExitCode="%v">`,
+		`<CommandOutput Command="%v" Content="%v" Duration="%v" ExitCode="%v">`,
+		o.Command,
 		string(content),
+		o.Duration,
 		o.ExitCode,
 	)
 }
