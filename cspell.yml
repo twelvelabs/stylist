@@ -1,4 +1,3 @@
----
 version: "0.2"
 language: en
 dictionaries:
@@ -20,7 +19,7 @@ ignorePaths:
   - Makefile
   - "**/testdata"
 ignoreRegExpList:
-  - '/import \([^)]+\)/g'
+  - /import \([^)]+\)/g
 words:
   - codecov
   - debugf
@@ -36,15 +35,15 @@ words:
   - GOFILE
   - gofmt
   - golangci
-  - gopls
   - gomod
+  - gopls
   - goreleaser
   - hadolint
   - infof
   - iostreams
   - ireturn
-  - logrus
   - linecache
+  - logrus
   - mapset
   - markdownlint
   - mergo
@@ -54,6 +53,7 @@ words:
   - sarif
   - shellcheck
   - shlex
+  - SOURCEPATHS
   - testdata
   - testutil
   - twelvelabs
