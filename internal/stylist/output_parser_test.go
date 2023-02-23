@@ -128,7 +128,7 @@ func TestRegexpOutputParser_Parse(t *testing.T) {
 		},
 		{
 			desc:     "returns an empty slice when nothing matches",
-			content:  bytes.NewBufferString("welp"),
+			content:  bytes.NewBufferString("something"),
 			mapping:  mapping,
 			expected: nil,
 			err:      "",

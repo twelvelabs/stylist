@@ -23,7 +23,7 @@ checksum:
   algorithm: sha256
 
 snapshot:
-  name_template: "{{ incpatch .Version }}-next"
+  name_template: "{{ incpatch .Version }}-next" # cspell: disable-line
 
 changelog:
   use: github
