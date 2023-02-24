@@ -67,12 +67,24 @@ func (p *TtyPrinter) Print(results []*Result) error {
 func (p *TtyPrinter) printLocation(result *Result, formatter *ioutil.Formatter) {
 	msg := ""
 	if result.Rule.Description != "" {
-		msg = formatter.Red(result.Rule.Description)
+		switch result.Level {
+		case ResultLevelError:
+			msg = formatter.Red(result.Rule.Description)
+		case ResultLevelWarning:
+			msg = formatter.Yellow(result.Rule.Description)
+		case ResultLevelNote:
+			msg = formatter.Blue(result.Rule.Description)
+		default:
+			msg = result.Rule.Description
+		}
 	}
 
 	rule := ""
 	if result.Rule.ID != "" {
 		rule = fmt.Sprintf("(%s)", result.Rule.ID)
+	}
+	if result.Rule.URI != "" && p.config.Output.ShowURL {
+		rule = fmt.Sprintf("%s <%s>", rule, result.Rule.URI)
 	}
 
 	fmt.Fprintf(
@@ -98,10 +110,12 @@ func (p *TtyPrinter) printUnderLinePointer(result *Result, formatter *ioutil.For
 		return
 	}
 
-	col0 := result.Location.StartColumn - 1
+	startCol0 := result.Location.StartColumn - 1
+	endCol0 := result.Location.EndColumn - 1
 	line := result.ContextLines[0]
+
 	prefixRunes := make([]rune, 0, len(line))
-	for j := 0; j < len(line) && j < col0; j++ {
+	for j := 0; j < len(line) && j < startCol0; j++ {
 		if line[j] == '\t' {
 			prefixRunes = append(prefixRunes, '\t')
 		} else {
@@ -109,5 +123,14 @@ func (p *TtyPrinter) printUnderLinePointer(result *Result, formatter *ioutil.For
 		}
 	}
 
-	fmt.Fprintf(p.ios.Out, "%s%s\n", string(prefixRunes), formatter.Yellow("^"))
+	indicatorCols := 1
+	if endCol0 > startCol0 && endCol0 <= len(line) {
+		indicatorCols = endCol0 - startCol0
+	}
+	indicatorRunes := make([]rune, 0, indicatorCols)
+	for j := 0; j < indicatorCols; j++ {
+		indicatorRunes = append(indicatorRunes, '^')
+	}
+
+	fmt.Fprintf(p.ios.Out, "%s%s\n", string(prefixRunes), formatter.Yellow(string(indicatorRunes)))
 }

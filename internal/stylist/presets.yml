@@ -77,10 +77,20 @@ hadolint:
   includes:
     - "**/Dockerfile"
   check:
-    command: "hadolint --format=sarif --no-color"
+    command: "hadolint --format=json --no-color"
     input: variadic
     output: stdout
-    format: sarif
+    # Using json (vs. sarif) because the sarif output doesn't include the URL.
+    format: json
+    mapping:
+      level: "{{ .level }}"
+      path: "{{ .file }}"
+      start_line: "{{ .line }}"
+      start_column: "{{ .column }}"
+      rule_id: "{{ .code }}"
+      rule_name: "{{ .code }}"
+      rule_description: "{{ .message }}"
+      rule_uri: '{{ if hasPrefix "SC" .code }}https://www.shellcheck.net/wiki/{{ .code }}{{ else }}https://github.com/hadolint/hadolint/wiki/{{ .code }}{{ end }}'
 
 markdownlint:
   name: "markdownlint"
@@ -102,7 +112,7 @@ markdownlint:
       end_column: "{{ if .errorRange }}{{ add (index .errorRange 0) (index .errorRange 1) }}{{ end }}"
       rule_id: "{{ index .ruleNames 0 }}"
       rule_name: "{{ index .ruleNames 1 }}"
-      rule_description: "{{ .ruleDescription }} {{ if .errorDetail }}[{{ .errorDetail }}]{{ end }}"
+      rule_description: "{{ .ruleDescription }}"
       rule_uri: "{{ .ruleInformation }}"
   fix:
     command: "markdownlint --fix"

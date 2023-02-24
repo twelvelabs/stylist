@@ -24,6 +24,7 @@ type Config struct {
 type OutputConfig struct {
 	Format      ResultFormat `yaml:"format,omitempty"       default:"tty"`
 	ShowContext bool         `yaml:"show_context,omitempty" default:"true"`
+	ShowURL     bool         `yaml:"show_url,omitempty" default:"true"`
 }
 
 func NewConfig() *Config {
