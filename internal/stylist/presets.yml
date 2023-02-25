@@ -70,6 +70,23 @@ golangci-lint:
     output: stdout
     format: none
 
+gofmt:
+  name: gofmt
+  preset: gofmt
+  tags: []
+  includes:
+    - "**/*.go"
+  check:
+    command: "gofmt -d"
+    input: variadic
+    output: stdout
+    format: diff
+  fix:
+    command: "gofmt -w"
+    input: variadic
+    output: stdout
+    format: none
+
 hadolint:
   name: hadolint
   preset: hadolint
@@ -141,3 +158,20 @@ shellcheck:
       rule_name: "SC{{ .code }}"
       rule_description: "{{ .message }}"
       rule_uri: "https://www.shellcheck.net/wiki/SC{{ .code }}"
+
+shfmt:
+  name: shfmt
+  preset: shfmt
+  tags: []
+  includes:
+    - "**/*.{bash,sh,shell}"
+  check:
+    command: "shfmt --diff"
+    input: variadic
+    output: stdout
+    format: diff
+  fix:
+    command: "shfmt --write"
+    input: variadic
+    output: stdout
+    format: none

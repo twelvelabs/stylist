@@ -259,6 +259,8 @@ func (x *LogLevel) Type() string {
 }
 
 const (
+	// OutputFormatDiff is a OutputFormat of type diff.
+	OutputFormatDiff OutputFormat = "diff"
 	// OutputFormatJson is a OutputFormat of type json.
 	OutputFormatJson OutputFormat = "json"
 	// OutputFormatNone is a OutputFormat of type none.
@@ -272,6 +274,7 @@ const (
 var ErrInvalidOutputFormat = fmt.Errorf("not a valid OutputFormat, try [%s]", strings.Join(_OutputFormatNames, ", "))
 
 var _OutputFormatNames = []string{
+	string(OutputFormatDiff),
 	string(OutputFormatJson),
 	string(OutputFormatNone),
 	string(OutputFormatRegexp),
@@ -297,6 +300,7 @@ func (x OutputFormat) IsValid() bool {
 }
 
 var _OutputFormatValue = map[string]OutputFormat{
+	"diff":   OutputFormatDiff,
 	"json":   OutputFormatJson,
 	"none":   OutputFormatNone,
 	"regexp": OutputFormatRegexp,

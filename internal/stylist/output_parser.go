@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"io"
 	"regexp"
+	"strings"
 
 	"github.com/owenrumney/go-sarif/sarif"
+	"github.com/sourcegraph/go-diff/diff"
 	"github.com/tidwall/gjson"
 
 	"github.com/twelvelabs/stylist/internal/fsutils"
@@ -29,6 +31,8 @@ type OutputParser interface {
 // NewOutputParser returns the appropriate parser for the given output type.
 func NewOutputParser(format OutputFormat) OutputParser { //nolint:ireturn
 	switch format {
+	case OutputFormatDiff:
+		return &DiffOutputParser{}
 	case OutputFormatJson:
 		return &JSONOutputParser{}
 	case OutputFormatNone:
@@ -40,6 +44,76 @@ func NewOutputParser(format OutputFormat) OutputParser { //nolint:ireturn
 	default:
 		panic(fmt.Sprintf("unknown output format: %s", format))
 	}
+}
+
+/*
+* DiffOutputParser
+**/
+
+// DiffOutputParser parses unified diffs.
+type DiffOutputParser struct {
+}
+
+// Parse parses command output into a slice of results.
+func (p *DiffOutputParser) Parse(output CommandOutput, mapping ResultMapping) ([]*Result, error) {
+	// Read the content.
+	buf, err := io.ReadAll(output.Content)
+	if err != nil {
+		return nil, err
+	}
+	content := ansiRegexp.ReplaceAll(buf, []byte(""))
+	if len(content) == 0 {
+		return nil, nil // nothing to parse
+	}
+
+	// Parse.
+	diffs, err := diff.ParseMultiFileDiff(content)
+	if err != nil {
+		return nil, fmt.Errorf("invalid diff: %w", err)
+	}
+
+	// Map the diffs to a slice of `Result` structs.
+	results := []*Result{}
+	for _, d := range diffs {
+		var startLine int
+		var contextLines []string
+
+		if len(d.Hunks) > 0 {
+			// Hunks often start w/ a few preceding context lines.
+			// Calculate the actual start of the changeset.
+			changeStart := 0
+			bodyLines := bytes.Split(d.Hunks[0].Body, []byte{'\n'})
+			for _, line := range bodyLines {
+				if len(line) > 0 && (line[0] == '+' || line[0] == '-') {
+					break
+				}
+				changeStart++
+			}
+			startLine = int(d.Hunks[0].OrigStartLine) + changeStart
+
+			// Printing just the hunks (vs full diff) so we don't have
+			// redundant file names at the top of the context.
+			hunks, _ := diff.PrintHunks(d.Hunks)
+			contextLines = strings.Split(strings.TrimSuffix(string(hunks), "\n"), "\n")
+		}
+
+		result := &Result{
+			Level: ResultLevelError,
+			Location: ResultLocation{
+				Path:      d.NewName,
+				StartLine: startLine,
+			},
+			Rule: ResultRule{
+				ID:          "diff",
+				Name:        "diff",
+				Description: "Formatting error",
+			},
+			ContextLines: contextLines,
+		}
+		results = append(results, result)
+	}
+
+	return results, nil
 }
 
 /*

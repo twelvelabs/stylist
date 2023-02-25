@@ -33,6 +33,105 @@ func TestNewOutputParser(t *testing.T) {
 	})
 }
 
+func TestDiffOutputParser_Parse(t *testing.T) {
+	tests := []struct {
+		desc     string
+		content  io.Reader
+		expected []*Result
+		err      string
+	}{
+		{
+			desc:     "returns an empty slice when no content",
+			content:  bytes.NewBufferString(""),
+			expected: nil,
+			err:      "",
+		},
+		{
+			desc:     "returns an empty slice when not a valid diff",
+			content:  bytes.NewBufferString("not a diff"),
+			expected: []*Result{},
+			err:      "",
+		},
+		{
+			desc:    "parses diffs",
+			content: mustOpenFile("testdata/output/shfmt.diff"),
+			expected: []*Result{
+				{
+					Level: ResultLevelError,
+					Location: ResultLocation{
+						Path:      "bin/command.sh",
+						StartLine: 4,
+					},
+					Rule: ResultRule{
+						ID:          "diff",
+						Name:        "diff",
+						Description: "Formatting error",
+					},
+					ContextLines: []string{
+						"@@ -1,10 +1,10 @@",
+						" #!/usr/bin/env bash",
+						" set -o errexit -o errtrace -o nounset -o pipefail",
+						"",
+						"-",
+						"-if [",
+						"+if",
+						"+    [",
+						"     $foo == \"bar\"",
+						"-]",
+						"+    ]",
+						" then",
+						"     echo \"lol\"",
+						" fi",
+					},
+				},
+				{
+					Level: ResultLevelError,
+					Location: ResultLocation{
+						Path:      "bin/entrypoint.sh",
+						StartLine: 19,
+					},
+					Rule: ResultRule{
+						ID:          "diff",
+						Name:        "diff",
+						Description: "Formatting error",
+					},
+					ContextLines: []string{
+						"@@ -16,8 +16,8 @@",
+						"     # fix permissions",
+						"     sudo chown -R app:app \\",
+						"         /app \\",
+						"-            /home/app \\",
+						"-                /run/host-services/ssh-auth.sock",
+						"+        /home/app \\",
+						"+        /run/host-services/ssh-auth.sock",
+						" fi",
+						"",
+					},
+				},
+			},
+			err: "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.desc, func(t *testing.T) {
+			actual, err := (&DiffOutputParser{}).Parse(
+				CommandOutput{
+					Content: tt.content,
+				},
+				ResultMapping{},
+			)
+
+			if tt.err == "" {
+				assert.NoError(t, err)
+			} else {
+				assert.ErrorContains(t, err, tt.err)
+			}
+
+			assert.Equal(t, tt.expected, actual)
+		})
+	}
+}
+
 func TestJSONOutputParser_Parse(t *testing.T) {
 	file, err := os.Open("testdata/output/shellcheck.json")
 	assert.NoError(t, err)
