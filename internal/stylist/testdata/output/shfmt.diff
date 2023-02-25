@@ -1,0 +1,28 @@
+--- bin/command.sh.orig
++++ bin/command.sh
+@@ -1,10 +1,10 @@
+ #!/usr/bin/env bash
+ set -o errexit -o errtrace -o nounset -o pipefail
+
+-
+-if [
++if
++    [
+     $foo == "bar"
+-]
++    ]
+ then
+     echo "lol"
+ fi
+--- bin/entrypoint.sh.orig
++++ bin/entrypoint.sh
+@@ -16,8 +16,8 @@
+     # fix permissions
+     sudo chown -R app:app \
+         /app \
+-            /home/app \
+-                /run/host-services/ssh-auth.sock
++        /home/app \
++        /run/host-services/ssh-auth.sock
+ fi
+

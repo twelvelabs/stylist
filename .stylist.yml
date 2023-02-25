@@ -2,4 +2,8 @@ processors:
   - preset: cspell
   - preset: gitleaks
   - preset: golangci-lint
+  - preset: gofmt
   - preset: markdownlint
+  # - preset: hadolint
+  # - preset: shellcheck
+  # - preset: shfmt
