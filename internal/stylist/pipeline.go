@@ -2,6 +2,7 @@ package stylist
 
 import (
 	"context"
+	"fmt"
 	"runtime"
 	"sort"
 	"time"
@@ -193,19 +194,21 @@ func FilterResults(ctx context.Context, results []*Result) ([]*Result, error) {
 }
 
 func SortResults(ctx context.Context, results []*Result) ([]*Result, error) {
-	// TODO: add config option: https://github.com/twelvelabs/stylist/issues/21
-	sort.Slice(results, func(i, j int) bool {
-		if results[i].Source != results[j].Source {
-			return results[i].Source < results[j].Source
-		}
-		if results[i].Location.Path != results[j].Location.Path {
-			return results[i].Location.Path < results[j].Location.Path
-		}
-		if results[i].Location.StartLine != results[j].Location.StartLine {
-			return results[i].Location.StartLine < results[j].Location.StartLine
-		}
-		return results[i].Location.StartColumn < results[j].Location.StartColumn
-	})
+	config := AppConfig(ctx)
+
+	var sorter sort.Interface
+	switch config.Output.Sort {
+	case ResultSortLocation:
+		sorter = ResultsByLocation{results}
+	case ResultSortSeverity:
+		sorter = ResultsBySeverity{results}
+	case ResultSortSource:
+		sorter = ResultsBySource{results}
+	default:
+		return nil, fmt.Errorf("unknown sort type: %s", config.Output.Sort.String())
+	}
+	sort.Sort(sorter)
+
 	return results, nil
 }
 

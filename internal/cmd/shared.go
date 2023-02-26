@@ -29,6 +29,22 @@ func addOutputFlags(cmd *cobra.Command, oc *stylist.OutputConfig) {
 		panic(err)
 	}
 
+	sortNames := stylist.ResultSortNames()
+	sortHelp := fmt.Sprintf(
+		"Sort issues by [`SORT`: %s]",
+		strings.Join(sortNames, ", "),
+	)
+	sortCompFunc := func(cmd *cobra.Command, args []string, toComplete string) (
+		[]string, cobra.ShellCompDirective,
+	) {
+		return sortNames, cobra.ShellCompDirectiveNoFileComp
+	}
+
+	cmd.Flags().VarP(&oc.Sort, "sort", "s", sortHelp)
+	if err := cmd.RegisterFlagCompletionFunc("sort", sortCompFunc); err != nil {
+		panic(err)
+	}
+
 	severityNames := stylist.ResultLevelNames()
 	severityHelp := "Comma separated list of severities to display"
 	severityCompFunc := func(cmd *cobra.Command, args []string, toComplete string) (
@@ -37,7 +53,7 @@ func addOutputFlags(cmd *cobra.Command, oc *stylist.OutputConfig) {
 		return severityNames, cobra.ShellCompDirectiveNoFileComp
 	}
 
-	cmd.Flags().StringSliceVarP(&oc.Severity, "severity", "s", oc.Severity, severityHelp)
+	cmd.Flags().StringSliceVar(&oc.Severity, "severity", oc.Severity, severityHelp)
 	if err := cmd.RegisterFlagCompletionFunc("severity", severityCompFunc); err != nil {
 		panic(err)
 	}

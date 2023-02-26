@@ -592,3 +592,84 @@ func (x *ResultLevel) Get() interface{} {
 func (x *ResultLevel) Type() string {
 	return "ResultLevel"
 }
+
+const (
+	// ResultSortLocation is a ResultSort of type location.
+	ResultSortLocation ResultSort = "location"
+	// ResultSortSeverity is a ResultSort of type severity.
+	ResultSortSeverity ResultSort = "severity"
+	// ResultSortSource is a ResultSort of type source.
+	ResultSortSource ResultSort = "source"
+)
+
+var ErrInvalidResultSort = fmt.Errorf("not a valid ResultSort, try [%s]", strings.Join(_ResultSortNames, ", "))
+
+var _ResultSortNames = []string{
+	string(ResultSortLocation),
+	string(ResultSortSeverity),
+	string(ResultSortSource),
+}
+
+// ResultSortNames returns a list of possible string values of ResultSort.
+func ResultSortNames() []string {
+	tmp := make([]string, len(_ResultSortNames))
+	copy(tmp, _ResultSortNames)
+	return tmp
+}
+
+// String implements the Stringer interface.
+func (x ResultSort) String() string {
+	return string(x)
+}
+
+// String implements the Stringer interface.
+func (x ResultSort) IsValid() bool {
+	_, err := ParseResultSort(string(x))
+	return err == nil
+}
+
+var _ResultSortValue = map[string]ResultSort{
+	"location": ResultSortLocation,
+	"severity": ResultSortSeverity,
+	"source":   ResultSortSource,
+}
+
+// ParseResultSort attempts to convert a string to a ResultSort.
+func ParseResultSort(name string) (ResultSort, error) {
+	if x, ok := _ResultSortValue[name]; ok {
+		return x, nil
+	}
+	return ResultSort(""), fmt.Errorf("%s is %w", name, ErrInvalidResultSort)
+}
+
+// MarshalText implements the text marshaller method.
+func (x ResultSort) MarshalText() ([]byte, error) {
+	return []byte(string(x)), nil
+}
+
+// UnmarshalText implements the text unmarshaller method.
+func (x *ResultSort) UnmarshalText(text []byte) error {
+	tmp, err := ParseResultSort(string(text))
+	if err != nil {
+		return err
+	}
+	*x = tmp
+	return nil
+}
+
+// Set implements the Golang flag.Value interface func.
+func (x *ResultSort) Set(val string) error {
+	v, err := ParseResultSort(val)
+	*x = v
+	return err
+}
+
+// Get implements the Golang flag.Getter interface func.
+func (x *ResultSort) Get() interface{} {
+	return *x
+}
+
+// Type implements the github.com/spf13/pFlag Value interface.
+func (x *ResultSort) Type() string {
+	return "ResultSort"
+}

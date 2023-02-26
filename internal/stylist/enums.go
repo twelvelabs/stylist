@@ -49,6 +49,11 @@ func CoerceResultLevel(value string) (ResultLevel, error) {
 // ENUM(sarif, tty).
 type ResultFormat string
 
+// ResultSort represents how to sort the results.
+//
+// ENUM(location, severity, source).
+type ResultSort string
+
 // LogLevel controls the log level.
 //
 // ENUM(error, warn, info, debug).

@@ -22,11 +22,12 @@ type Config struct {
 }
 
 type OutputConfig struct {
-	Format          ResultFormat `yaml:"format,omitempty"       default:"tty"`
-	ShowContext     bool         `yaml:"show_context,omitempty" default:"true"`
-	ShowURL         bool         `yaml:"show_url,omitempty" default:"true"`
+	Format          ResultFormat `yaml:"format,omitempty"           default:"tty"`
+	Sort            ResultSort   `yaml:"sort,omitempty"             default:"location"`
+	ShowContext     bool         `yaml:"show_context,omitempty"     default:"true"`
+	ShowURL         bool         `yaml:"show_url,omitempty"         default:"true"`
 	SyntaxHighlight bool         `yaml:"syntax_highlight,omitempty" default:"true"`
-	Severity        []string     `yaml:"severity,omitempty" default:"[\"none\", \"info\", \"warning\", \"error\"]"` //nolint: lll
+	Severity        []string     `yaml:"severity,omitempty"         default:"[\"none\", \"info\", \"warning\", \"error\"]"` //nolint: lll
 }
 
 func NewConfig() *Config {
