@@ -195,3 +195,48 @@ func TestTtyPrinter_Print(t *testing.T) {
 		})
 	}
 }
+
+func TestTtyPrinter_Print_ColorEnabled(t *testing.T) {
+	app := NewTestApp()
+
+	// Enable color so we can exercise the syntax highlighting logic.
+	app.IO.SetColorEnabled(true)
+	app.Config.Output.ShowURL = false
+
+	printer := &TtyPrinter{
+		ios:    app.IO,
+		config: app.Config,
+	}
+	err := printer.Print([]*Result{
+		{
+			Source: "test-linter",
+			Level:  ResultLevelError,
+			Location: ResultLocation{
+				Path:        "some/path/foo.go",
+				StartLine:   1,
+				StartColumn: 1,
+			},
+			Rule: ResultRule{
+				ID:          "rule-id1",
+				Name:        "rule-name1",
+				Description: "some issue",
+				URI:         "https://test-linter.com/rule-id1",
+			},
+			ContextLines: []string{
+				"package foo",
+				"",
+				"import \"os\"",
+			},
+		},
+	})
+
+	// Assert that the context lines have been highlighted.
+	assert.NoError(t, err)
+	assert.Equal(t, []string{
+		// cspell: disable
+		"\x1b[1m\x1b[38;5;129mpackage\x1b[0m foo",
+		"",
+		"\x1b[1m\x1b[38;5;129mimport\x1b[0m \x1b[38;5;131m\"os\"\x1b[0m",
+		// cspell: enable
+	}, app.IO.Out.Lines()[1:])
+}

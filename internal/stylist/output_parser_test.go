@@ -83,6 +83,7 @@ func TestDiffOutputParser_Parse(t *testing.T) {
 						"     echo \"lol\"",
 						" fi",
 					},
+					ContextLang: "diff",
 				},
 				{
 					Level: ResultLevelError,
@@ -107,6 +108,7 @@ func TestDiffOutputParser_Parse(t *testing.T) {
 						" fi",
 						"",
 					},
+					ContextLang: "diff",
 				},
 			},
 			err: "",

@@ -2,6 +2,10 @@ excludes:
   - dist/**
   - .cspellcache
   - coverage.out
+output:
+  # show_context: false
+  # show_url: false
+  # syntax_highlight: false
 processors:
   - preset: cspell
   - preset: gitleaks

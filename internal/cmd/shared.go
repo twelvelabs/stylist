@@ -32,6 +32,9 @@ func addOutputFlags(cmd *cobra.Command, oc *stylist.OutputConfig) {
 	cmd.Flags().BoolVar(
 		&oc.ShowURL, "show-url", oc.ShowURL, "Show issue URLs when available",
 	)
+	cmd.Flags().BoolVar(
+		&oc.SyntaxHighlight, "highlight", oc.SyntaxHighlight, "Syntax highlight context lines",
+	)
 }
 
 func addProcessorFilterFlags(cmd *cobra.Command, filter *stylist.ProcessorFilter) {
