@@ -49,6 +49,56 @@ type ResultRule struct {
 	URI         string
 }
 
+// Results is a sortable collection of results.
+type Results []*Result
+
+// Len implements sort.Interface.
+func (r Results) Len() int { return len(r) }
+
+// Swap implements sort.Interface.
+func (r Results) Swap(i, j int) { r[i], r[j] = r[j], r[i] }
+
+type ResultsByLocation struct{ Results }
+
+func (r ResultsByLocation) Less(i, j int) bool {
+	return resultsByLocation(r.Results, i, j)
+}
+
+type ResultsBySeverity struct{ Results }
+
+func (r ResultsBySeverity) Less(i, j int) bool {
+	if r.Results[i].Level != r.Results[j].Level {
+		return r.Results[i].Level > r.Results[j].Level
+	}
+	return resultsByLocation(r.Results, i, j)
+}
+
+type ResultsBySource struct{ Results }
+
+func (r ResultsBySource) Less(i, j int) bool {
+	if r.Results[i].Source != r.Results[j].Source {
+		return r.Results[i].Source < r.Results[j].Source
+	}
+	return resultsByLocation(r.Results, i, j)
+}
+
+func resultsByLocation(results []*Result, i, j int) bool {
+	if results[i].Location.Path != results[j].Location.Path {
+		return results[i].Location.Path < results[j].Location.Path
+	}
+	if results[i].Location.StartLine != results[j].Location.StartLine {
+		return results[i].Location.StartLine < results[j].Location.StartLine
+	}
+	if results[i].Location.StartColumn != results[j].Location.StartColumn {
+		return results[i].Location.StartColumn < results[j].Location.StartColumn
+	}
+	// Additional tie-breakers for deterministic results.
+	if results[i].Source != results[j].Source {
+		return results[i].Source < results[j].Source
+	}
+	return results[i].Level > results[j].Level
+}
+
 // NewResultsError returns a new error when the results slice is non-empty.
 func NewResultsError(results []*Result) error {
 	if len(results) == 0 {
