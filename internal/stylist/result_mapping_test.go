@@ -318,7 +318,7 @@ func TestResultMapping_RenderLevel(t *testing.T) {
 			data: resultData{
 				"level": "unknown",
 			},
-			expected: ResultLevel(""),
+			expected: ResultLevelNone,
 			err:      "unknown is not a valid ResultLevel",
 		},
 		{
@@ -327,7 +327,7 @@ func TestResultMapping_RenderLevel(t *testing.T) {
 			data: resultData{
 				"level": "unknown",
 			},
-			expected: ResultLevel(""),
+			expected: ResultLevelNone,
 			err:      "fail: boom",
 		},
 	}

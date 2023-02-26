@@ -18,6 +18,7 @@ ignorePaths:
   - go.sum
   - Makefile
   - "**/testdata"
+  - "**/*_enum.go"
 ignoreRegExpList:
   - /import \([^)]+\)/g
 words:

@@ -26,7 +26,7 @@ type OutputFormat string
 // These values were chosen to match those in the SARIF specification.
 //
 // ENUM(none, note, warning, error).
-type ResultLevel string
+type ResultLevel int
 
 // CoerceResultLevel returns the correct enum for the given value.
 func CoerceResultLevel(value string) (ResultLevel, error) {
