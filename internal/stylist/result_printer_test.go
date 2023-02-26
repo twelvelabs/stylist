@@ -65,7 +65,7 @@ func TestTtyPrinter_Print(t *testing.T) {
 		},
 		{
 			Source: "test-linter",
-			Level:  ResultLevelNote,
+			Level:  ResultLevelInfo,
 			Location: ResultLocation{
 				Path:        "some/path/baz.go",
 				StartLine:   1,
@@ -127,7 +127,7 @@ func TestTtyPrinter_Print(t *testing.T) {
 			expected: []string{
 				"some/path/foo.go:1:0: error: test-linter: no start column. [rule-id1]",
 				"some/path/bar.go:2:10: warning: test-linter: valid start and end column. [rule-id2]",
-				"some/path/baz.go:1:1: note: test-linter: single char indicator. [rule-id3]",
+				"some/path/baz.go:1:1: info: test-linter: single char indicator. [rule-id3]",
 				"some/path/qux.go:1:99: none: test-linter: out of bounds indicator. [rule-id4]",
 			},
 			err: "",
@@ -145,7 +145,7 @@ func TestTtyPrinter_Print(t *testing.T) {
 				"some/path/bar.go:2:10: warning: test-linter: valid start and end column. [rule-id2]",
 				"\tcontext line two",
 				"\t        ^^^^",
-				"some/path/baz.go:1:1: note: test-linter: single char indicator. [rule-id3]",
+				"some/path/baz.go:1:1: info: test-linter: single char indicator. [rule-id3]",
 				"context line three",
 				"^",
 				"some/path/qux.go:1:99: none: test-linter: out of bounds indicator. [rule-id4]",
@@ -166,7 +166,7 @@ func TestTtyPrinter_Print(t *testing.T) {
 					"[rule-id1](https://test-linter.com/rule-id1)",
 				"some/path/bar.go:2:10: warning: test-linter: valid start and end column. " +
 					"[rule-id2](https://test-linter.com/rule-id2)",
-				"some/path/baz.go:1:1: note: test-linter: single char indicator. " +
+				"some/path/baz.go:1:1: info: test-linter: single char indicator. " +
 					"[rule-id3](https://test-linter.com/rule-id3)",
 				"some/path/qux.go:1:99: none: test-linter: out of bounds indicator. " +
 					"[rule-id4](https://test-linter.com/rule-id4)",

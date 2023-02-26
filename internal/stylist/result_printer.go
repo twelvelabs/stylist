@@ -77,8 +77,8 @@ func (p *TtyPrinter) printLocation(result *Result, formatter *ioutil.Formatter) 
 		severity = formatter.Red(severity) + ": "
 	case ResultLevelWarning:
 		severity = formatter.Yellow(severity) + ": "
-	case ResultLevelNote:
-		severity = formatter.Blue(severity) + ": "
+	case ResultLevelInfo:
+		severity = formatter.Cyan(severity) + ": "
 	case ResultLevelNone:
 		severity = formatter.Gray(severity) + ": "
 	default:

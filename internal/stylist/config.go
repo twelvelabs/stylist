@@ -26,6 +26,7 @@ type OutputConfig struct {
 	ShowContext     bool         `yaml:"show_context,omitempty" default:"true"`
 	ShowURL         bool         `yaml:"show_url,omitempty" default:"true"`
 	SyntaxHighlight bool         `yaml:"syntax_highlight,omitempty" default:"true"`
+	Severity        []string     `yaml:"severity,omitempty" default:"[\"none\", \"info\", \"warning\", \"error\"]"` //nolint: lll
 }
 
 func NewConfig() *Config {

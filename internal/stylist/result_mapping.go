@@ -115,7 +115,7 @@ func (m ResultMapping) ToResultSlice(items []resultData) ([]*Result, error) {
 func (m ResultMapping) RenderLevel(item resultData) (ResultLevel, error) {
 	rendered, err := m.RenderString(m.Level, item)
 	if err != nil {
-		return ResultLevel(rendered), err
+		return ResultLevelNone, err
 	}
 
 	return CoerceResultLevel(rendered)

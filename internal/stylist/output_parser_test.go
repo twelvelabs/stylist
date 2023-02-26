@@ -160,7 +160,7 @@ func TestJSONOutputParser_Parse(t *testing.T) {
 	assert.NoError(t, err)
 	require.Equal(t, 1, len(results))
 	assert.Equal(t, &Result{
-		Level: ResultLevelNote,
+		Level: ResultLevelInfo,
 		Location: ResultLocation{
 			Path:        "entrypoint.sh",
 			StartLine:   15,

@@ -502,23 +502,25 @@ func (x *ResultFormat) Type() string {
 }
 
 const (
-	// ResultLevelNone is a ResultLevel of type none.
-	ResultLevelNone ResultLevel = "none"
-	// ResultLevelNote is a ResultLevel of type note.
-	ResultLevelNote ResultLevel = "note"
-	// ResultLevelWarning is a ResultLevel of type warning.
-	ResultLevelWarning ResultLevel = "warning"
-	// ResultLevelError is a ResultLevel of type error.
-	ResultLevelError ResultLevel = "error"
+	// ResultLevelNone is a ResultLevel of type None.
+	ResultLevelNone ResultLevel = iota
+	// ResultLevelInfo is a ResultLevel of type Info.
+	ResultLevelInfo
+	// ResultLevelWarning is a ResultLevel of type Warning.
+	ResultLevelWarning
+	// ResultLevelError is a ResultLevel of type Error.
+	ResultLevelError
 )
 
 var ErrInvalidResultLevel = fmt.Errorf("not a valid ResultLevel, try [%s]", strings.Join(_ResultLevelNames, ", "))
 
+const _ResultLevelName = "noneinfowarningerror"
+
 var _ResultLevelNames = []string{
-	string(ResultLevelNone),
-	string(ResultLevelNote),
-	string(ResultLevelWarning),
-	string(ResultLevelError),
+	_ResultLevelName[0:4],
+	_ResultLevelName[4:8],
+	_ResultLevelName[8:15],
+	_ResultLevelName[15:20],
 }
 
 // ResultLevelNames returns a list of possible string values of ResultLevel.
@@ -528,22 +530,26 @@ func ResultLevelNames() []string {
 	return tmp
 }
 
-// String implements the Stringer interface.
-func (x ResultLevel) String() string {
-	return string(x)
+var _ResultLevelMap = map[ResultLevel]string{
+	ResultLevelNone:    _ResultLevelName[0:4],
+	ResultLevelInfo:    _ResultLevelName[4:8],
+	ResultLevelWarning: _ResultLevelName[8:15],
+	ResultLevelError:   _ResultLevelName[15:20],
 }
 
 // String implements the Stringer interface.
-func (x ResultLevel) IsValid() bool {
-	_, err := ParseResultLevel(string(x))
-	return err == nil
+func (x ResultLevel) String() string {
+	if str, ok := _ResultLevelMap[x]; ok {
+		return str
+	}
+	return fmt.Sprintf("ResultLevel(%d)", x)
 }
 
 var _ResultLevelValue = map[string]ResultLevel{
-	"none":    ResultLevelNone,
-	"note":    ResultLevelNote,
-	"warning": ResultLevelWarning,
-	"error":   ResultLevelError,
+	_ResultLevelName[0:4]:   ResultLevelNone,
+	_ResultLevelName[4:8]:   ResultLevelInfo,
+	_ResultLevelName[8:15]:  ResultLevelWarning,
+	_ResultLevelName[15:20]: ResultLevelError,
 }
 
 // ParseResultLevel attempts to convert a string to a ResultLevel.
@@ -551,17 +557,18 @@ func ParseResultLevel(name string) (ResultLevel, error) {
 	if x, ok := _ResultLevelValue[name]; ok {
 		return x, nil
 	}
-	return ResultLevel(""), fmt.Errorf("%s is %w", name, ErrInvalidResultLevel)
+	return ResultLevel(0), fmt.Errorf("%s is %w", name, ErrInvalidResultLevel)
 }
 
 // MarshalText implements the text marshaller method.
 func (x ResultLevel) MarshalText() ([]byte, error) {
-	return []byte(string(x)), nil
+	return []byte(x.String()), nil
 }
 
 // UnmarshalText implements the text unmarshaller method.
 func (x *ResultLevel) UnmarshalText(text []byte) error {
-	tmp, err := ParseResultLevel(string(text))
+	name := string(text)
+	tmp, err := ParseResultLevel(name)
 	if err != nil {
 		return err
 	}
