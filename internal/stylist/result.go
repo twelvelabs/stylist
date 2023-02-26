@@ -11,6 +11,7 @@ type Result struct {
 	Location     ResultLocation
 	Rule         ResultRule
 	ContextLines []string
+	ContextLang  string
 }
 
 // ResultLocation describes the physical location where the result occurred.

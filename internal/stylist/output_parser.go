@@ -109,6 +109,7 @@ func (p *DiffOutputParser) Parse(output CommandOutput, mapping ResultMapping) ([
 				Description: "Formatting error",
 			},
 			ContextLines: contextLines,
+			ContextLang:  "diff",
 		}
 		results = append(results, result)
 	}

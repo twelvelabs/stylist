@@ -1,9 +1,14 @@
 package stylist
 
 import (
+	"bytes"
 	"fmt"
 	"strings"
 
+	"github.com/alecthomas/chroma/v2"
+	"github.com/alecthomas/chroma/v2/formatters"
+	"github.com/alecthomas/chroma/v2/lexers"
+	"github.com/alecthomas/chroma/v2/styles"
 	"github.com/twelvelabs/termite/ioutil"
 )
 
@@ -113,9 +118,58 @@ func (p *TtyPrinter) printLocation(result *Result, formatter *ioutil.Formatter) 
 }
 
 func (p *TtyPrinter) printContext(result *Result) {
-	for _, line := range result.ContextLines {
-		fmt.Fprintln(p.ios.Out, line)
+	if len(result.ContextLines) == 0 {
+		return
 	}
+
+	contextLines := strings.Join(result.ContextLines, "\n") + "\n"
+	if p.config.Output.SyntaxHighlight && p.ios.IsColorEnabled() {
+		contextLines, _ = p.syntaxHighlight(
+			contextLines, result.Location.Path, result.ContextLang,
+		)
+	}
+
+	fmt.Fprint(p.ios.Out, contextLines)
+}
+
+func (p *TtyPrinter) syntaxHighlight(text, path, lang string) (string, error) {
+	// seems the chroma author uses UK english :/
+	// cspell:words Analyse Tokenise
+
+	// Resolve the lexer.
+	l := lexers.Get(lang)
+	if l == nil {
+		l = lexers.Match(path)
+	}
+	if l == nil {
+		l = lexers.Analyse(text)
+	}
+	if l == nil {
+		l = lexers.Fallback
+	}
+	l = chroma.Coalesce(l)
+
+	// Resolve the formatter.
+	f := formatters.TTY256
+
+	// Resolve the style.
+	s := styles.Get("emacs")
+	if s == nil {
+		s = styles.Fallback
+	}
+
+	it, err := l.Tokenise(nil, text)
+	if err != nil {
+		return text, err
+	}
+
+	buf := &bytes.Buffer{}
+	err = f.Format(buf, s, it)
+	if err != nil {
+		return text, err
+	}
+
+	return buf.String(), nil
 }
 
 // Copied from golangci-lint.
