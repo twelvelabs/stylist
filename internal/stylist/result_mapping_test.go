@@ -288,12 +288,12 @@ func TestResultMapping_RenderLevel(t *testing.T) {
 			expected: ResultLevelNone,
 		},
 		{
-			desc:     "info should be normalized to note",
+			desc:     "note should be normalized to info",
 			template: render.MustCompile(`{{ .level }}`),
 			data: resultData{
-				"level": "info",
+				"level": "note",
 			},
-			expected: ResultLevelNote,
+			expected: ResultLevelInfo,
 		},
 		{
 			desc:     "warn should be normalized to warning",

@@ -504,8 +504,8 @@ func (x *ResultFormat) Type() string {
 const (
 	// ResultLevelNone is a ResultLevel of type None.
 	ResultLevelNone ResultLevel = iota
-	// ResultLevelNote is a ResultLevel of type Note.
-	ResultLevelNote
+	// ResultLevelInfo is a ResultLevel of type Info.
+	ResultLevelInfo
 	// ResultLevelWarning is a ResultLevel of type Warning.
 	ResultLevelWarning
 	// ResultLevelError is a ResultLevel of type Error.
@@ -514,7 +514,7 @@ const (
 
 var ErrInvalidResultLevel = fmt.Errorf("not a valid ResultLevel, try [%s]", strings.Join(_ResultLevelNames, ", "))
 
-const _ResultLevelName = "nonenotewarningerror"
+const _ResultLevelName = "noneinfowarningerror"
 
 var _ResultLevelNames = []string{
 	_ResultLevelName[0:4],
@@ -532,7 +532,7 @@ func ResultLevelNames() []string {
 
 var _ResultLevelMap = map[ResultLevel]string{
 	ResultLevelNone:    _ResultLevelName[0:4],
-	ResultLevelNote:    _ResultLevelName[4:8],
+	ResultLevelInfo:    _ResultLevelName[4:8],
 	ResultLevelWarning: _ResultLevelName[8:15],
 	ResultLevelError:   _ResultLevelName[15:20],
 }
@@ -547,7 +547,7 @@ func (x ResultLevel) String() string {
 
 var _ResultLevelValue = map[string]ResultLevel{
 	_ResultLevelName[0:4]:   ResultLevelNone,
-	_ResultLevelName[4:8]:   ResultLevelNote,
+	_ResultLevelName[4:8]:   ResultLevelInfo,
 	_ResultLevelName[8:15]:  ResultLevelWarning,
 	_ResultLevelName[15:20]: ResultLevelError,
 }

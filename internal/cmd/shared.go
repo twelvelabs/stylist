@@ -12,29 +12,62 @@ import (
 
 func addOutputFlags(cmd *cobra.Command, oc *stylist.OutputConfig) {
 	formatNames := stylist.ResultFormatNames()
-	formatHelp := fmt.Sprintf("Output format [`FORMAT`: %s]", strings.Join(formatNames, ", "))
-	// Since go-enum generates `flag.Value` methods we can use it directly,
-	// and the generated `.Set()` method will take care of validation and type casting.
-	cmd.Flags().VarP(&oc.Format, "format", "f", formatHelp)
-
-	compFunc := func(cmd *cobra.Command, args []string, toComplete string) (
+	formatHelp := fmt.Sprintf(
+		"Output format [`FORMAT`: %s]",
+		strings.Join(formatNames, ", "),
+	)
+	formatCompFunc := func(cmd *cobra.Command, args []string, toComplete string) (
 		[]string, cobra.ShellCompDirective,
 	) {
 		return formatNames, cobra.ShellCompDirectiveNoFileComp
 	}
-	if err := cmd.RegisterFlagCompletionFunc("format", compFunc); err != nil {
+
+	// Since go-enum generates `flag.Value` methods we can use it directly,
+	// and the generated `.Set()` method will take care of validation and type casting.
+	cmd.Flags().VarP(&oc.Format, "format", "f", formatHelp)
+	if err := cmd.RegisterFlagCompletionFunc("format", formatCompFunc); err != nil {
 		panic(err)
+	}
+
+	severityNames := stylist.ResultLevelNames()
+	severityHelp := "Comma separated list of severities to display"
+	severityCompFunc := func(cmd *cobra.Command, args []string, toComplete string) (
+		[]string, cobra.ShellCompDirective,
+	) {
+		return severityNames, cobra.ShellCompDirectiveNoFileComp
+	}
+
+	cmd.Flags().StringSliceVarP(&oc.Severity, "severity", "s", oc.Severity, severityHelp)
+	if err := cmd.RegisterFlagCompletionFunc("severity", severityCompFunc); err != nil {
+		panic(err)
+	}
+
+	boolCompFunc := func(cmd *cobra.Command, args []string, toComplete string) (
+		[]string, cobra.ShellCompDirective,
+	) {
+		return []string{"false", "true"}, cobra.ShellCompDirectiveNoFileComp
 	}
 
 	cmd.Flags().BoolVar(
 		&oc.ShowContext, "show-context", oc.ShowContext, "Show the lines of code affected",
 	)
+	if err := cmd.RegisterFlagCompletionFunc("show-context", boolCompFunc); err != nil {
+		panic(err)
+	}
+
 	cmd.Flags().BoolVar(
 		&oc.ShowURL, "show-url", oc.ShowURL, "Show issue URLs when available",
 	)
+	if err := cmd.RegisterFlagCompletionFunc("show-url", boolCompFunc); err != nil {
+		panic(err)
+	}
+
 	cmd.Flags().BoolVar(
 		&oc.SyntaxHighlight, "highlight", oc.SyntaxHighlight, "Syntax highlight context lines",
 	)
+	if err := cmd.RegisterFlagCompletionFunc("highlight", boolCompFunc); err != nil {
+		panic(err)
+	}
 }
 
 func addProcessorFilterFlags(cmd *cobra.Command, filter *stylist.ProcessorFilter) {

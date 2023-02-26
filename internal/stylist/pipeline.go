@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/bmatcuk/doublestar/v4"
+	mapset "github.com/deckarep/golang-set/v2"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -158,12 +159,41 @@ func (p *Pipeline) execute(
 		return nil, err
 	}
 
+	// Run the results through some post-processing steps.
+	transformers := []ResultsTransformer{
+		FilterResults,
+		SortResults,
+		EnsureContextLines,
+	}
+	for _, transformer := range transformers {
+		results, err = transformer(ctx, results)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	// Return the transformed results.
-	return p.transform(results)
+	return results, nil
 }
 
-func (p *Pipeline) transform(results []*Result) ([]*Result, error) {
-	// Maybe this should be controlled by a flag (and done by the caller)?
+type ResultsTransformer func(ctx context.Context, results []*Result) ([]*Result, error)
+
+func FilterResults(ctx context.Context, results []*Result) ([]*Result, error) {
+	config := AppConfig(ctx)
+	severities := mapset.NewSet(config.Output.Severity...)
+
+	filtered := []*Result{}
+	for _, r := range results {
+		if severities.Contains(r.Level.String()) {
+			filtered = append(filtered, r)
+		}
+	}
+
+	return filtered, nil
+}
+
+func SortResults(ctx context.Context, results []*Result) ([]*Result, error) {
+	// TODO: add config option: https://github.com/twelvelabs/stylist/issues/21
 	sort.Slice(results, func(i, j int) bool {
 		if results[i].Source != results[j].Source {
 			return results[i].Source < results[j].Source
@@ -176,7 +206,10 @@ func (p *Pipeline) transform(results []*Result) ([]*Result, error) {
 		}
 		return results[i].Location.StartColumn < results[j].Location.StartColumn
 	})
+	return results, nil
+}
 
+func EnsureContextLines(ctx context.Context, results []*Result) ([]*Result, error) {
 	loader := NewContextLineLoader()
 	for _, result := range results {
 		if result.ContextLines == nil {
@@ -187,6 +220,5 @@ func (p *Pipeline) transform(results []*Result) ([]*Result, error) {
 			result.ContextLines = lines
 		}
 	}
-
 	return results, nil
 }

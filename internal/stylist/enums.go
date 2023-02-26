@@ -25,7 +25,7 @@ type OutputFormat string
 // ResultLevel represents the severity level of the result.
 // These values were chosen to match those in the SARIF specification.
 //
-// ENUM(none, note, warning, error).
+// ENUM(none, info, warning, error).
 type ResultLevel int
 
 // CoerceResultLevel returns the correct enum for the given value.
@@ -33,11 +33,11 @@ func CoerceResultLevel(value string) (ResultLevel, error) {
 	switch value {
 	case "", "<no value>":
 		return ResultLevelNone, nil
-	case "info":
-		return ResultLevelNote, nil
-	case "warn":
+	case "info", "note":
+		return ResultLevelInfo, nil
+	case "warn", "warning":
 		return ResultLevelWarning, nil
-	case "err":
+	case "err", "error":
 		return ResultLevelError, nil
 	default:
 		return ParseResultLevel(value)

@@ -132,12 +132,12 @@ func TestCoerceResultLevel(t *testing.T) {
 		},
 		{
 			desc:     "info",
-			expected: ResultLevelNote,
+			expected: ResultLevelInfo,
 			err:      "",
 		},
 		{
 			desc:     "note",
-			expected: ResultLevelNote,
+			expected: ResultLevelInfo,
 			err:      "",
 		},
 		{
