@@ -125,10 +125,10 @@ func TestTtyPrinter_Print(t *testing.T) {
 			},
 			results: results,
 			expected: []string{
-				"[test-linter] some/path/foo.go:1:0 no start column (rule-id1)",
-				"[test-linter] some/path/bar.go:2:10 valid start and end column (rule-id2)",
-				"[test-linter] some/path/baz.go:1:1 single char indicator (rule-id3)",
-				"[test-linter] some/path/qux.go:1:99 out of bounds indicator (rule-id4)",
+				"some/path/foo.go:1:0: error: test-linter: no start column. [rule-id1]",
+				"some/path/bar.go:2:10: warning: test-linter: valid start and end column. [rule-id2]",
+				"some/path/baz.go:1:1: note: test-linter: single char indicator. [rule-id3]",
+				"some/path/qux.go:1:99: none: test-linter: out of bounds indicator. [rule-id4]",
 			},
 			err: "",
 		},
@@ -140,15 +140,15 @@ func TestTtyPrinter_Print(t *testing.T) {
 			},
 			results: results,
 			expected: []string{
-				"[test-linter] some/path/foo.go:1:0 no start column (rule-id1)",
+				"some/path/foo.go:1:0: error: test-linter: no start column. [rule-id1]",
 				"context line one",
-				"[test-linter] some/path/bar.go:2:10 valid start and end column (rule-id2)",
+				"some/path/bar.go:2:10: warning: test-linter: valid start and end column. [rule-id2]",
 				"\tcontext line two",
 				"\t        ^^^^",
-				"[test-linter] some/path/baz.go:1:1 single char indicator (rule-id3)",
+				"some/path/baz.go:1:1: note: test-linter: single char indicator. [rule-id3]",
 				"context line three",
 				"^",
-				"[test-linter] some/path/qux.go:1:99 out of bounds indicator (rule-id4)",
+				"some/path/qux.go:1:99: none: test-linter: out of bounds indicator. [rule-id4]",
 				"context line four",
 				"                 ^",
 			},
@@ -162,14 +162,14 @@ func TestTtyPrinter_Print(t *testing.T) {
 			},
 			results: results,
 			expected: []string{
-				"[test-linter] some/path/foo.go:1:0 no start column (rule-id1) " +
-					"<https://test-linter.com/rule-id1>",
-				"[test-linter] some/path/bar.go:2:10 valid start and end column (rule-id2) " +
-					"<https://test-linter.com/rule-id2>",
-				"[test-linter] some/path/baz.go:1:1 single char indicator (rule-id3) " +
-					"<https://test-linter.com/rule-id3>",
-				"[test-linter] some/path/qux.go:1:99 out of bounds indicator (rule-id4) " +
-					"<https://test-linter.com/rule-id4>",
+				"some/path/foo.go:1:0: error: test-linter: no start column. " +
+					"[rule-id1](https://test-linter.com/rule-id1)",
+				"some/path/bar.go:2:10: warning: test-linter: valid start and end column. " +
+					"[rule-id2](https://test-linter.com/rule-id2)",
+				"some/path/baz.go:1:1: note: test-linter: single char indicator. " +
+					"[rule-id3](https://test-linter.com/rule-id3)",
+				"some/path/qux.go:1:99: none: test-linter: out of bounds indicator. " +
+					"[rule-id4](https://test-linter.com/rule-id4)",
 			},
 			err: "",
 		},

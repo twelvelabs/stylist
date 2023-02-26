@@ -2,6 +2,7 @@ package stylist
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/twelvelabs/termite/ioutil"
 )
@@ -65,33 +66,47 @@ func (p *TtyPrinter) Print(results []*Result) error {
 }
 
 func (p *TtyPrinter) printLocation(result *Result, formatter *ioutil.Formatter) {
-	msg := ""
-	if result.Rule.Description != "" {
-		switch result.Level {
-		case ResultLevelError:
-			msg = formatter.Red(result.Rule.Description)
-		case ResultLevelWarning:
-			msg = formatter.Yellow(result.Rule.Description)
-		case ResultLevelNote:
-			msg = formatter.Blue(result.Rule.Description)
-		default:
-			msg = result.Rule.Description
+	severity := result.Level.String()
+	switch result.Level {
+	case ResultLevelError:
+		severity = formatter.Red(severity) + ": "
+	case ResultLevelWarning:
+		severity = formatter.Yellow(severity) + ": "
+	case ResultLevelNote:
+		severity = formatter.Blue(severity) + ": "
+	case ResultLevelNone:
+		severity = formatter.Gray(severity) + ": "
+	default:
+		severity = ""
+	}
+
+	source := result.Source
+	if source != "" {
+		source = formatter.Underline(source) + ": "
+	}
+
+	msg := result.Rule.Description
+	if msg != "" {
+		if !(strings.HasSuffix(msg, ".") || strings.HasSuffix(msg, "!")) {
+			msg += "."
 		}
+		msg += " "
 	}
 
 	rule := ""
 	if result.Rule.ID != "" {
-		rule = fmt.Sprintf("(%s)", result.Rule.ID)
+		rule = fmt.Sprintf("[%s]", result.Rule.ID)
 	}
 	if result.Rule.URI != "" && p.config.Output.ShowURL {
-		rule = fmt.Sprintf("%s <%s>", rule, result.Rule.URI)
+		rule = fmt.Sprintf("%s(%s)", rule, result.Rule.URI)
 	}
 
 	fmt.Fprintf(
 		p.ios.Out,
-		"[%s] %s %s %s\n",
-		formatter.Bold(result.Source),
+		"%s: %s%s%s%s\n",
 		formatter.Bold(result.Location.String()),
+		severity,
+		source,
 		msg,
 		rule,
 	)
