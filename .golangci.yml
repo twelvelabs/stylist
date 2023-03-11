@@ -1,4 +1,5 @@
 linters:
+  enable-all: true
   disable:
     - cyclop
     - dupl
@@ -22,9 +23,8 @@ linters:
     - varnamelen
     - wrapcheck
     - wsl
-    # disabled because of generics
+    # disabled because they spew warnings re: generics
     - rowserrcheck
-    - sqlclosecheck
     - wastedassign
     # deprecated
     - deadcode
@@ -36,7 +36,6 @@ linters:
     - scopelint
     - structcheck
     - varcheck
-  enable-all: true
 
 linters-settings:
   exhaustive:
