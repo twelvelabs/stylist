@@ -1,5 +1,8 @@
 # Stylist
 
+[![build](https://github.com/twelvelabs/stylist/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/twelvelabs/stylist/actions/workflows/build.yml)
+[![codecov](https://codecov.io/gh/twelvelabs/stylist/branch/main/graph/badge.svg?token=DT34yqxq4r)](https://codecov.io/gh/twelvelabs/stylist)
+
 Stylist aggregates all your code quality tools into a single, fast,
 and easy to use executable. You define the tools your project uses
 in `.stylist.yml`:
