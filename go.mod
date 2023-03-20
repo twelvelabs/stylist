@@ -8,7 +8,7 @@ require (
 	github.com/bmatcuk/doublestar/v4 v4.6.0
 	github.com/deckarep/golang-set/v2 v2.2.0
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
-	github.com/imdario/mergo v0.3.13
+	github.com/imdario/mergo v0.3.14
 	github.com/owenrumney/go-sarif v1.1.1
 	github.com/sirupsen/logrus v1.9.0
 	github.com/sourcegraph/go-diff v0.7.0
