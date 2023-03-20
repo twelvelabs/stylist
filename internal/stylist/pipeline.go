@@ -212,7 +212,7 @@ func SortResults(ctx context.Context, results []*Result) ([]*Result, error) {
 	return results, nil
 }
 
-func EnsureContextLines(ctx context.Context, results []*Result) ([]*Result, error) {
+func EnsureContextLines(_ context.Context, results []*Result) ([]*Result, error) {
 	loader := NewContextLineLoader()
 	for _, result := range results {
 		if result.ContextLines == nil {

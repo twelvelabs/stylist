@@ -55,7 +55,7 @@ type DiffOutputParser struct {
 }
 
 // Parse parses command output into a slice of results.
-func (p *DiffOutputParser) Parse(output CommandOutput, mapping ResultMapping) ([]*Result, error) {
+func (p *DiffOutputParser) Parse(output CommandOutput, _ ResultMapping) ([]*Result, error) {
 	// Read the content.
 	buf, err := io.ReadAll(output.Content)
 	if err != nil {
@@ -184,7 +184,7 @@ type NoneOutputParser struct {
 }
 
 // Parse parses command output into a slice of results.
-func (p *NoneOutputParser) Parse(output CommandOutput, mapping ResultMapping) ([]*Result, error) {
+func (p *NoneOutputParser) Parse(_ CommandOutput, _ ResultMapping) ([]*Result, error) {
 	return nil, nil
 }
 
@@ -247,7 +247,7 @@ type SarifOutputParser struct {
 }
 
 // Parse parses command output into a slice of results.
-func (p *SarifOutputParser) Parse(output CommandOutput, mapping ResultMapping) ([]*Result, error) {
+func (p *SarifOutputParser) Parse(output CommandOutput, _ ResultMapping) ([]*Result, error) {
 	// Read the content.
 	buf, err := io.ReadAll(output.Content)
 	if err != nil {

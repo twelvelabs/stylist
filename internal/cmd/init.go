@@ -21,10 +21,7 @@ func NewInitCmd(app *stylist.App) *cobra.Command {
 			if err := action.Validate(args); err != nil {
 				return err
 			}
-			if err := action.Run(cmd.Context()); err != nil {
-				return err
-			}
-			return nil
+			return action.Run(cmd.Context())
 		},
 	}
 
@@ -41,7 +38,7 @@ type InitAction struct {
 	*stylist.App
 }
 
-func (a *InitAction) Validate(args []string) error {
+func (a *InitAction) Validate(_ []string) error {
 	return nil
 }
 

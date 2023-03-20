@@ -21,10 +21,7 @@ func NewVersionCmd(app *stylist.App) *cobra.Command {
 			if err := action.Validate(args); err != nil {
 				return err
 			}
-			if err := action.Run(cmd.Context()); err != nil {
-				return err
-			}
-			return nil
+			return action.Run(cmd.Context())
 		},
 	}
 
@@ -41,11 +38,11 @@ type VersionAction struct {
 	*stylist.App
 }
 
-func (a *VersionAction) Validate(args []string) error {
+func (a *VersionAction) Validate(_ []string) error {
 	return nil
 }
 
-func (a *VersionAction) Run(ctx context.Context) error {
+func (a *VersionAction) Run(_ context.Context) error {
 	fmt.Fprintln(a.IO.Out, "Version:", a.Meta.Version)
 	fmt.Fprintln(a.IO.Out, "GOOS:", a.Meta.GOOS)
 	fmt.Fprintln(a.IO.Out, "GOARCH:", a.Meta.GOARCH)

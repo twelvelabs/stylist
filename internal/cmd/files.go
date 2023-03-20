@@ -20,10 +20,7 @@ func NewFilesCmd(app *stylist.App) *cobra.Command {
 			if err := action.Validate(args); err != nil {
 				return err
 			}
-			if err := action.Run(cmd.Context()); err != nil {
-				return err
-			}
-			return nil
+			return action.Run(cmd.Context())
 		},
 		DisableFlagsInUseLine: true,
 	}

@@ -104,11 +104,8 @@ func WriteConfig(config *Config, path string) error {
 	if err := encoder.Encode(config); err != nil {
 		return err
 	}
-	if err := encoder.Close(); err != nil {
-		return err
-	}
 
-	return nil
+	return encoder.Close()
 }
 
 func CommentOutConfigPresets(path string) error {
@@ -127,8 +124,5 @@ func CommentOutConfigPresets(path string) error {
 	}
 	fileBytes = bytes.Join(lines, newline)
 
-	if err := os.WriteFile(path, fileBytes, 0600); err != nil {
-		return err
-	}
-	return nil
+	return os.WriteFile(path, fileBytes, 0600)
 }

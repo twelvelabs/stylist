@@ -42,7 +42,7 @@ type SarifPrinter struct {
 }
 
 // Print writes the SARIF formatted results to Stdout.
-func (p *SarifPrinter) Print(results []*Result) error {
+func (p *SarifPrinter) Print(_ []*Result) error {
 	return nil
 }
 
