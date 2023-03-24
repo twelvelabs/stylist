@@ -16,28 +16,24 @@ processors:
   # Stylist comes with presets for many common tools...
   ############################################################
 
-  - name: cspell
-    preset: cspell
+  - preset: cspell
     includes:
       - "**/*"
     excludes:
       - "problem-file1.txt"
       - "problem-file2.txt"
 
-  - name: gofmt
-    preset: gofmt
+  - preset: gofmt
     includes:
       - "**/*.go"
 
-  - name: golangci-lint
-    preset: golangci-lint
+  - preset: golangci-lint
     includes:
       - "**/*.go"
     excludes:
       - "gen/*"
 
-  - name: markdownlint
-    preset: markdownlint
+  - preset: markdownlint
     includes:
       - "**/*.md"
 
