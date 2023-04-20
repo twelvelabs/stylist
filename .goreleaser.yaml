@@ -18,6 +18,19 @@ archives:
   - id: stylist
     format: binary
 
+brews:
+  - name: stylist
+    tap:
+      owner: twelvelabs
+      name: homebrew-tools
+      branch: main
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+    folder: Formula
+
+    homepage: "https://github.com/twelvelabs/stylist"
+    description: "Manage all your code quality tools with a single executable."
+    license: "MIT"
+
 checksum:
   name_template: "checksums.txt"
   algorithm: sha256

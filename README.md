@@ -71,3 +71,25 @@ $ stylist check
 $ stylist fix
 [markdownlint] README.md
 ```
+
+## Installation
+
+### Using [Homebrew](https://brew.sh/)
+
+```bash
+brew install twelvelabs/tools/stylist
+```
+
+### Pre-built binary
+
+Download a pre-built binary from the
+[Releases](https://github.com/twelvelabs/stylist/releases) page.
+
+### From source
+
+```bash
+go install "github.com/twelvelabs/stylist@latest"
+# or a specific version tag
+tag=$(gh release view --json tagName --jq .tagName)
+go install "github.com/twelvelabs/stylist@${tag}"
+```
