@@ -77,7 +77,7 @@ $ stylist fix
 ### Using [Homebrew](https://brew.sh/)
 
 ```bash
-brew install twelvelabs/tools/stylist
+brew install twelvelabs/tap/stylist
 ```
 
 ### Pre-built binary

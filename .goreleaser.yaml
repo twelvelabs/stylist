@@ -22,7 +22,7 @@ brews:
   - name: stylist
     tap:
       owner: twelvelabs
-      name: homebrew-tools
+      name: homebrew-tap
       branch: main
       token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
     folder: Formula
