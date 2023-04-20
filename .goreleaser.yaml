@@ -28,7 +28,7 @@ brews:
     folder: Formula
 
     homepage: "https://github.com/twelvelabs/stylist"
-    description: "Manage all your code quality tools with a single executable."
+    description: "Manage all your code quality tools with a single executable"
     license: "MIT"
 
 checksum:
