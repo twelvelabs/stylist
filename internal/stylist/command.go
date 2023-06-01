@@ -8,6 +8,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"time"
@@ -30,6 +31,7 @@ type Command struct {
 	ResultMapping ResultMapping `yaml:"mapping,omitempty"`
 	Parallelism   int           `yaml:"parallelism,omitempty"`
 	BatchSize     int           `yaml:"batch_size,omitempty"`
+	WorkingDir    string        `yaml:"working_dir,omitempty"`
 }
 
 // Execute executes paths concurrently in batches on behalf of the named processor.
@@ -84,6 +86,7 @@ func (c *Command) executeBatch(
 	}
 
 	cmd := client.CommandContext(ctx, args[0], args[1:]...)
+	cmd.Dir = c.WorkingDir
 
 	// Setup the IO streams
 	if c.InputType == InputTypeStdin {
@@ -161,7 +164,11 @@ func (c *Command) executeBatch(
 	transformed := []*Result{}
 	for idx, r := range parsed {
 		logger.Debugf("Parsed[%v]: %#v", idx, r)
-
+		if c.WorkingDir != "" && r.Location.Path != "" {
+			// Add the working dir back to the path, otherwise
+			// it will get filtered out below.
+			r.Location.Path = filepath.Join(c.WorkingDir, r.Location.Path)
+		}
 		// Add the processor name to the results
 		r.Source = name
 		// InputTypeNone doesn't pass `paths` to the command, so there may
