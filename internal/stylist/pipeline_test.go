@@ -66,7 +66,21 @@ func TestPipeline_Check(t *testing.T) {
 			pathSpecs: []string{
 				"testdata/txt",
 			},
-			expected: []*Result{},
+			expected: []*Result{
+				{
+					Level: ResultLevelError,
+					Location: ResultLocation{
+						Path: "testdata/txt/ccc.txt",
+					},
+					Rule: ResultRule{
+						Description: "Unknown issue",
+					},
+					ContextLang: "plaintext",
+					ContextLines: []string{
+						"lint failure",
+					},
+				},
+			},
 		},
 		{
 			desc: "should return errors for any commands that fail unexpectedly",

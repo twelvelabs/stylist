@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
+	"strings"
 	"time"
 
 	mapset "github.com/deckarep/golang-set/v2"
@@ -94,8 +95,9 @@ func (c *Command) executeBatch(
 	}
 	stderr := &bytes.Buffer{}
 	stdout := &bytes.Buffer{}
-	cmd.Stderr = stderr
-	cmd.Stdout = stdout
+	combined := &bytes.Buffer{}
+	cmd.Stderr = io.MultiWriter(stderr, combined)
+	cmd.Stdout = io.MultiWriter(stdout, combined)
 
 	logger.Debugln("Command:", cmd.String())
 
@@ -130,11 +132,36 @@ func (c *Command) executeBatch(
 	if err != nil {
 		return nil, err
 	}
+	if len(parsed) == 0 && output.ExitCode > 0 {
+		// The command didn't exit successfully, but we were unable
+		// to parse anything.
+		// We don't know which path triggered the issue,
+		// so return a result for each one w/ the combined output
+		// (likely containing an error message of some kind).
+		contextBody := ansiRegexp.ReplaceAllString(combined.String(), "")
+		contextLines := strings.Split(contextBody, "\n")
+		for _, path := range paths {
+			result := &Result{
+				Level: ResultLevelError,
+				Location: ResultLocation{
+					Path: path,
+				},
+				Rule: ResultRule{
+					Description: "Unknown issue",
+				},
+				ContextLang:  "plaintext",
+				ContextLines: contextLines,
+			}
+			parsed = append(parsed, result)
+		}
+	}
 
 	// Do a little post processing on the results.
 	pathSet := mapset.NewSet(paths...)
 	transformed := []*Result{}
-	for _, r := range parsed {
+	for idx, r := range parsed {
+		logger.Debugf("Parsed[%v]: %#v", idx, r)
+
 		// Add the processor name to the results
 		r.Source = name
 		// InputTypeNone doesn't pass `paths` to the command, so there may
@@ -143,6 +170,7 @@ func (c *Command) executeBatch(
 			transformed = append(transformed, r)
 		}
 	}
+
 	return transformed, nil
 }
 
