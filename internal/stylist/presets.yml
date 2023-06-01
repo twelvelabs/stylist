@@ -175,3 +175,20 @@ shfmt:
     input: variadic
     output: stdout
     format: none
+
+terraform:
+  name: terraform
+  preset: terraform
+  tags: []
+  includes:
+    - "**/*.{tf,tfvars}"
+  check:
+    command: "terraform fmt -check -diff"
+    input: variadic
+    output: stdout
+    format: diff
+  fix:
+    command: "terraform fmt"
+    input: variadic
+    output: stdout
+    format: none

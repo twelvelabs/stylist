@@ -57,6 +57,7 @@ words:
   - SOURCEPATHS
   - testdata
   - testutil
+  - tfvars
   - twelvelabs
   - unmarshaller
   - unparam
