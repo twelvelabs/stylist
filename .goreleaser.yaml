@@ -35,9 +35,6 @@ checksum:
   name_template: "checksums.txt"
   algorithm: sha256
 
-snapshot:
-  name_template: "{{ incpatch .Version }}-next" # cspell: disable-line
-
 changelog:
   use: github
   sort: asc
@@ -50,3 +47,46 @@ changelog:
       order: 10
     - title: Other work
       order: 99
+
+dockers:
+  - image_templates:
+      - "gcr.io/twelvelabs/{{ .ProjectName }}:{{ .Tag }}-amd64"
+    build_flag_templates:
+      - "--pull"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.name={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--label=org.opencontainers.image.source={{.GitURL}}"
+      - "--platform=linux/amd64"
+    goarch: amd64
+    use: buildx
+
+  - image_templates:
+      - "gcr.io/twelvelabs/{{ .ProjectName }}:{{ .Tag }}-arm64"
+    build_flag_templates:
+      - "--pull"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.name={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--label=org.opencontainers.image.source={{.GitURL}}"
+      - "--platform=linux/arm64"
+    goarch: arm64
+    use: buildx
+
+docker_manifests:
+  - name_template: "gcr.io/twelvelabs/{{ .ProjectName }}:{{ .Tag }}"
+    image_templates:
+      - "gcr.io/twelvelabs/{{ .ProjectName }}:{{ .Tag }}-amd64"
+      - "gcr.io/twelvelabs/{{ .ProjectName }}:{{ .Tag }}-arm64"
+
+  - name_template: "gcr.io/twelvelabs/{{ .ProjectName }}:latest"
+    image_templates:
+      - "gcr.io/twelvelabs/{{ .ProjectName }}:{{ .Tag }}-amd64"
+      - "gcr.io/twelvelabs/{{ .ProjectName }}:{{ .Tag }}-arm64"
+
+report_sizes: true
+
+snapshot:
+  name_template: "{{ incpatch .Version }}-next" # cspell: disable-line

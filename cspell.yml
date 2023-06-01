@@ -19,6 +19,7 @@ ignorePaths:
 ignoreRegExpList:
   - /import \([^)]+\)/g
 words:
+  - buildx
   - codecov
   - debugf
   - debugln
@@ -46,6 +47,7 @@ words:
   - markdownlint
   - mergo
   - nolint
+  - opencontainers
   - pflag
   - renderable
   - sarif
