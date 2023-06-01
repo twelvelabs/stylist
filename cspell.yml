@@ -6,13 +6,10 @@ dictionaries:
   - fullstack
   - golang
 ignorePaths:
-  - .cspellcache
   - .git/
   - .gitattributes
   - .gitignore
   - .golangci.yml
-  - dist
-  - coverage.out
   - cspell.yml
   - go.mod
   - go.sum

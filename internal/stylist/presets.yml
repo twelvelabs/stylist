@@ -6,7 +6,7 @@ cspell:
   includes:
     - "**/*"
   check:
-    command: "cspell --cache --dot --no-must-find-files --relative --show-suggestions --no-progress --no-summary ."
+    command: "cspell --cache --dot --gitignore --no-must-find-files --relative --show-suggestions --no-progress --no-summary ."
     input: none
     output: stdout
     format: regexp
