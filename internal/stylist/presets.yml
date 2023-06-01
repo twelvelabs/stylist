@@ -192,3 +192,28 @@ terraform:
     input: variadic
     output: stdout
     format: none
+
+tflint:
+  name: tflint
+  preset: tflint
+  tags: []
+  includes:
+    - "**/*.{tf,tfvars}"
+  check:
+    command: "tflint --format=json --no-color"
+    input: none
+    output: stdout
+    format: json
+    mapping:
+      # has both an `issues` and `errors` array (sigh... with subtly different JSON)
+      pattern: "@values|@flatten"
+      level: '{{ if .rule }}{{ .rule.severity | default "error" }}{{ else }}{{ .severity | default "error" }}{{ end }}'
+      path: "{{ .range.filename }}"
+      start_line: "{{ .range.start.line }}"
+      start_column: "{{ .range.start.column }}"
+      end_line: "{{ .range.end.line }}"
+      end_column: "{{ .range.end.column }}"
+      rule_id: "{{ if .rule }}{{ .rule.name }}{{ end }}"
+      rule_name: "{{ if .rule }}{{ .rule.name }}{{ end }}"
+      rule_description: "{{ .message }}"
+      rule_uri: "{{ if .rule }}{{ .rule.link }}{{ end }}"

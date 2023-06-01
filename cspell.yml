@@ -53,9 +53,11 @@ words:
   - sarif
   - shellcheck
   - shlex
-  - SOURCEPATHS
+  - sigstore
+  - sourcepaths
   - testdata
   - testutil
+  - tflint
   - tfvars
   - twelvelabs
   - unmarshaller
