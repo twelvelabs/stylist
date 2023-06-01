@@ -97,10 +97,18 @@ func (p *DiffOutputParser) Parse(output CommandOutput, _ ResultMapping) ([]*Resu
 			contextLines = strings.Split(strings.TrimSuffix(string(hunks), "\n"), "\n")
 		}
 
+		path := d.NewName
+		// Some diffs prefix the file path - strip that out.
+		if strings.HasPrefix(d.NewName, "new/") &&
+			(strings.HasPrefix(d.OrigName, "old/") ||
+				strings.HasPrefix(d.OrigName, "orig/")) {
+			path = strings.TrimPrefix(d.NewName, "new/")
+		}
+
 		result := &Result{
 			Level: ResultLevelError,
 			Location: ResultLocation{
-				Path:      d.NewName,
+				Path:      path,
 				StartLine: startLine,
 			},
 			Rule: ResultRule{
