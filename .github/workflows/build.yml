@@ -91,7 +91,7 @@ jobs:
         uses: sigstore/cosign-installer@9e9de2292db7abb3f51b7f4808d98f0d347a8919 # pin@v3.0.2
 
       - name: Log in to the container registry
-        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a # pin@v2.1.0
+        uses: docker/login-action@465a07811f14bebb1938fbed4728c6a1ff8901fc # pin@v2.2.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
