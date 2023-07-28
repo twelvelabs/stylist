@@ -2,6 +2,7 @@ linters:
   enable-all: true
   disable:
     - cyclop
+    - depguard
     - dupl
     - goerr113
     - exhaustivestruct
