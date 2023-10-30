@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/Masterminds/sprig/v3 v3.2.3
-	github.com/alecthomas/chroma/v2 v2.7.0
+	github.com/alecthomas/chroma/v2 v2.10.0
 	github.com/bmatcuk/doublestar/v4 v4.6.0
 	github.com/deckarep/golang-set/v2 v2.3.0
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
@@ -28,7 +28,7 @@ require (
 	github.com/briandowns/spinner v1.21.0 // indirect
 	github.com/creasty/defaults v1.6.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/dlclark/regexp2 v1.8.1 // indirect
+	github.com/dlclark/regexp2 v1.10.0 // indirect
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
