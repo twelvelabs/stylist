@@ -9,7 +9,7 @@ import (
 	"github.com/alecthomas/chroma/v2/formatters"
 	"github.com/alecthomas/chroma/v2/lexers"
 	"github.com/alecthomas/chroma/v2/styles"
-	"github.com/twelvelabs/termite/ioutil"
+	"github.com/twelvelabs/termite/ui"
 )
 
 // ResultPrinter is the interface that wraps the Print method.
@@ -19,7 +19,7 @@ type ResultPrinter interface {
 }
 
 // NewResultPrinter returns the appropriate printer for the given format.
-func NewResultPrinter(ios *ioutil.IOStreams, config *Config) ResultPrinter { //nolint:ireturn
+func NewResultPrinter(ios *ui.IOStreams, config *Config) ResultPrinter { //nolint:ireturn
 	format := config.Output.Format
 	switch format {
 	case ResultFormatSarif:
@@ -37,7 +37,7 @@ func NewResultPrinter(ios *ioutil.IOStreams, config *Config) ResultPrinter { //n
 
 // SarifPrinter generates SARIF formatted output.
 type SarifPrinter struct {
-	ios    *ioutil.IOStreams
+	ios    *ui.IOStreams
 	config *Config
 }
 
@@ -53,7 +53,7 @@ func (p *SarifPrinter) Print(_ []*Result) error {
 // TtyPrinter generates TTY formatted output.
 // The output will contain ANSI color codes if the terminal allows them.
 type TtyPrinter struct {
-	ios    *ioutil.IOStreams
+	ios    *ui.IOStreams
 	config *Config
 }
 
@@ -70,7 +70,7 @@ func (p *TtyPrinter) Print(results []*Result) error {
 	return nil
 }
 
-func (p *TtyPrinter) printLocation(result *Result, formatter *ioutil.Formatter) {
+func (p *TtyPrinter) printLocation(result *Result, formatter *ui.Formatter) {
 	severity := result.Level.String()
 	switch result.Level {
 	case ResultLevelError:
@@ -173,7 +173,7 @@ func (p *TtyPrinter) syntaxHighlight(text, path, lang string) (string, error) {
 }
 
 // Copied from golangci-lint.
-func (p *TtyPrinter) printUnderLinePointer(result *Result, formatter *ioutil.Formatter) {
+func (p *TtyPrinter) printUnderLinePointer(result *Result, formatter *ui.Formatter) {
 	// StartColumn == 0 means "unknown".
 	if len(result.ContextLines) != 1 || result.Location.StartColumn == 0 {
 		return

@@ -46,6 +46,7 @@ golangci-lint:
   tags: []
   includes:
     - "**/*.go"
+    - "**/go.{mod,sum}"
   check:
     command: "golangci-lint run --out-format=json"
     input: none
