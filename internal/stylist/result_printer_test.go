@@ -4,11 +4,11 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/twelvelabs/termite/ioutil"
+	"github.com/twelvelabs/termite/ui"
 )
 
 func TestNewResultPrinter(t *testing.T) {
-	ios := ioutil.Test()
+	ios := ui.NewTestIOStreams()
 	config := NewConfig()
 	// Ensure a printer exists for each enum value.
 	for _, name := range ResultFormatNames() {

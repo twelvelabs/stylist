@@ -3,9 +3,9 @@ excludes:
   - .cspellcache
   - coverage.out
 output:
-  # show_context: false
-  # show_url: false
-  # syntax_highlight: false
+  show_context: true
+  show_url: true
+  syntax_highlight: true
 processors:
   - preset: cspell
   - preset: gitleaks

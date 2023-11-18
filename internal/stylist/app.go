@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/sirupsen/logrus"
-	"github.com/twelvelabs/termite/ioutil"
 	"github.com/twelvelabs/termite/run"
 	"github.com/twelvelabs/termite/ui"
 )
@@ -23,10 +22,10 @@ const (
 )
 
 type App struct {
-	IO        *ioutil.IOStreams
+	IO        *ui.IOStreams
 	Config    *Config
 	Meta      *AppMeta
-	Messenger *ui.Messenger
+	UI        *ui.UserInterface
 	Prompter  ui.Prompter
 	CmdClient *run.Client
 	Logger    *logrus.Logger
@@ -60,7 +59,7 @@ func NewApp(meta *AppMeta) (*App, error) {
 		return nil, err
 	}
 
-	ios := ioutil.System()
+	ios := ui.NewIOStreams()
 	logger := newLogger(ios, config.LogLevel)
 	logger.Debugf(
 		"Initializing app: config=%v log-level=%v",
@@ -72,8 +71,8 @@ func NewApp(meta *AppMeta) (*App, error) {
 		IO:        ios,
 		Config:    config,
 		Meta:      meta,
-		Messenger: ui.NewMessenger(ios),
-		Prompter:  ui.NewSurveyPrompter(ios.In, ios.Out, ios.Err, ios),
+		UI:        ui.NewUserInterface(ios),
+		Prompter:  ui.NewSurveyPrompter(ios),
 		CmdClient: run.NewClient(),
 		Logger:    logger,
 	}
@@ -87,15 +86,15 @@ func NewTestApp() *App {
 	meta := NewAppMeta("test", "", "0")
 	config := NewConfig()
 
-	ios := ioutil.Test()
+	ios := ui.NewTestIOStreams()
 	logger := newLogger(ios, LogLevelDebug)
 
 	app := &App{
 		IO:        ios,
 		Config:    config,
 		Meta:      meta,
-		Messenger: ui.NewMessenger(ios),
-		Prompter:  ui.NewPrompterMock(),
+		UI:        ui.NewUserInterface(ios),
+		Prompter:  ui.NewStubPrompter(ios),
 		CmdClient: run.NewClient().WithStubbing(),
 		Logger:    logger,
 	}
@@ -103,7 +102,7 @@ func NewTestApp() *App {
 	return app
 }
 
-func newLogger(ios *ioutil.IOStreams, level LogLevel) *logrus.Logger {
+func newLogger(ios *ui.IOStreams, level LogLevel) *logrus.Logger {
 	logger := logrus.New()
 	logger.SetOutput(ios.Err)
 	logger.SetFormatter(&logrus.TextFormatter{

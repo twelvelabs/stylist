@@ -20,7 +20,7 @@ archives:
 
 brews:
   - name: stylist
-    tap:
+    repository:
       owner: twelvelabs
       name: homebrew-tap
       branch: main

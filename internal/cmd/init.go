@@ -50,8 +50,8 @@ func (a *InitAction) Run(ctx context.Context) error {
 	// Handle existing config file.
 	if fsutils.PathExists(configPath) {
 		verb = "Replaced"
-		a.Messenger.Warning("%s already exists\n", configPath)
-		ok, err := a.Prompter.Confirm("Overwrite?", false, "")
+		a.UI.Out(a.UI.WarningIcon()+" %s already exists\n", configPath)
+		ok, err := a.Prompter.Confirm("Overwrite?", false)
 		if err != nil {
 			return err
 		}
@@ -90,6 +90,6 @@ func (a *InitAction) Run(ctx context.Context) error {
 		return err
 	}
 
-	a.Messenger.Success("%s %s\n", verb, configPath)
+	a.UI.Out(a.UI.SuccessIcon()+" %s %s\n", verb, configPath)
 	return nil
 }
