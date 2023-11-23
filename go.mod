@@ -3,7 +3,6 @@ module github.com/twelvelabs/stylist
 go 1.20
 
 require (
-	github.com/Masterminds/sprig/v3 v3.2.3
 	github.com/alecthomas/chroma/v2 v2.11.1
 	github.com/bmatcuk/doublestar/v4 v4.6.1
 	github.com/deckarep/golang-set/v2 v2.3.1
@@ -25,6 +24,7 @@ require (
 	github.com/AlecAivazis/survey/v2 v2.3.7 // indirect
 	github.com/Masterminds/goutils v1.1.1 // indirect
 	github.com/Masterminds/semver/v3 v3.2.1 // indirect
+	github.com/Masterminds/sprig/v3 v3.2.3 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 	github.com/briandowns/spinner v1.23.0 // indirect
 	github.com/caarlos0/env/v8 v8.0.0 // indirect
@@ -36,6 +36,7 @@ require (
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.16.0 // indirect
+	github.com/gobuffalo/flect v1.0.2 // indirect
 	github.com/google/uuid v1.4.0 // indirect
 	github.com/huandu/xstrings v1.4.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect

@@ -4,8 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-
-	"github.com/twelvelabs/stylist/internal/render"
+	"github.com/twelvelabs/termite/render"
 )
 
 func TestProcessor_Merge(t *testing.T) {

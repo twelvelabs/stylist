@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/twelvelabs/stylist/internal/render"
+	"github.com/twelvelabs/termite/render"
 )
 
 const (
