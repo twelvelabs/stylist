@@ -9,8 +9,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
-	"github.com/twelvelabs/stylist/internal/render"
+	"github.com/twelvelabs/termite/render"
 )
 
 func mustOpenFile(path string) *os.File {
