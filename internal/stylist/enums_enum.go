@@ -37,7 +37,8 @@ func (x CommandType) String() string {
 	return string(x)
 }
 
-// String implements the Stringer interface.
+// IsValid provides a quick way to determine if the typed value is
+// part of the allowed enumerated values
 func (x CommandType) IsValid() bool {
 	_, err := ParseCommandType(string(x))
 	return err == nil
@@ -120,7 +121,8 @@ func (x InputType) String() string {
 	return string(x)
 }
 
-// String implements the Stringer interface.
+// IsValid provides a quick way to determine if the typed value is
+// part of the allowed enumerated values
 func (x InputType) IsValid() bool {
 	_, err := ParseInputType(string(x))
 	return err == nil
@@ -205,7 +207,8 @@ func (x LogLevel) String() string {
 	return string(x)
 }
 
-// String implements the Stringer interface.
+// IsValid provides a quick way to determine if the typed value is
+// part of the allowed enumerated values
 func (x LogLevel) IsValid() bool {
 	_, err := ParseLogLevel(string(x))
 	return err == nil
@@ -293,7 +296,8 @@ func (x OutputFormat) String() string {
 	return string(x)
 }
 
-// String implements the Stringer interface.
+// IsValid provides a quick way to determine if the typed value is
+// part of the allowed enumerated values
 func (x OutputFormat) IsValid() bool {
 	_, err := ParseOutputFormat(string(x))
 	return err == nil
@@ -373,7 +377,8 @@ func (x OutputType) String() string {
 	return string(x)
 }
 
-// String implements the Stringer interface.
+// IsValid provides a quick way to determine if the typed value is
+// part of the allowed enumerated values
 func (x OutputType) IsValid() bool {
 	_, err := ParseOutputType(string(x))
 	return err == nil
@@ -425,6 +430,8 @@ func (x *OutputType) Type() string {
 }
 
 const (
+	// ResultFormatCheckstyle is a ResultFormat of type checkstyle.
+	ResultFormatCheckstyle ResultFormat = "checkstyle"
 	// ResultFormatSarif is a ResultFormat of type sarif.
 	ResultFormatSarif ResultFormat = "sarif"
 	// ResultFormatTty is a ResultFormat of type tty.
@@ -434,6 +441,7 @@ const (
 var ErrInvalidResultFormat = fmt.Errorf("not a valid ResultFormat, try [%s]", strings.Join(_ResultFormatNames, ", "))
 
 var _ResultFormatNames = []string{
+	string(ResultFormatCheckstyle),
 	string(ResultFormatSarif),
 	string(ResultFormatTty),
 }
@@ -450,15 +458,17 @@ func (x ResultFormat) String() string {
 	return string(x)
 }
 
-// String implements the Stringer interface.
+// IsValid provides a quick way to determine if the typed value is
+// part of the allowed enumerated values
 func (x ResultFormat) IsValid() bool {
 	_, err := ParseResultFormat(string(x))
 	return err == nil
 }
 
 var _ResultFormatValue = map[string]ResultFormat{
-	"sarif": ResultFormatSarif,
-	"tty":   ResultFormatTty,
+	"checkstyle": ResultFormatCheckstyle,
+	"sarif":      ResultFormatSarif,
+	"tty":        ResultFormatTty,
 }
 
 // ParseResultFormat attempts to convert a string to a ResultFormat.
@@ -545,6 +555,13 @@ func (x ResultLevel) String() string {
 	return fmt.Sprintf("ResultLevel(%d)", x)
 }
 
+// IsValid provides a quick way to determine if the typed value is
+// part of the allowed enumerated values
+func (x ResultLevel) IsValid() bool {
+	_, ok := _ResultLevelMap[x]
+	return ok
+}
+
 var _ResultLevelValue = map[string]ResultLevel{
 	_ResultLevelName[0:4]:   ResultLevelNone,
 	_ResultLevelName[4:8]:   ResultLevelInfo,
@@ -622,7 +639,8 @@ func (x ResultSort) String() string {
 	return string(x)
 }
 
-// String implements the Stringer interface.
+// IsValid provides a quick way to determine if the typed value is
+// part of the allowed enumerated values
 func (x ResultSort) IsValid() bool {
 	_, err := ParseResultSort(string(x))
 	return err == nil

@@ -20,6 +20,7 @@ ignoreRegExpList:
   - /import \([^)]+\)/g
 words:
   - buildx
+  - checkstyle
   - codecov
   - debugf
   - debugln
