@@ -46,7 +46,7 @@ func CoerceResultLevel(value string) (ResultLevel, error) {
 
 // ResultFormat represents how to format the results.
 //
-// ENUM(checkstyle, sarif, tty).
+// ENUM(checkstyle, json, sarif, tty).
 type ResultFormat string
 
 // ResultSort represents how to sort the results.

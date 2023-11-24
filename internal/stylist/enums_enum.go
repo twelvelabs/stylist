@@ -436,6 +436,8 @@ func (x *OutputType) Type() string {
 const (
 	// ResultFormatCheckstyle is a ResultFormat of type checkstyle.
 	ResultFormatCheckstyle ResultFormat = "checkstyle"
+	// ResultFormatJson is a ResultFormat of type json.
+	ResultFormatJson ResultFormat = "json"
 	// ResultFormatSarif is a ResultFormat of type sarif.
 	ResultFormatSarif ResultFormat = "sarif"
 	// ResultFormatTty is a ResultFormat of type tty.
@@ -446,6 +448,7 @@ var ErrInvalidResultFormat = fmt.Errorf("not a valid ResultFormat, try [%s]", st
 
 var _ResultFormatNames = []string{
 	string(ResultFormatCheckstyle),
+	string(ResultFormatJson),
 	string(ResultFormatSarif),
 	string(ResultFormatTty),
 }
@@ -471,6 +474,7 @@ func (x ResultFormat) IsValid() bool {
 
 var _ResultFormatValue = map[string]ResultFormat{
 	"checkstyle": ResultFormatCheckstyle,
+	"json":       ResultFormatJson,
 	"sarif":      ResultFormatSarif,
 	"tty":        ResultFormatTty,
 }

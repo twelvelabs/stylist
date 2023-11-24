@@ -214,13 +214,19 @@ func SortResults(ctx context.Context, results []*Result) ([]*Result, error) {
 
 func EnsureContextLines(_ context.Context, results []*Result) ([]*Result, error) {
 	loader := NewContextLineLoader()
+	analyzer := NewContextLineAnalyzer()
 	for _, result := range results {
+		path := result.Location.Path
+		lines, err := loader.Load(result.Location)
+		if err != nil {
+			return nil, err
+		}
+
 		if result.ContextLines == nil {
-			lines, err := loader.Load(result.Location)
-			if err != nil {
-				return nil, err
-			}
 			result.ContextLines = lines
+		}
+		if result.ContextLang == "" {
+			result.ContextLang = analyzer.DetectLanguage(path, lines)
 		}
 	}
 	return results, nil
