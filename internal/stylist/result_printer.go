@@ -2,6 +2,7 @@ package stylist
 
 import (
 	"bytes"
+	"encoding/xml"
 	"fmt"
 	"strings"
 
@@ -10,6 +11,8 @@ import (
 	"github.com/alecthomas/chroma/v2/lexers"
 	"github.com/alecthomas/chroma/v2/styles"
 	"github.com/twelvelabs/termite/ui"
+
+	"github.com/twelvelabs/stylist/internal/checkstyle"
 )
 
 // ResultPrinter is the interface that wraps the Print method.
@@ -22,6 +25,8 @@ type ResultPrinter interface {
 func NewResultPrinter(ios *ui.IOStreams, config *Config) ResultPrinter { //nolint:ireturn
 	format := config.Output.Format
 	switch format {
+	case ResultFormatCheckstyle:
+		return &CheckstylePrinter{ios: ios, config: config}
 	case ResultFormatSarif:
 		return &SarifPrinter{ios: ios, config: config}
 	case ResultFormatTty:
@@ -29,6 +34,55 @@ func NewResultPrinter(ios *ui.IOStreams, config *Config) ResultPrinter { //nolin
 	default:
 		panic(fmt.Sprintf("unknown result format: %s", format))
 	}
+}
+
+/*
+* CheckstylePrinter
+**/
+
+// CheckstylePrinter generates Checkstyle formatted output.
+type CheckstylePrinter struct {
+	ios    *ui.IOStreams
+	config *Config
+}
+
+// Print writes the Checkstyle formatted results to Stdout.
+func (p *CheckstylePrinter) Print(results []*Result) error {
+	files := map[string]*checkstyle.CSFile{}
+	paths := []string{}
+
+	for _, result := range results {
+		path := result.Location.Path
+
+		if _, ok := files[path]; !ok {
+			files[path] = &checkstyle.CSFile{
+				Name: path,
+			}
+			paths = append(paths, path)
+		}
+
+		files[path].Errors = append(files[path].Errors, &checkstyle.CSError{
+			Column:   result.Location.StartColumn,
+			Line:     result.Location.StartLine,
+			Message:  fmt.Sprintf("%s [%s]", result.Rule.Description, result.Rule.ID),
+			Severity: result.Level.String(),
+			Source:   result.Source,
+		})
+	}
+
+	csr := &checkstyle.CSResult{Version: "4.3"}
+	for _, path := range paths {
+		csr.Files = append(csr.Files, files[path])
+	}
+
+	buf, err := xml.Marshal(csr)
+	if err != nil {
+		return err
+	}
+
+	doc := xml.Header + string(buf) + "\n"
+	_, err = fmt.Fprint(p.ios.Out, doc)
+	return err
 }
 
 /*

@@ -98,8 +98,7 @@ func TestResultLevel(t *testing.T) {
 
 	name := names[0]
 	enum, _ := ParseResultLevel(name)
-	// Pending https://github.com/abice/go-enum/issues/177
-	// require.True(t, enum.IsValid())
+	require.True(t, enum.IsValid())
 	require.Equal(t, enum, enum.Get())
 	require.NoError(t, enum.Set(enum.String()))
 
@@ -112,6 +111,8 @@ func TestResultLevel(t *testing.T) {
 	require.NoError(t, err)
 	err = enum.UnmarshalText([]byte{})
 	require.Error(t, err)
+
+	_ = ResultLevel(99).String()
 }
 
 func TestCoerceResultLevel(t *testing.T) {
@@ -187,6 +188,27 @@ func TestResultFormat(t *testing.T) {
 
 	name := names[0]
 	enum, _ := ParseResultFormat(name)
+	require.True(t, enum.IsValid())
+	require.Equal(t, enum, enum.Get())
+	require.NoError(t, enum.Set(enum.String()))
+
+	enumType := strings.TrimPrefix(fmt.Sprintf("%T", enum), "stylist.")
+	require.Equal(t, enumType, enum.Type())
+
+	marshalled, err := enum.MarshalText()
+	require.NoError(t, err)
+	err = enum.UnmarshalText(marshalled)
+	require.NoError(t, err)
+	err = enum.UnmarshalText([]byte{})
+	require.Error(t, err)
+}
+
+func TestResultSort(t *testing.T) {
+	names := ResultSortNames()
+	require.True(t, len(names) > 0)
+
+	name := names[0]
+	enum, _ := ParseResultSort(name)
 	require.True(t, enum.IsValid())
 	require.Equal(t, enum, enum.Get())
 	require.NoError(t, enum.Set(enum.String()))
