@@ -6,21 +6,21 @@ import (
 
 // Result describes a single result detected by a processor.
 type Result struct {
-	Source       string
-	Level        ResultLevel
-	Location     ResultLocation
-	Rule         ResultRule
-	ContextLines []string
-	ContextLang  string
+	Source       string         `json:"source"`
+	Level        ResultLevel    `json:"level"`
+	Location     ResultLocation `json:"location"`
+	Rule         ResultRule     `json:"rule"`
+	ContextLines []string       `json:"context_lines"`
+	ContextLang  string         `json:"context_lang"`
 }
 
 // ResultLocation describes the physical location where the result occurred.
 type ResultLocation struct {
-	Path        string
-	StartLine   int
-	StartColumn int
-	EndLine     int
-	EndColumn   int
+	Path        string `json:"path"`
+	StartLine   int    `json:"start_line"`
+	StartColumn int    `json:"start_column"`
+	EndLine     int    `json:"end_line"`
+	EndColumn   int    `json:"end_column"`
 }
 
 // Returns the start and end lines.
@@ -43,10 +43,10 @@ func (r ResultLocation) String() string {
 
 // ResultRule describes the rule that was evaluated to produce the result.
 type ResultRule struct {
-	ID          string
-	Name        string
-	Description string
-	URI         string
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	URI         string `json:"uri"`
 }
 
 // Results is a sortable collection of results.

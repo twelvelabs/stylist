@@ -2,6 +2,7 @@ package stylist
 
 import (
 	"bytes"
+	"encoding/json"
 	"encoding/xml"
 	"fmt"
 	"strings"
@@ -27,6 +28,8 @@ func NewResultPrinter(ios *ui.IOStreams, config *Config) ResultPrinter { //nolin
 	switch format {
 	case ResultFormatCheckstyle:
 		return &CheckstylePrinter{ios: ios, config: config}
+	case ResultFormatJson:
+		return &JSONPrinter{ios: ios, config: config}
 	case ResultFormatSarif:
 		return &SarifPrinter{ios: ios, config: config}
 	case ResultFormatTty:
@@ -86,6 +89,27 @@ func (p *CheckstylePrinter) Print(results []*Result) error {
 }
 
 /*
+* JSONPrinter
+**/
+
+// JSONPrinter generates JSON formatted output.
+type JSONPrinter struct {
+	ios    *ui.IOStreams
+	config *Config
+}
+
+// Print writes the JSON formatted results to Stdout.
+func (p *JSONPrinter) Print(results []*Result) error {
+	buf, err := json.Marshal(results)
+	if err != nil {
+		return err
+	}
+
+	_, err = fmt.Fprint(p.ios.Out, string(buf)+"\n")
+	return err
+}
+
+/*
 * SarifPrinter
 **/
 
@@ -136,7 +160,6 @@ func (p *TtyPrinter) printLocation(result *Result, formatter *ui.Formatter) {
 	case ResultLevelNone:
 		severity = formatter.Gray(severity) + ": "
 	default:
-		severity = ""
 	}
 
 	source := result.Source
