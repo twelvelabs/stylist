@@ -19,7 +19,7 @@ type OutputType string
 
 // OutputFormat represents how to parse command output.
 //
-// ENUM(diff, json, none, regexp, sarif).
+// ENUM(checkstyle, diff, json, none, regexp, sarif).
 type OutputFormat string
 
 // ResultLevel represents the severity level of the result.

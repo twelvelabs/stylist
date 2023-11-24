@@ -2,6 +2,7 @@ package stylist
 
 import (
 	"bytes"
+	"encoding/xml"
 	"fmt"
 	"io"
 	"regexp"
@@ -11,6 +12,7 @@ import (
 	"github.com/sourcegraph/go-diff/diff"
 	"github.com/tidwall/gjson"
 
+	"github.com/twelvelabs/stylist/internal/checkstyle"
 	"github.com/twelvelabs/stylist/internal/fsutils"
 )
 
@@ -31,6 +33,8 @@ type OutputParser interface {
 // NewOutputParser returns the appropriate parser for the given output type.
 func NewOutputParser(format OutputFormat) OutputParser { //nolint:ireturn
 	switch format {
+	case OutputFormatCheckstyle:
+		return &CheckstyleOutputParser{}
 	case OutputFormatDiff:
 		return &DiffOutputParser{}
 	case OutputFormatJson:
@@ -44,6 +48,58 @@ func NewOutputParser(format OutputFormat) OutputParser { //nolint:ireturn
 	default:
 		panic(fmt.Sprintf("unknown output format: %s", format))
 	}
+}
+
+/*
+* CheckstyleOutputParser
+**/
+
+// CheckstyleOutputParser parses Checkstyle XML.
+type CheckstyleOutputParser struct {
+}
+
+func (p *CheckstyleOutputParser) Parse(output CommandOutput, _ ResultMapping) ([]*Result, error) {
+	// Read the content.
+	buf, err := io.ReadAll(output.Content)
+	if err != nil {
+		return nil, err
+	}
+	content := ansiRegexp.ReplaceAll(buf, []byte(""))
+	if len(content) == 0 {
+		return nil, nil // nothing to parse
+	}
+
+	// Parse.
+	csDoc := &checkstyle.CSResult{}
+	err = xml.Unmarshal(content, csDoc)
+	if err != nil {
+		return nil, fmt.Errorf("invalid checkstyle XML: %w", err)
+	}
+
+	// Map to Result structs.
+	results := []*Result{}
+	for _, file := range csDoc.Files {
+		path := file.Name
+		for _, e := range file.Errors {
+			level, _ := CoerceResultLevel(e.Severity)
+			result := &Result{
+				Level: level,
+				Location: ResultLocation{
+					Path:        path,
+					StartLine:   e.Line,
+					StartColumn: e.Column,
+				},
+				Rule: ResultRule{
+					ID:          e.Source,
+					Name:        e.Source,
+					Description: e.Message,
+				},
+			}
+			results = append(results, result)
+		}
+	}
+
+	return results, nil
 }
 
 /*

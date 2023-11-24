@@ -262,6 +262,8 @@ func (x *LogLevel) Type() string {
 }
 
 const (
+	// OutputFormatCheckstyle is a OutputFormat of type checkstyle.
+	OutputFormatCheckstyle OutputFormat = "checkstyle"
 	// OutputFormatDiff is a OutputFormat of type diff.
 	OutputFormatDiff OutputFormat = "diff"
 	// OutputFormatJson is a OutputFormat of type json.
@@ -277,6 +279,7 @@ const (
 var ErrInvalidOutputFormat = fmt.Errorf("not a valid OutputFormat, try [%s]", strings.Join(_OutputFormatNames, ", "))
 
 var _OutputFormatNames = []string{
+	string(OutputFormatCheckstyle),
 	string(OutputFormatDiff),
 	string(OutputFormatJson),
 	string(OutputFormatNone),
@@ -304,11 +307,12 @@ func (x OutputFormat) IsValid() bool {
 }
 
 var _OutputFormatValue = map[string]OutputFormat{
-	"diff":   OutputFormatDiff,
-	"json":   OutputFormatJson,
-	"none":   OutputFormatNone,
-	"regexp": OutputFormatRegexp,
-	"sarif":  OutputFormatSarif,
+	"checkstyle": OutputFormatCheckstyle,
+	"diff":       OutputFormatDiff,
+	"json":       OutputFormatJson,
+	"none":       OutputFormatNone,
+	"regexp":     OutputFormatRegexp,
+	"sarif":      OutputFormatSarif,
 }
 
 // ParseOutputFormat attempts to convert a string to a OutputFormat.

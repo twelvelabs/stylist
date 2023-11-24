@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<checkstyle version="5.0">
+    <file name="internal/stylist/output_parser.go">
+        <error column="76" line="33" message="Comment should end in a period" severity="error" source="godot"></error>
+        <error column="48" line="57" message="Comment should end in a period" severity="error" source="godot"></error>
+    </file>
+    <file name="internal/stylist/output_parser_test.go">
+        <error column="7" line="35" message="Comment should end in a period" severity="error" source="godot"></error>
+    </file>
+</checkstyle>

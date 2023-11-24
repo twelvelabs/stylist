@@ -2,10 +2,12 @@ package stylist
 
 import (
 	"bytes"
+	"errors"
 	"io"
 	"os"
 	"strings"
 	"testing"
+	"testing/iotest"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -32,6 +34,98 @@ func TestNewOutputParser(t *testing.T) {
 	})
 }
 
+func TestCheckstyleOutputParser_Parse(t *testing.T) {
+	tests := []struct {
+		desc     string
+		content  io.Reader
+		expected []*Result
+		err      string
+	}{
+		{
+			desc:     "returns an empty slice when no content",
+			content:  bytes.NewBufferString(""),
+			expected: nil,
+			err:      "",
+		},
+		{
+			desc:     "returns an error when unable to read content",
+			content:  iotest.ErrReader(errors.New("boom")),
+			expected: nil,
+			err:      "boom",
+		},
+		{
+			desc:     "returns an error when not checkstyle content",
+			content:  bytes.NewBufferString("not a checkstyle document"),
+			expected: nil,
+			err:      "invalid checkstyle XML",
+		},
+		{
+			desc:    "parses checkstyle",
+			content: mustOpenFile("testdata/output/golangci.xml"),
+			expected: []*Result{
+				{
+					Level: ResultLevelError,
+					Location: ResultLocation{
+						Path:        "internal/stylist/output_parser.go",
+						StartLine:   33,
+						StartColumn: 76,
+					},
+					Rule: ResultRule{
+						ID:          "godot",
+						Name:        "godot",
+						Description: "Comment should end in a period",
+					},
+				},
+				{
+					Level: ResultLevelError,
+					Location: ResultLocation{
+						Path:        "internal/stylist/output_parser.go",
+						StartLine:   57,
+						StartColumn: 48,
+					},
+					Rule: ResultRule{
+						ID:          "godot",
+						Name:        "godot",
+						Description: "Comment should end in a period",
+					},
+				},
+				{
+					Level: ResultLevelError,
+					Location: ResultLocation{
+						Path:        "internal/stylist/output_parser_test.go",
+						StartLine:   35,
+						StartColumn: 7,
+					},
+					Rule: ResultRule{
+						ID:          "godot",
+						Name:        "godot",
+						Description: "Comment should end in a period",
+					},
+				},
+			},
+			err: "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.desc, func(t *testing.T) {
+			actual, err := (&CheckstyleOutputParser{}).Parse(
+				CommandOutput{
+					Content: tt.content,
+				},
+				ResultMapping{},
+			)
+
+			if tt.err == "" {
+				require.NoError(t, err)
+			} else {
+				require.ErrorContains(t, err, tt.err)
+			}
+
+			require.Equal(t, tt.expected, actual)
+		})
+	}
+}
+
 func TestDiffOutputParser_Parse(t *testing.T) {
 	tests := []struct {
 		desc     string
@@ -46,10 +140,16 @@ func TestDiffOutputParser_Parse(t *testing.T) {
 			err:      "",
 		},
 		{
-			desc:     "returns an empty slice when not a valid diff",
+			desc:     "returns an empty slice when not a diff",
 			content:  bytes.NewBufferString("not a diff"),
 			expected: []*Result{},
 			err:      "",
+		},
+		{
+			desc:     "returns an error when unable to read content",
+			content:  iotest.ErrReader(errors.New("boom")),
+			expected: nil,
+			err:      "boom",
 		},
 		{
 			desc:    "parses diffs",
@@ -138,7 +238,35 @@ func TestJSONOutputParser_Parse(t *testing.T) {
 	assert.NoError(t, err)
 
 	parser := &JSONOutputParser{}
+
 	results, err := parser.Parse(
+		CommandOutput{
+			Content: bytes.NewBufferString(""),
+		},
+		ResultMapping{},
+	)
+	require.NoError(t, err)
+	require.Nil(t, results)
+
+	results, err = parser.Parse(
+		CommandOutput{
+			Content: bytes.NewBufferString("{{}"),
+		},
+		ResultMapping{},
+	)
+	require.ErrorContains(t, err, "invalid json")
+	require.Nil(t, results)
+
+	results, err = parser.Parse(
+		CommandOutput{
+			Content: iotest.ErrReader(errors.New("boom")),
+		},
+		ResultMapping{},
+	)
+	require.ErrorContains(t, err, "boom")
+	require.Nil(t, results)
+
+	results, err = parser.Parse(
 		CommandOutput{
 			Content: file,
 		},
@@ -201,6 +329,13 @@ func TestRegexpOutputParser_Parse(t *testing.T) {
 		expected []*Result
 		err      string
 	}{
+		{
+			desc:     "returns an error when unable to read content",
+			content:  iotest.ErrReader(errors.New("boom")),
+			mapping:  mapping,
+			expected: nil,
+			err:      "boom",
+		},
 		{
 			desc:    "returns an error if pattern is missing",
 			content: mustOpenFile("testdata/output/gitleaks.txt"),
@@ -310,6 +445,12 @@ func TestSarifOutputParser_Parse(t *testing.T) {
 			content:  bytes.NewBufferString(""),
 			expected: nil,
 			err:      "",
+		},
+		{
+			desc:     "returns an error when unable to read content",
+			content:  iotest.ErrReader(errors.New("boom")),
+			expected: nil,
+			err:      "boom",
 		},
 		{
 			desc:     "returns an error when not sarif content",
