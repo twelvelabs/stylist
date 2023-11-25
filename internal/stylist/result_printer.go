@@ -11,6 +11,7 @@ import (
 	"github.com/alecthomas/chroma/v2/formatters"
 	"github.com/alecthomas/chroma/v2/lexers"
 	"github.com/alecthomas/chroma/v2/styles"
+	"github.com/owenrumney/go-sarif/v2/sarif"
 	"github.com/twelvelabs/termite/ui"
 
 	"github.com/twelvelabs/stylist/internal/checkstyle"
@@ -100,6 +101,13 @@ type JSONPrinter struct {
 
 // Print writes the JSON formatted results to Stdout.
 func (p *JSONPrinter) Print(results []*Result) error {
+	if !p.config.Output.ShowContext {
+		for _, r := range results {
+			r.ContextLines = nil
+			r.ContextLang = ""
+		}
+	}
+
 	buf, err := json.Marshal(results)
 	if err != nil {
 		return err
@@ -120,8 +128,75 @@ type SarifPrinter struct {
 }
 
 // Print writes the SARIF formatted results to Stdout.
-func (p *SarifPrinter) Print(_ []*Result) error {
-	return nil
+func (p *SarifPrinter) Print(results []*Result) error {
+	// Group results by source so we can create a SARIF run for each.
+	resultsBySource := map[string][]*Result{}
+	for _, r := range results {
+		if _, ok := resultsBySource[r.Source]; !ok {
+			resultsBySource[r.Source] = []*Result{}
+		}
+		resultsBySource[r.Source] = append(resultsBySource[r.Source], r)
+	}
+
+	// create a top-level SARIF report.
+	report, err := sarif.New(sarif.Version210)
+	if err != nil {
+		return err
+	}
+
+	// Create a SARIF run for each source.
+	for sourceName, resultsForSource := range resultsBySource {
+		run := sarif.NewRun(*sarif.NewSimpleTool(sourceName))
+		for _, r := range resultsForSource {
+			// Create a new rule for each rule id.
+			rule := run.AddRule(r.Rule.ID).
+				WithName(r.Rule.Name)
+			if r.Rule.URI != "" {
+				rule.WithHelpURI(r.Rule.URI)
+			}
+
+			// Add the location as a unique artifact for the entire run.
+			artifact := run.AddDistinctArtifact(r.Location.Path)
+			if p.config.Output.ShowContext {
+				artifact.WithSourceLanguage(r.ContextLang)
+			}
+
+			// Create a region w/ the location and range for this particular result.
+			region := sarif.NewRegion().
+				WithStartLine(r.Location.StartLine).
+				WithStartColumn(r.Location.StartColumn).
+				WithEndLine(r.Location.EndLine).
+				WithEndColumn(r.Location.EndColumn).
+				WithSourceLanguage(r.ContextLang)
+			if p.config.Output.ShowContext {
+				region = region.WithSourceLanguage(r.ContextLang)
+				if len(r.ContextLines) > 0 {
+					region = region.WithSnippet(
+						sarif.NewArtifactContent().WithText(
+							strings.Join(r.ContextLines, "\n"),
+						),
+					)
+				}
+			}
+
+			// Add the result to the run.
+			run.CreateResultForRule(r.Rule.ID).
+				WithLevel(r.Level.String()).
+				WithMessage(sarif.NewTextMessage(r.Rule.Description)).
+				AddLocation(
+					sarif.NewLocationWithPhysicalLocation(
+						sarif.NewPhysicalLocation().
+							WithArtifactLocation(
+								sarif.NewSimpleArtifactLocation(r.Location.Path),
+							).
+							WithRegion(region),
+					),
+				)
+		}
+		report.AddRun(run)
+	}
+
+	return report.Write(p.ios.Out)
 }
 
 /*

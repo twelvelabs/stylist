@@ -5,10 +5,10 @@ go 1.20
 require (
 	github.com/alecthomas/chroma/v2 v2.11.1
 	github.com/bmatcuk/doublestar/v4 v4.6.1
-	github.com/deckarep/golang-set/v2 v2.3.1
+	github.com/deckarep/golang-set/v2 v2.4.0
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
 	github.com/imdario/mergo v1.0.0
-	github.com/owenrumney/go-sarif v1.1.1
+	github.com/owenrumney/go-sarif/v2 v2.3.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/sourcegraph/go-diff v0.7.0
 	github.com/spf13/cobra v1.8.0
@@ -25,7 +25,6 @@ require (
 	github.com/Masterminds/goutils v1.1.1 // indirect
 	github.com/Masterminds/semver/v3 v3.2.1 // indirect
 	github.com/Masterminds/sprig/v3 v3.2.3 // indirect
-	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 	github.com/briandowns/spinner v1.23.0 // indirect
 	github.com/caarlos0/env/v8 v8.0.0 // indirect
 	github.com/creasty/defaults v1.7.0 // indirect
@@ -52,7 +51,6 @@ require (
 	github.com/spf13/cast v1.5.1 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect
-	github.com/zclconf/go-cty v1.14.1 // indirect
 	golang.org/x/crypto v0.15.0 // indirect
 	golang.org/x/net v0.18.0 // indirect
 	golang.org/x/sys v0.14.0 // indirect
