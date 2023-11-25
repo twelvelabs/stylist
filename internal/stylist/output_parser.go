@@ -8,7 +8,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/owenrumney/go-sarif/sarif"
+	"github.com/owenrumney/go-sarif/v2/sarif"
 	"github.com/sourcegraph/go-diff/diff"
 	"github.com/tidwall/gjson"
 

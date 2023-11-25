@@ -126,7 +126,12 @@ func TestJSONPrinter_Print(t *testing.T) {
 				ID:          "rule-id1",
 				Name:        "rule-name1",
 				Description: "no start column",
+				URI:         "https://example.com/",
 			},
+			ContextLines: []string{
+				"foo1",
+			},
+			ContextLang: "go",
 		},
 		{
 			Source: "test-linter",
@@ -140,7 +145,12 @@ func TestJSONPrinter_Print(t *testing.T) {
 				ID:          "rule-id2",
 				Name:        "rule-name2",
 				Description: "valid start column",
+				URI:         "https://example.com/",
 			},
+			ContextLines: []string{
+				"foo2",
+			},
+			ContextLang: "go",
 		},
 		{
 			Source: "test-linter",
@@ -154,12 +164,15 @@ func TestJSONPrinter_Print(t *testing.T) {
 				ID:          "rule-id2",
 				Name:        "rule-name2",
 				Description: "another valid start column",
+				URI:         "https://example.com/",
 			},
+			ContextLang: "go",
 		},
 	}
 
 	tests := []struct {
 		desc     string
+		config   OutputConfig
 		results  []*Result
 		expected string
 		err      string
@@ -173,13 +186,24 @@ func TestJSONPrinter_Print(t *testing.T) {
 		{
 			desc:     "a non empty result set should print JSON formatted results",
 			results:  results,
-			expected: `[{"source":"test-linter","level":"error","location":{"path":"some/path/foo.go","start_line":1,"start_column":0,"end_line":0,"end_column":0},"rule":{"id":"rule-id1","name":"rule-name1","description":"no start column","uri":""},"context_lines":null,"context_lang":""},{"source":"test-linter","level":"warning","location":{"path":"some/path/foo.go","start_line":2,"start_column":3,"end_line":0,"end_column":0},"rule":{"id":"rule-id2","name":"rule-name2","description":"valid start column","uri":""},"context_lines":null,"context_lang":""},{"source":"test-linter","level":"warning","location":{"path":"some/path/bar.go","start_line":4,"start_column":5,"end_line":0,"end_column":0},"rule":{"id":"rule-id2","name":"rule-name2","description":"another valid start column","uri":""},"context_lines":null,"context_lang":""}]`, //nolint: lll
+			expected: `[{"source":"test-linter","level":"error","location":{"path":"some/path/foo.go","start_line":1,"start_column":0,"end_line":0,"end_column":0},"rule":{"id":"rule-id1","name":"rule-name1","description":"no start column","uri":"https://example.com/"}},{"source":"test-linter","level":"warning","location":{"path":"some/path/foo.go","start_line":2,"start_column":3,"end_line":0,"end_column":0},"rule":{"id":"rule-id2","name":"rule-name2","description":"valid start column","uri":"https://example.com/"}},{"source":"test-linter","level":"warning","location":{"path":"some/path/bar.go","start_line":4,"start_column":5,"end_line":0,"end_column":0},"rule":{"id":"rule-id2","name":"rule-name2","description":"another valid start column","uri":"https://example.com/"}}]`, //nolint: lll
+		},
+
+		{
+			desc: "should not include context if disabled",
+			config: OutputConfig{
+				ShowContext: false,
+			},
+			results:  results,
+			expected: `[{"source":"test-linter","level":"error","location":{"path":"some/path/foo.go","start_line":1,"start_column":0,"end_line":0,"end_column":0},"rule":{"id":"rule-id1","name":"rule-name1","description":"no start column","uri":"https://example.com/"}},{"source":"test-linter","level":"warning","location":{"path":"some/path/foo.go","start_line":2,"start_column":3,"end_line":0,"end_column":0},"rule":{"id":"rule-id2","name":"rule-name2","description":"valid start column","uri":"https://example.com/"}},{"source":"test-linter","level":"warning","location":{"path":"some/path/bar.go","start_line":4,"start_column":5,"end_line":0,"end_column":0},"rule":{"id":"rule-id2","name":"rule-name2","description":"another valid start column","uri":"https://example.com/"}}]`, //nolint: lll
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.desc, func(t *testing.T) {
 			app := NewTestApp()
+			app.Config.Output = tt.config
+
 			printer := &JSONPrinter{
 				ios:    app.IO,
 				config: app.Config,
@@ -200,15 +224,112 @@ func TestJSONPrinter_Print(t *testing.T) {
 }
 
 func TestSarifPrinter_Print(t *testing.T) {
-	app := NewTestApp()
-	printer := &SarifPrinter{
-		ios:    app.IO,
-		config: app.Config,
+	results := []*Result{
+		{
+			Source: "test-linter",
+			Level:  ResultLevelError,
+			Location: ResultLocation{
+				Path:        "some/path/foo.go",
+				StartLine:   1,
+				StartColumn: 0,
+			},
+			Rule: ResultRule{
+				ID:          "rule-id1",
+				Name:        "rule-name1",
+				Description: "no start column",
+				URI:         "https://example.com/",
+			},
+			ContextLines: []string{
+				"foo1",
+			},
+			ContextLang: "go",
+		},
+		{
+			Source: "test-linter",
+			Level:  ResultLevelWarning,
+			Location: ResultLocation{
+				Path:        "some/path/foo.go",
+				StartLine:   2,
+				StartColumn: 3,
+			},
+			Rule: ResultRule{
+				ID:          "rule-id2",
+				Name:        "rule-name2",
+				Description: "valid start column",
+				URI:         "https://example.com/",
+			},
+			ContextLines: []string{
+				"foo2",
+			},
+			ContextLang: "go",
+		},
+		{
+			Source: "test-linter",
+			Level:  ResultLevelWarning,
+			Location: ResultLocation{
+				Path:        "some/path/bar.go",
+				StartLine:   4,
+				StartColumn: 5,
+			},
+			Rule: ResultRule{
+				ID:          "rule-id2",
+				Name:        "rule-name2",
+				Description: "another valid start column",
+				URI:         "https://example.com/",
+			},
+			ContextLang: "go",
+		},
 	}
-	results := []*Result{}
 
-	err := printer.Print(results)
-	assert.NoError(t, err)
+	tests := []struct {
+		desc     string
+		config   OutputConfig
+		results  []*Result
+		expected string
+		err      string
+	}{
+		{
+			desc:     "empty result set should print an empty SARIF doc",
+			results:  []*Result{},
+			expected: `{"version":"2.1.0","$schema":"https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json","runs":[]}`, //nolint: lll
+		},
+
+		{
+			desc:     "a non empty result set should print SARIF formatted results",
+			results:  results,
+			expected: `{"version":"2.1.0","$schema":"https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json","runs":[{"tool":{"driver":{"name":"test-linter","rules":[{"id":"rule-id1","name":"rule-name1","shortDescription":null,"helpUri":"https://example.com/"},{"id":"rule-id2","name":"rule-name2","shortDescription":null,"helpUri":"https://example.com/"}]}},"artifacts":[{"location":{"uri":"some/path/foo.go"},"length":-1,"sourceLanguage":"go"},{"location":{"uri":"some/path/bar.go"},"length":-1,"sourceLanguage":"go"}],"results":[{"ruleId":"rule-id1","ruleIndex":0,"level":"error","message":{"text":"no start column"},"locations":[{"physicalLocation":{"artifactLocation":{"uri":"some/path/foo.go"},"region":{"startLine":1,"startColumn":0,"endLine":0,"endColumn":0,"snippet":{"text":"foo1"}}}}]},{"ruleId":"rule-id2","ruleIndex":1,"level":"warning","message":{"text":"valid start column"},"locations":[{"physicalLocation":{"artifactLocation":{"uri":"some/path/foo.go"},"region":{"startLine":2,"startColumn":3,"endLine":0,"endColumn":0,"snippet":{"text":"foo2"}}}}]},{"ruleId":"rule-id2","ruleIndex":1,"level":"warning","message":{"text":"another valid start column"},"locations":[{"physicalLocation":{"artifactLocation":{"uri":"some/path/bar.go"},"region":{"startLine":4,"startColumn":5,"endLine":0,"endColumn":0}}}]}]}]}`, //nolint: lll
+		},
+
+		{
+			desc: "should not include context if disabled",
+			config: OutputConfig{
+				ShowContext: false,
+			},
+			results:  results,
+			expected: `{"version":"2.1.0","$schema":"https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json","runs":[{"tool":{"driver":{"name":"test-linter","rules":[{"id":"rule-id1","name":"rule-name1","shortDescription":null,"helpUri":"https://example.com/"},{"id":"rule-id2","name":"rule-name2","shortDescription":null,"helpUri":"https://example.com/"}]}},"artifacts":[{"location":{"uri":"some/path/foo.go"},"length":-1,"sourceLanguage":"go"},{"location":{"uri":"some/path/bar.go"},"length":-1,"sourceLanguage":"go"}],"results":[{"ruleId":"rule-id1","ruleIndex":0,"level":"error","message":{"text":"no start column"},"locations":[{"physicalLocation":{"artifactLocation":{"uri":"some/path/foo.go"},"region":{"startLine":1,"startColumn":0,"endLine":0,"endColumn":0,"snippet":{"text":"foo1"}}}}]},{"ruleId":"rule-id2","ruleIndex":1,"level":"warning","message":{"text":"valid start column"},"locations":[{"physicalLocation":{"artifactLocation":{"uri":"some/path/foo.go"},"region":{"startLine":2,"startColumn":3,"endLine":0,"endColumn":0,"snippet":{"text":"foo2"}}}}]},{"ruleId":"rule-id2","ruleIndex":1,"level":"warning","message":{"text":"another valid start column"},"locations":[{"physicalLocation":{"artifactLocation":{"uri":"some/path/bar.go"},"region":{"startLine":4,"startColumn":5,"endLine":0,"endColumn":0}}}]}]}]}`, //nolint: lll
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.desc, func(t *testing.T) {
+			app := NewTestApp()
+			printer := &SarifPrinter{
+				ios:    app.IO,
+				config: app.Config,
+			}
+			err := printer.Print(tt.results)
+
+			if tt.err == "" {
+				require.NoError(t, err)
+			} else {
+				require.ErrorContains(t, err, tt.err)
+			}
+
+			out := app.IO.Out.String()
+			out = strings.ReplaceAll(out, "\n", "")
+			require.Equal(t, tt.expected, out)
+		})
+	}
 }
 
 func TestTtyPrinter_Print(t *testing.T) {

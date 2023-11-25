@@ -10,8 +10,8 @@ type Result struct {
 	Level        ResultLevel    `json:"level"`
 	Location     ResultLocation `json:"location"`
 	Rule         ResultRule     `json:"rule"`
-	ContextLines []string       `json:"context_lines"`
-	ContextLang  string         `json:"context_lang"`
+	ContextLines []string       `json:"context_lines,omitempty"`
+	ContextLang  string         `json:"context_lang,omitempty"`
 }
 
 // ResultLocation describes the physical location where the result occurred.
