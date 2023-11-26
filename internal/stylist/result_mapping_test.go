@@ -317,8 +317,7 @@ func TestResultMapping_RenderLevel(t *testing.T) {
 			data: resultData{
 				"level": "unknown",
 			},
-			expected: ResultLevelNone,
-			err:      "unknown is not a valid ResultLevel",
+			expected: ResultLevelError,
 		},
 		{
 			desc:     "should return an error when template fails to render",

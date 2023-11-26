@@ -31,16 +31,16 @@ type ResultLevel int
 // CoerceResultLevel returns the correct enum for the given value.
 func CoerceResultLevel(value string) (ResultLevel, error) {
 	switch value {
-	case "", "<no value>":
+	case "none", "", "<no value>":
 		return ResultLevelNone, nil
-	case "info", "note":
+	case "info", "note", "style":
 		return ResultLevelInfo, nil
 	case "warn", "warning":
 		return ResultLevelWarning, nil
 	case "err", "error":
 		return ResultLevelError, nil
 	default:
-		return ParseResultLevel(value)
+		return ResultLevelError, nil
 	}
 }
 
