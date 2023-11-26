@@ -163,8 +163,8 @@ func TestCoerceResultLevel(t *testing.T) {
 		},
 		{
 			desc:     "unknown",
-			expected: ResultLevelNone,
-			err:      "unknown is not a valid ResultLevel",
+			expected: ResultLevelError,
+			err:      "",
 		},
 	}
 	for _, tt := range tests {
