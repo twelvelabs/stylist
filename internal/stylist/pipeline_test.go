@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/twelvelabs/termite/run"
 )
 
@@ -222,6 +223,308 @@ func TestPipeline_Index(t *testing.T) {
 			if tt.expectFunc != nil {
 				tt.expectFunc(t, pipeline)
 			}
+		})
+	}
+}
+
+func TestEnsureContextLines(t *testing.T) {
+	tests := []struct {
+		desc     string
+		config   *OutputConfig
+		results  []*Result
+		expected []*Result
+		err      string
+	}{
+		{
+			desc: "ensures context by default",
+			results: []*Result{
+				{
+					Location: ResultLocation{
+						Path:      "testdata/txt/aaa.txt",
+						StartLine: 1,
+						EndLine:   1,
+					},
+				},
+				{
+					Location: ResultLocation{
+						Path:      "testdata/txt/bbb.txt",
+						StartLine: 1,
+						EndLine:   1,
+					},
+				},
+				{
+					Location: ResultLocation{
+						Path:      "testdata/txt/ccc.txt",
+						StartLine: 1,
+						EndLine:   1,
+					},
+				},
+			},
+			expected: []*Result{
+				{
+					Location: ResultLocation{
+						Path:      "testdata/txt/aaa.txt",
+						StartLine: 1,
+						EndLine:   1,
+					},
+					ContextLang: "plaintext",
+					ContextLines: []string{
+						"aaa content",
+					},
+				},
+				{
+					Location: ResultLocation{
+						Path:      "testdata/txt/bbb.txt",
+						StartLine: 1,
+						EndLine:   1,
+					},
+					ContextLang: "plaintext",
+					ContextLines: []string{
+						"bbb content",
+					},
+				},
+				{
+					Location: ResultLocation{
+						Path:      "testdata/txt/ccc.txt",
+						StartLine: 1,
+						EndLine:   1,
+					},
+					ContextLang: "plaintext",
+					ContextLines: []string{
+						"ccc content",
+					},
+				},
+			},
+			err: "",
+		},
+
+		{
+			desc: "strips context when disabled via config",
+			config: &OutputConfig{
+				ShowContext: false,
+			},
+			results: []*Result{
+				{
+					Location: ResultLocation{
+						Path:      "testdata/txt/aaa.txt",
+						StartLine: 1,
+						EndLine:   1,
+					},
+					ContextLang: "plaintext",
+					ContextLines: []string{
+						"aaa content",
+					},
+				},
+				{
+					Location: ResultLocation{
+						Path:      "testdata/txt/bbb.txt",
+						StartLine: 1,
+						EndLine:   1,
+					},
+					ContextLang: "plaintext",
+					ContextLines: []string{
+						"bbb content",
+					},
+				},
+				{
+					Location: ResultLocation{
+						Path:      "testdata/txt/ccc.txt",
+						StartLine: 1,
+						EndLine:   1,
+					},
+					ContextLang: "plaintext",
+					ContextLines: []string{
+						"ccc content",
+					},
+				},
+			},
+			expected: []*Result{
+				{
+					Location: ResultLocation{
+						Path:      "testdata/txt/aaa.txt",
+						StartLine: 1,
+						EndLine:   1,
+					},
+					ContextLang:  "",
+					ContextLines: nil,
+				},
+				{
+					Location: ResultLocation{
+						Path:      "testdata/txt/bbb.txt",
+						StartLine: 1,
+						EndLine:   1,
+					},
+					ContextLang:  "",
+					ContextLines: nil,
+				},
+				{
+					Location: ResultLocation{
+						Path:      "testdata/txt/ccc.txt",
+						StartLine: 1,
+						EndLine:   1,
+					},
+					ContextLang:  "",
+					ContextLines: nil,
+				},
+			},
+			err: "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.desc, func(t *testing.T) {
+			app := NewTestApp()
+			if tt.config != nil {
+				app.Config.Output = *tt.config
+			}
+			ctx := app.InitContext(context.Background())
+
+			actual, err := EnsureContextLines(ctx, tt.results)
+
+			if tt.err == "" {
+				require.NoError(t, err)
+			} else {
+				require.ErrorContains(t, err, tt.err)
+			}
+
+			require.Equal(t, tt.expected, actual)
+		})
+	}
+}
+
+func TestSortResults(t *testing.T) {
+	tests := []struct {
+		desc     string
+		config   *OutputConfig
+		results  []*Result
+		expected []*Result
+		err      string
+	}{
+		{
+			desc: "sorts by location by default",
+			results: []*Result{
+				{
+					Location: ResultLocation{
+						Path: "testdata/txt/ccc.txt",
+					},
+				},
+				{
+					Location: ResultLocation{
+						Path: "testdata/txt/aaa.txt",
+					},
+				},
+				{
+					Location: ResultLocation{
+						Path: "testdata/txt/bbb.txt",
+					},
+				},
+			},
+			expected: []*Result{
+				{
+					Location: ResultLocation{
+						Path: "testdata/txt/aaa.txt",
+					},
+				},
+				{
+					Location: ResultLocation{
+						Path: "testdata/txt/bbb.txt",
+					},
+				},
+				{
+					Location: ResultLocation{
+						Path: "testdata/txt/ccc.txt",
+					},
+				},
+			},
+			err: "",
+		},
+
+		{
+			desc: "sorts by severity",
+			config: &OutputConfig{
+				Sort: ResultSortSeverity,
+			},
+			results: []*Result{
+				{
+					Level: ResultLevelWarning,
+				},
+				{
+					Level: ResultLevelError,
+				},
+				{
+					Level: ResultLevelInfo,
+				},
+			},
+			expected: []*Result{
+				{
+					Level: ResultLevelError,
+				},
+				{
+					Level: ResultLevelWarning,
+				},
+				{
+					Level: ResultLevelInfo,
+				},
+			},
+			err: "",
+		},
+
+		{
+			desc: "sorts by source",
+			config: &OutputConfig{
+				Sort: ResultSortSource,
+			},
+			results: []*Result{
+				{
+					Source: "ccc",
+				},
+				{
+					Source: "aaa",
+				},
+				{
+					Source: "bbb",
+				},
+			},
+			expected: []*Result{
+				{
+					Source: "aaa",
+				},
+				{
+					Source: "bbb",
+				},
+				{
+					Source: "ccc",
+				},
+			},
+			err: "",
+		},
+
+		{
+			desc: "returns an error when unknown source",
+			config: &OutputConfig{
+				Sort: ResultSort("nope"),
+			},
+			results:  []*Result{},
+			expected: nil,
+			err:      "unknown sort type: nope",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.desc, func(t *testing.T) {
+			app := NewTestApp()
+			if tt.config != nil {
+				app.Config.Output = *tt.config
+			}
+			ctx := app.InitContext(context.Background())
+
+			actual, err := SortResults(ctx, tt.results)
+
+			if tt.err == "" {
+				require.NoError(t, err)
+			} else {
+				require.ErrorContains(t, err, tt.err)
+			}
+
+			require.Equal(t, tt.expected, actual)
 		})
 	}
 }

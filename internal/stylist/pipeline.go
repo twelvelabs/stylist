@@ -212,22 +212,41 @@ func SortResults(ctx context.Context, results []*Result) ([]*Result, error) {
 	return results, nil
 }
 
-func EnsureContextLines(_ context.Context, results []*Result) ([]*Result, error) {
+func EnsureContextLines(ctx context.Context, results []*Result) ([]*Result, error) {
+	config := AppConfig(ctx)
+
 	loader := NewContextLineLoader()
 	analyzer := NewContextLineAnalyzer()
-	for _, result := range results {
-		path := result.Location.Path
-		lines, err := loader.Load(result.Location)
-		if err != nil {
-			return nil, err
-		}
 
-		if result.ContextLines == nil {
-			result.ContextLines = lines
-		}
-		if result.ContextLang == "" {
-			result.ContextLang = analyzer.DetectLanguage(path, lines)
-		}
+	// Load context lines concurrently (loader uses a mutex wrapped cache).
+	group, _ := errgroup.WithContext(ctx)
+	group.SetLimit(runtime.NumCPU())
+	for _, result := range results {
+		result := result
+		group.Go(func() error {
+			if config.Output.ShowContext {
+				lines, err := loader.Load(result.Location)
+				if err != nil {
+					return err
+				}
+				if result.ContextLines == nil {
+					result.ContextLines = lines
+				}
+				if result.ContextLang == "" {
+					result.ContextLang = analyzer.DetectLanguage(result.Location.Path, lines)
+				}
+			} else {
+				result.ContextLines = nil
+				result.ContextLang = ""
+			}
+			return nil
+		})
 	}
+
+	err := group.Wait()
+	if err != nil {
+		return nil, err
+	}
+
 	return results, nil
 }
