@@ -3,7 +3,7 @@ module github.com/twelvelabs/stylist
 go 1.20
 
 require (
-	github.com/alecthomas/chroma/v2 v2.11.1
+	github.com/alecthomas/chroma/v2 v2.12.0
 	github.com/bmatcuk/doublestar/v4 v4.6.1
 	github.com/deckarep/golang-set/v2 v2.5.0
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
