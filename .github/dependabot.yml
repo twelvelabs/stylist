@@ -10,7 +10,7 @@ updates:
     schedule:
       interval: weekly
     commit-message:
-      prefix: chore
+      prefix: ci
       include: scope
 
   - package-ecosystem: gomod
@@ -18,5 +18,5 @@ updates:
     schedule:
       interval: weekly
     commit-message:
-      prefix: fix
+      prefix: chore
       include: scope
