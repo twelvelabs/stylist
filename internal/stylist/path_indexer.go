@@ -1,6 +1,7 @@
 package stylist
 
 import (
+	"context"
 	"errors"
 	"io/fs"
 	"os"
@@ -71,7 +72,7 @@ func (pi *PathIndexer) Cardinality() int {
 // to a list of paths and attempts to add them to the index.
 // Paths will only be added to the index if they match
 // the types and/or patterns registered with the indexer.
-func (pi *PathIndexer) Index(pathSpecs ...string) error {
+func (pi *PathIndexer) Index(_ context.Context, pathSpecs ...string) error {
 	for _, pathSpec := range pathSpecs {
 		if err := pi.indexPathSpec(pathSpec); err != nil {
 			return err

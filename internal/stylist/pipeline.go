@@ -53,7 +53,7 @@ func (p *Pipeline) Index(ctx context.Context, pathSpecs []string) error {
 	// Doing this once is _much_ faster than once per-processor,
 	// especially when dealing w/ very large projects and many processors or patterns.
 	indexer := NewPathIndexer(includes, p.excludes)
-	if err := indexer.Index(pathSpecs...); err != nil {
+	if err := indexer.Index(ctx, pathSpecs...); err != nil {
 		return err
 	}
 
