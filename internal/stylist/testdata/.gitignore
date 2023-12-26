@@ -1,0 +1,4 @@
+ignored_file.*
+
+ignored_dir/
+!ignored_dir/allowed.txt

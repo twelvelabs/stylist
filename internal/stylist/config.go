@@ -17,7 +17,7 @@ type Config struct {
 	LogLevel   LogLevel     `yaml:"log_level,omitempty"   default:"warn"`
 	Output     OutputConfig `yaml:"output,omitempty"`
 
-	Excludes   []string     `yaml:"excludes,omitempty"    default:"[\".git\", \"node_modules\"]"`
+	Excludes   []string     `yaml:"excludes,omitempty"`
 	Processors []*Processor `yaml:"processors,omitempty"`
 }
 

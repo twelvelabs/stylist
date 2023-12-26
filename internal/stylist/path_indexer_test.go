@@ -1,6 +1,7 @@
 package stylist
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -157,7 +158,10 @@ func TestPathIndexer_Index(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.desc, func(t *testing.T) {
-			err := tt.indexer.Index(tt.pathSpec)
+			app := NewTestApp()
+			ctx := app.InitContext(context.Background())
+
+			err := tt.indexer.Index(ctx, tt.pathSpec)
 
 			if tt.err == "" {
 				assert.NoError(t, err)

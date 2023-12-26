@@ -1,6 +1,7 @@
 package stylist
 
 import (
+	"context"
 	"errors"
 	"io/fs"
 	"os"
@@ -9,6 +10,7 @@ import (
 
 	"github.com/bmatcuk/doublestar/v4"
 	mapset "github.com/deckarep/golang-set/v2"
+	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -59,6 +61,9 @@ type PathIndexer struct {
 
 	// Paths grouped by wildcard pattern.
 	PathsByInclude map[string]PathSet
+
+	ignorer *PathIgnorer
+	logger  *logrus.Logger
 }
 
 // Cardinality returns the total number of patterns
@@ -71,51 +76,77 @@ func (pi *PathIndexer) Cardinality() int {
 // to a list of paths and attempts to add them to the index.
 // Paths will only be added to the index if they match
 // the types and/or patterns registered with the indexer.
-func (pi *PathIndexer) Index(pathSpecs ...string) error {
-	for _, pathSpec := range pathSpecs {
-		if err := pi.indexPathSpec(pathSpec); err != nil {
+func (pi *PathIndexer) Index(ctx context.Context, pathSpecs ...string) error {
+	ignorer, err := NewPathIgnorer(".gitignore", pi.Excludes.ToSlice())
+	if err != nil {
+		return err
+	}
+	pi.ignorer = ignorer
+	pi.logger = AppLogger(ctx)
+
+	files, dirs, patterns, err := pi.partitionPathSpecs(pathSpecs)
+	if err != nil {
+		return err
+	}
+
+	for _, f := range files {
+		if err := pi.indexPath(f); err != nil {
+			return err
+		}
+	}
+	for _, d := range dirs {
+		if err := pi.indexDir(d); err != nil {
+			return err
+		}
+	}
+	if len(patterns) > 0 {
+		if err := pi.indexPatterns(patterns); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-// indexPathSpec dispatches to the appropriate index method for the given type.
-func (pi *PathIndexer) indexPathSpec(pathSpec string) error {
-	if strings.ContainsAny(pathSpec, patternChars) {
-		return pi.indexPattern(pathSpec)
+func (pi *PathIndexer) partitionPathSpecs(pathSpecs []string) (
+	[]string, []string, []string, error,
+) {
+	var fileSpecs []string
+	var dirSpecs []string
+	var patternSpecs []string
+
+	for _, pathSpec := range pathSpecs {
+		if strings.ContainsAny(pathSpec, patternChars) {
+			pattern := filepath.ToSlash(filepath.Clean(pathSpec))
+
+			base, _ := doublestar.SplitPattern(pattern)
+			if _, err := os.Lstat(base); err != nil {
+				if errors.Is(err, os.ErrNotExist) {
+					return nil, nil, nil, doublestar.ErrPatternNotExist
+				}
+				return nil, nil, nil, err
+			}
+
+			patternSpecs = append(patternSpecs, pattern)
+			continue
+		}
+
+		info, err := os.Lstat(pathSpec)
+		if err != nil {
+			return nil, nil, nil, err
+		}
+		if info.IsDir() {
+			dirSpecs = append(dirSpecs, pathSpec)
+		} else {
+			fileSpecs = append(fileSpecs, pathSpec)
+		}
 	}
-	info, err := os.Stat(pathSpec)
-	if err != nil {
-		return err
-	}
-	if info.IsDir() {
-		return pi.indexDir(pathSpec)
-	}
-	return pi.indexPath(pathSpec)
+
+	return fileSpecs, dirSpecs, patternSpecs, nil
 }
 
-// indexPattern walks every path in pattern and calls indexWalkedPath().
-func (pi *PathIndexer) indexPattern(pattern string) error {
-	pattern = filepath.ToSlash(filepath.Clean(pattern))
-
-	// Replicate the pattern validation logic from doublestar's Glob* functions.
-	base, _ := doublestar.SplitPattern(pattern)
-	if _, err := os.Lstat(base); err != nil {
-		if errors.Is(err, os.ErrNotExist) {
-			return doublestar.ErrPatternNotExist
-		}
-		return err
-	}
-
-	// Note: We're intentionally using `filepath.WalkDir` (vs. using doublestar's
-	// Glob or GlobWalk functions) because this allows us to skip excluded dirs
-	// (see logic in indexWalkedPath).
-	// For most projects this ends up being way faster, especially projects
-	// containing large cache or node_modules directories.
-	// Skipping those dirs can cut the time in half.
+func (pi *PathIndexer) indexPatterns(patterns []string) error {
 	return filepath.WalkDir(".", func(path string, d fs.DirEntry, err error) error {
-		return pi.indexWalkedPath(path, d, err, pattern)
+		return pi.indexWalkedPath(path, d, err, patterns...)
 	})
 }
 
@@ -139,11 +170,7 @@ func (pi *PathIndexer) indexWalkedPath(
 	// and if so, return `fs.SkipDir`. This is a sentinel that `filepath.WalkDir`
 	// uses to determine whether to recurse into subdirectories.
 	if d.IsDir() {
-		ok, err := pi.exclude(path)
-		if err != nil {
-			return err
-		}
-		if ok {
+		if pi.exclude(path, true) {
 			return fs.SkipDir
 		}
 		return nil
@@ -174,11 +201,7 @@ func (pi *PathIndexer) indexWalkedPath(
 // indexPath adds path to the index if it matches.
 func (pi *PathIndexer) indexPath(path string) error {
 	// Check if it's excluded
-	ok, err := pi.exclude(path)
-	if err != nil {
-		return err
-	}
-	if ok {
+	if pi.exclude(path, false) {
 		return nil
 	}
 
@@ -195,17 +218,12 @@ func (pi *PathIndexer) indexPath(path string) error {
 }
 
 // exclude returns true if path should be excluded.
-func (pi *PathIndexer) exclude(path string) (bool, error) {
-	for exclude := range pi.Excludes.Iter() {
-		ok, err := matchPattern(exclude, path)
-		if err != nil {
-			return false, err // doublestar parse error
-		}
-		if ok {
-			return true, nil
-		}
+func (pi *PathIndexer) exclude(path string, isDir bool) bool {
+	if pi.ignorer.ShouldIgnore(path, isDir) {
+		pi.logger.Debugf("Index ignore dir=%v path=%s", isDir, path)
+		return true
 	}
-	return false, nil
+	return false
 }
 
 // match returns the patterns that match path.

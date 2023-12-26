@@ -6,9 +6,11 @@ require (
 	github.com/alecthomas/chroma/v2 v2.12.0
 	github.com/bmatcuk/doublestar/v4 v4.6.1
 	github.com/deckarep/golang-set/v2 v2.5.0
+	github.com/denormal/go-gitignore v0.0.0-20180930084346-ae8ad1d07817
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
 	github.com/imdario/mergo v1.0.0
 	github.com/owenrumney/go-sarif/v2 v2.3.0
+	github.com/prashantv/gostub v1.1.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/sourcegraph/go-diff v0.7.0
 	github.com/spf13/cobra v1.8.0
@@ -28,6 +30,7 @@ require (
 	github.com/briandowns/spinner v1.23.0 // indirect
 	github.com/caarlos0/env/v8 v8.0.0 // indirect
 	github.com/creasty/defaults v1.7.0 // indirect
+	github.com/danwakefield/fnmatch v0.0.0-20160403171240-cbb64ac3d964 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dlclark/regexp2 v1.10.0 // indirect
 	github.com/fatih/color v1.16.0 // indirect

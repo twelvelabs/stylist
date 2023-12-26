@@ -39,6 +39,7 @@ words:
   - gopls
   - goreleaser
   - gosec
+  - gostub
   - hadolint
   - infof
   - iostreams
