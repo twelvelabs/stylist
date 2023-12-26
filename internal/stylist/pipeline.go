@@ -35,10 +35,11 @@ func (p *Pipeline) Index(ctx context.Context, pathSpecs []string) error {
 	logger := AppLogger(ctx)
 
 	// Aggregate each processor's include patterns
-	includes := []string{}
+	includeSet := NewPathSet()
 	for _, processor := range p.processors {
-		includes = append(includes, processor.Includes...)
+		includeSet.Append(processor.Includes...)
 	}
+	includes := includeSet.ToSlice()
 
 	startedAt := time.Now()
 	logger.Debugf(
@@ -47,7 +48,6 @@ func (p *Pipeline) Index(ctx context.Context, pathSpecs []string) error {
 		p.excludes,
 	)
 
-	// TODO: support passing Context to the indexer
 	// Create an index of paths (resolved from the path specs),
 	// matching any of the include patterns used by our processors.
 	// Doing this once is _much_ faster than once per-processor,

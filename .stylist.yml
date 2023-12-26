@@ -1,7 +1,3 @@
-excludes:
-  - dist/**
-  - .cspellcache
-  - coverage.out
 output:
   show_context: true
   show_url: true

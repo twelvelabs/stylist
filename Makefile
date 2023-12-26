@@ -6,7 +6,7 @@ BUILD_DIR := ./dist
 DST_DIR := /usr/local/bin
 
 CURRENT_SHA = $(shell git rev-parse --short HEAD)
-CURRENT_TS = $(shell date -I seconds)
+CURRENT_TS = $(shell date -Iseconds)
 
 ##@ App
 
