@@ -12,6 +12,10 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+var (
+	DefaultConfigPath = ".stylist.yml"
+)
+
 type Config struct {
 	ConfigPath string       `yaml:"config_path,omitempty" default:".stylist.yml"`
 	LogLevel   LogLevel     `yaml:"log_level,omitempty"   default:"warn"`
@@ -47,8 +51,7 @@ func NewConfig() *Config {
 // different sets because most flags default to values from the config file,
 // which we don't know the location of until we parse the config flag.
 func NewConfigFromArgs(args []string) (*Config, error) {
-	config := NewConfig()
-	configPath := config.ConfigPath
+	configPath := DefaultConfigPath
 	logLevelStr := ""
 
 	fs := pflag.NewFlagSet("config-args", pflag.ContinueOnError)
@@ -61,7 +64,7 @@ func NewConfigFromArgs(args []string) (*Config, error) {
 
 	// Ignore all the flags defined on the main Cobra flagset.
 	fs.ParseErrorsWhitelist.UnknownFlags = true
-	// Needed to suppress the default usage
+	// Suppress usage (the Cobra flagset will handle showing it).
 	fs.Usage = func() {}
 
 	err := fs.Parse(args)
@@ -69,12 +72,10 @@ func NewConfigFromArgs(args []string) (*Config, error) {
 		return nil, fmt.Errorf("unable to parse config args: %w", err)
 	}
 
-	config, err = conf.NewLoader(config, configPath).Load()
+	config, err := NewConfigFromPath(configPath)
 	if err != nil {
 		return nil, err
 	}
-	// Ensure the path from the flag takes precedence over anything in the file.
-	config.ConfigPath = configPath
 
 	if logLevelStr != "" {
 		// Coerce the level string from the flag back into an enum.
@@ -85,9 +86,23 @@ func NewConfigFromArgs(args []string) (*Config, error) {
 		}
 	}
 
+	return config, nil
+}
+
+// NewConfigFromPath returns a new Config loaded from path.
+func NewConfigFromPath(path string) (*Config, error) {
+	var config *Config
+	var err error
+
+	config, err = conf.NewLoader(&Config{}, path).Load()
+	if err != nil {
+		return nil, fmt.Errorf("config load: %w", err)
+	}
+	config.ConfigPath = path
+
 	config.Processors, err = ResolvePresets(config.Processors)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("config presets: %w", err)
 	}
 
 	return config, nil
