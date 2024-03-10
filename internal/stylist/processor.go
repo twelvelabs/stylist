@@ -17,12 +17,12 @@ type Processor struct {
 	Excludes     []string `yaml:"excludes,omitempty"`
 	CheckCommand *Command `yaml:"check,omitempty"`
 	FixCommand   *Command `yaml:"fix,omitempty"`
-
-	paths []string
 }
 
-// Execute runs the given command for the current set of paths.
-func (p *Processor) Execute(ctx context.Context, ct CommandType) ([]*Result, error) {
+// Execute runs the given command for paths.
+func (p *Processor) Execute(
+	ctx context.Context, ct CommandType, paths []string,
+) ([]*Result, error) {
 	// Resolve the command to execute.
 	var cmd *Command
 	switch ct {
@@ -30,8 +30,6 @@ func (p *Processor) Execute(ctx context.Context, ct CommandType) ([]*Result, err
 		cmd = p.CheckCommand
 	case CommandTypeFix:
 		cmd = p.FixCommand
-	default:
-		panic(fmt.Sprintf("unknown command type '%s'", ct.String()))
 	}
 
 	if cmd == nil {
@@ -40,7 +38,7 @@ func (p *Processor) Execute(ctx context.Context, ct CommandType) ([]*Result, err
 	}
 
 	// Delegate to the command.
-	return cmd.Execute(ctx, p.Name, p.Paths())
+	return cmd.Execute(ctx, p.Name, paths)
 }
 
 // Merge merges the receiver and arguments and returns a new processor
@@ -52,11 +50,6 @@ func (p *Processor) Merge(others ...*Processor) *Processor {
 		_ = mergo.Merge(dst, other, mergo.WithOverride)
 	}
 	return dst
-}
-
-// Paths returns all paths matched by the processor.
-func (p *Processor) Paths() []string {
-	return p.paths
 }
 
 // ProcessorFilter filters processors by name and/or tag.

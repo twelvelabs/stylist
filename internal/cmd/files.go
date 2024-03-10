@@ -60,20 +60,15 @@ func (a *FilesAction) Run(ctx context.Context) error {
 	}
 
 	pipeline := stylist.NewPipeline(processors, excludes)
-	err = pipeline.Index(ctx, a.pathSpecs)
+	matches, err := pipeline.Match(ctx, a.pathSpecs)
 	if err != nil {
 		return err
 	}
 
-	for _, processor := range processors {
-		fmt.Printf("Processor: %s\n", processor.Name)
-		paths := processor.Paths()
-		if len(paths) == 0 {
-			fmt.Printf(" [no matching files]\n")
-		} else {
-			for _, path := range processor.Paths() {
-				fmt.Printf(" - %s\n", path)
-			}
+	for _, match := range matches {
+		fmt.Printf("Processor: %s\n", match.Processor.Name)
+		for _, path := range match.Paths {
+			fmt.Printf(" - %s\n", path)
 		}
 		fmt.Printf("\n")
 	}
