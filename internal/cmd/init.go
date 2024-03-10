@@ -72,9 +72,14 @@ func (a *InitAction) Run(ctx context.Context) error {
 	presets := store.All()
 	excludes := config.Excludes
 	pipeline := stylist.NewPipeline(presets, excludes)
-	processors, err := pipeline.Match(ctx, []string{"."})
+	matches, err := pipeline.Match(ctx, []string{"."})
 	if err != nil {
 		return err
+	}
+
+	processors := []*stylist.Processor{}
+	for _, match := range matches {
+		processors = append(processors, match.Processor)
 	}
 
 	// Generate a new config file containing all matching presets.

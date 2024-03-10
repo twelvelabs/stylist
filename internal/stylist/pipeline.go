@@ -26,12 +26,8 @@ type Pipeline struct {
 	excludes   []string
 }
 
-// Index populates the paths for each processor in the pipeline.
-//
-// The source paths are resolved from each path spec; matched against
-// any global exclude patterns; then matched against each processor's
-// individual type, include, and exclude patterns.
-func (p *Pipeline) Index(ctx context.Context, pathSpecs []string) error {
+// Match returns all processors that match the given path specs.
+func (p *Pipeline) Match(ctx context.Context, pathSpecs []string) ([]PipelineMatch, error) {
 	logger := AppLogger(ctx)
 
 	// Aggregate each processor's include patterns
@@ -47,16 +43,17 @@ func (p *Pipeline) Index(ctx context.Context, pathSpecs []string) error {
 		includes,
 		p.excludes,
 	)
-
 	// Create an index of paths (resolved from the path specs),
 	// matching any of the include patterns used by our processors.
 	// Doing this once is _much_ faster than once per-processor,
 	// especially when dealing w/ very large projects and many processors or patterns.
 	indexer := NewPathIndexer(includes, p.excludes)
 	if err := indexer.Index(ctx, pathSpecs...); err != nil {
-		return err
+		return nil, err
 	}
+	logger.Debugf("Indexed in %s", time.Since(startedAt))
 
+	matches := []PipelineMatch{}
 	// For each processor...
 	for _, processor := range p.processors {
 		// Gather all paths matching the include patterns
@@ -76,7 +73,7 @@ func (p *Pipeline) Index(ctx context.Context, pathSpecs []string) error {
 			for _, pattern := range processor.Excludes {
 				ok, err := doublestar.PathMatch(pattern, path)
 				if err != nil {
-					return err
+					return nil, err
 				}
 				if ok {
 					excluded = true
@@ -87,25 +84,15 @@ func (p *Pipeline) Index(ctx context.Context, pathSpecs []string) error {
 			}
 		}
 
-		sort.Strings(paths)
-		processor.paths = paths
-	}
-
-	logger.Debugf("Indexed in %s", time.Since(startedAt))
-	return nil
-}
-
-// Match returns all processors that match the given path specs.
-func (p *Pipeline) Match(ctx context.Context, pathSpecs []string) ([]*Processor, error) {
-	if err := p.Index(ctx, pathSpecs); err != nil {
-		return nil, err
-	}
-	matches := []*Processor{}
-	for _, processor := range p.processors {
-		if len(processor.Paths()) > 0 {
-			matches = append(matches, processor)
+		if len(paths) > 0 {
+			sort.Strings(paths)
+			matches = append(matches, PipelineMatch{
+				Paths:     paths,
+				Processor: processor,
+			})
 		}
 	}
+
 	return matches, nil
 }
 
@@ -122,8 +109,8 @@ func (p *Pipeline) Fix(ctx context.Context, pathSpecs []string) ([]*Result, erro
 func (p *Pipeline) execute(
 	ctx context.Context, pathSpecs []string, ct CommandType,
 ) ([]*Result, error) {
-	// Get all the processors that match the pathSpecs.
-	processors, err := p.Match(ctx, pathSpecs)
+	// Match the pathSpecs.
+	matches, err := p.Match(ctx, pathSpecs)
 	if err != nil {
 		return nil, err
 	}
@@ -142,10 +129,10 @@ func (p *Pipeline) execute(
 
 	// Execute the processors in goroutines and aggregate their results.
 	results := []*Result{}
-	for _, processor := range processors {
-		processor := processor
+	for _, match := range matches {
+		match := match
 		group.Go(func() error {
-			pr, err := processor.Execute(ctx, ct)
+			pr, err := match.Processor.Execute(ctx, ct, match.Paths)
 			if err != nil {
 				return err
 			}
@@ -175,6 +162,11 @@ func (p *Pipeline) execute(
 
 	// Return the transformed results.
 	return results, nil
+}
+
+type PipelineMatch struct {
+	Paths     []string
+	Processor *Processor
 }
 
 type ResultsTransformer func(ctx context.Context, results []*Result) ([]*Result, error)

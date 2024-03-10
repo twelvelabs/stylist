@@ -142,13 +142,13 @@ func TestPipeline_Check(t *testing.T) {
 	}
 }
 
-func TestPipeline_Index(t *testing.T) {
+func TestPipeline_Match(t *testing.T) {
 	tests := []struct {
 		desc       string
 		processors []*Processor
 		excludes   []string
 		pathSpecs  []string
-		expectFunc func(t *testing.T, pipeline *Pipeline)
+		expectFunc func(t *testing.T, matches []PipelineMatch)
 		err        string
 	}{
 		{
@@ -178,10 +178,10 @@ func TestPipeline_Index(t *testing.T) {
 			pathSpecs: []string{
 				"testdata/txt",
 			},
-			expectFunc: func(t *testing.T, pipeline *Pipeline) {
+			expectFunc: func(t *testing.T, matches []PipelineMatch) {
 				t.Helper()
 
-				p1 := pipeline.processors[0]
+				assert.Len(t, matches, 2)
 				assert.ElementsMatch(t, []string{
 					"testdata/txt/001/011/111/aaa.txt",
 					"testdata/txt/001/011/aaa.txt",
@@ -190,9 +190,8 @@ func TestPipeline_Index(t *testing.T) {
 					"testdata/txt/003/033/aaa.txt",
 					"testdata/txt/003/aaa.txt",
 					"testdata/txt/aaa.txt",
-				}, p1.Paths())
+				}, matches[0].Paths)
 
-				p2 := pipeline.processors[1]
 				assert.ElementsMatch(t, []string{
 					"testdata/txt/001/011/111/aaa.txt",
 					"testdata/txt/001/011/aaa.txt",
@@ -201,7 +200,7 @@ func TestPipeline_Index(t *testing.T) {
 					"testdata/txt/002/022/aaa.txt",
 					"testdata/txt/002/aaa.txt",
 					"testdata/txt/aaa.txt",
-				}, p2.Paths())
+				}, matches[1].Paths)
 			},
 		},
 	}
@@ -212,7 +211,7 @@ func TestPipeline_Index(t *testing.T) {
 			ctx := app.InitContext(context.Background())
 
 			pipeline := NewPipeline(tt.processors, tt.excludes)
-			err := pipeline.Index(ctx, tt.pathSpecs)
+			matches, err := pipeline.Match(ctx, tt.pathSpecs)
 
 			if tt.err == "" {
 				assert.NoError(t, err)
@@ -221,7 +220,7 @@ func TestPipeline_Index(t *testing.T) {
 			}
 
 			if tt.expectFunc != nil {
-				tt.expectFunc(t, pipeline)
+				tt.expectFunc(t, matches)
 			}
 		})
 	}
