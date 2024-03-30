@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 
@@ -61,7 +62,9 @@ func (a *CheckAction) Run(ctx context.Context) error {
 	}
 
 	pipeline := stylist.NewPipeline(processors, excludes)
-	results, err := pipeline.Check(ctx, a.pathSpecs)
+
+	cwd, _ := os.Getwd()
+	results, err := pipeline.Check(ctx, cwd, a.pathSpecs)
 	if err != nil {
 		return err
 	}

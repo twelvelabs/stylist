@@ -13,7 +13,6 @@ import (
 	"strings"
 	"time"
 
-	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/google/shlex"
 	"golang.org/x/sync/errgroup"
 )
@@ -35,7 +34,9 @@ type Command struct {
 }
 
 // Execute executes paths concurrently in batches on behalf of the named processor.
-func (c *Command) Execute(ctx context.Context, name string, paths []string) ([]*Result, error) {
+func (c *Command) Execute(
+	ctx context.Context, name string, basePath string, paths []string,
+) ([]*Result, error) {
 	results := []*Result{}
 
 	group, ctx := errgroup.WithContext(ctx)
@@ -44,7 +45,7 @@ func (c *Command) Execute(ctx context.Context, name string, paths []string) ([]*
 	for _, batch := range c.partition(paths) {
 		batch := batch
 		group.Go(func() error {
-			batchResults, err := c.executeBatch(ctx, name, batch)
+			batchResults, err := c.executeBatch(ctx, name, basePath, batch)
 			if err != nil {
 				return err
 			}
@@ -60,7 +61,7 @@ func (c *Command) Execute(ctx context.Context, name string, paths []string) ([]*
 
 // executes a single batch of paths.
 func (c *Command) executeBatch(
-	ctx context.Context, name string, paths []string,
+	ctx context.Context, name string, basePath string, paths []string,
 ) ([]*Result, error) {
 	if len(paths) == 0 {
 		return nil, nil
@@ -86,7 +87,7 @@ func (c *Command) executeBatch(
 	}
 
 	cmd := client.CommandContext(ctx, args[0], args[1:]...)
-	cmd.Dir = c.WorkingDir
+	cmd.Dir = filepath.Join(basePath, c.WorkingDir)
 
 	// Setup the IO streams
 	if c.InputType == InputTypeStdin {
@@ -160,15 +161,12 @@ func (c *Command) executeBatch(
 	}
 
 	// Do a little post processing on the results.
-	pathSet := mapset.NewSet(paths...)
+	pathSet := NewNormalizedPathSet(basePath, paths...)
 	transformed := []*Result{}
 	for idx, r := range parsed {
 		logger.Debugf("Parsed[%v]: %#v", idx, r)
-		if c.WorkingDir != "" && r.Location.Path != "" {
-			// Add the working dir back to the path, otherwise
-			// it will get filtered out below.
-			r.Location.Path = filepath.Join(c.WorkingDir, r.Location.Path)
-		}
+		// Ensure the path is correct and normalized so we can match it below.
+		r.Location.Path = c.cleanupPath(basePath, r.Location.Path)
 		// Add the processor name to the results
 		r.Source = name
 		// InputTypeNone doesn't pass `paths` to the command, so there may
@@ -179,6 +177,16 @@ func (c *Command) executeBatch(
 	}
 
 	return transformed, nil
+}
+
+func (c *Command) cleanupPath(basePath, path string) string {
+	if path == "" || filepath.IsAbs(path) {
+		return path
+	}
+	if c.WorkingDir != "" {
+		path = filepath.Join(c.WorkingDir, path)
+	}
+	return NormalizePath(basePath, path)
 }
 
 func (c *Command) parallelism() int {

@@ -23,6 +23,7 @@ type Config struct {
 
 type OutputConfig struct {
 	Format          ResultFormat `yaml:"format,omitempty"           default:"tty"`
+	Paths           ResultPath   `yaml:"paths,omitempty"            default:"relative"`
 	Sort            ResultSort   `yaml:"sort,omitempty"             default:"location"`
 	ShowContext     bool         `yaml:"show_context,omitempty"     default:"true"`
 	ShowURL         bool         `yaml:"show_url,omitempty"         default:"true"`

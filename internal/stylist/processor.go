@@ -21,7 +21,7 @@ type Processor struct {
 
 // Execute runs the given command for paths.
 func (p *Processor) Execute(
-	ctx context.Context, ct CommandType, paths []string,
+	ctx context.Context, basePath string, paths []string, ct CommandType,
 ) ([]*Result, error) {
 	// Resolve the command to execute.
 	var cmd *Command
@@ -38,7 +38,7 @@ func (p *Processor) Execute(
 	}
 
 	// Delegate to the command.
-	return cmd.Execute(ctx, p.Name, paths)
+	return cmd.Execute(ctx, p.Name, basePath, paths)
 }
 
 // Merge merges the receiver and arguments and returns a new processor

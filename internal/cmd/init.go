@@ -72,7 +72,9 @@ func (a *InitAction) Run(ctx context.Context) error {
 	presets := store.All()
 	excludes := config.Excludes
 	pipeline := stylist.NewPipeline(presets, excludes)
-	matches, err := pipeline.Match(ctx, []string{"."})
+
+	cwd, _ := os.Getwd()
+	matches, err := pipeline.Match(ctx, cwd, []string{"."})
 	if err != nil {
 		return err
 	}

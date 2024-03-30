@@ -49,6 +49,11 @@ func CoerceResultLevel(value string) (ResultLevel, error) {
 // ENUM(checkstyle, json, sarif, tty).
 type ResultFormat string
 
+// ResultPath configures the type of path to use in results.
+//
+// ENUM(absolute, relative).
+type ResultPath string
+
 // ResultSort represents how to sort the results.
 //
 // ENUM(location, severity, source).

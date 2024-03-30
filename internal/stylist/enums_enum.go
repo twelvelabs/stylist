@@ -619,6 +619,84 @@ func (x *ResultLevel) Type() string {
 }
 
 const (
+	// ResultPathAbsolute is a ResultPath of type absolute.
+	ResultPathAbsolute ResultPath = "absolute"
+	// ResultPathRelative is a ResultPath of type relative.
+	ResultPathRelative ResultPath = "relative"
+)
+
+var ErrInvalidResultPath = fmt.Errorf("not a valid ResultPath, try [%s]", strings.Join(_ResultPathNames, ", "))
+
+var _ResultPathNames = []string{
+	string(ResultPathAbsolute),
+	string(ResultPathRelative),
+}
+
+// ResultPathNames returns a list of possible string values of ResultPath.
+func ResultPathNames() []string {
+	tmp := make([]string, len(_ResultPathNames))
+	copy(tmp, _ResultPathNames)
+	return tmp
+}
+
+// String implements the Stringer interface.
+func (x ResultPath) String() string {
+	return string(x)
+}
+
+// IsValid provides a quick way to determine if the typed value is
+// part of the allowed enumerated values
+func (x ResultPath) IsValid() bool {
+	_, err := ParseResultPath(string(x))
+	return err == nil
+}
+
+var _ResultPathValue = map[string]ResultPath{
+	"absolute": ResultPathAbsolute,
+	"relative": ResultPathRelative,
+}
+
+// ParseResultPath attempts to convert a string to a ResultPath.
+func ParseResultPath(name string) (ResultPath, error) {
+	if x, ok := _ResultPathValue[name]; ok {
+		return x, nil
+	}
+	return ResultPath(""), fmt.Errorf("%s is %w", name, ErrInvalidResultPath)
+}
+
+// MarshalText implements the text marshaller method.
+func (x ResultPath) MarshalText() ([]byte, error) {
+	return []byte(string(x)), nil
+}
+
+// UnmarshalText implements the text unmarshaller method.
+func (x *ResultPath) UnmarshalText(text []byte) error {
+	tmp, err := ParseResultPath(string(text))
+	if err != nil {
+		return err
+	}
+	*x = tmp
+	return nil
+}
+
+// Set implements the Golang flag.Value interface func.
+func (x *ResultPath) Set(val string) error {
+	v, err := ParseResultPath(val)
+	*x = v
+	return err
+}
+
+// Get implements the Golang flag.Getter interface func.
+func (x *ResultPath) Get() interface{} {
+	return *x
+}
+
+// Type implements the github.com/spf13/pFlag Value interface.
+func (x *ResultPath) Type() string {
+	return "ResultPath"
+}
+
+const (
 	// ResultSortLocation is a ResultSort of type location.
 	ResultSortLocation ResultSort = "location"
 	// ResultSortSeverity is a ResultSort of type severity.

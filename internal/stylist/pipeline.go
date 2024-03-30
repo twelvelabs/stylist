@@ -3,18 +3,18 @@ package stylist
 import (
 	"context"
 	"fmt"
+	"os"
 	"runtime"
 	"sort"
 	"time"
 
-	"github.com/bmatcuk/doublestar/v4"
 	mapset "github.com/deckarep/golang-set/v2"
 	"golang.org/x/sync/errgroup"
 )
 
 func NewPipeline(processors []*Processor, excludes []string) *Pipeline {
 	// Always ignore git dirs.
-	excludes = append(excludes, ".git/**")
+	excludes = append(excludes, "**/.git/**")
 	return &Pipeline{
 		processors: processors,
 		excludes:   excludes,
@@ -27,7 +27,9 @@ type Pipeline struct {
 }
 
 // Match returns all processors that match the given path specs.
-func (p *Pipeline) Match(ctx context.Context, pathSpecs []string) ([]PipelineMatch, error) {
+func (p *Pipeline) Match(
+	ctx context.Context, basePath string, pathSpecs []string,
+) ([]PipelineMatch, error) {
 	logger := AppLogger(ctx)
 
 	// Aggregate each processor's include patterns
@@ -47,8 +49,8 @@ func (p *Pipeline) Match(ctx context.Context, pathSpecs []string) ([]PipelineMat
 	// matching any of the include patterns used by our processors.
 	// Doing this once is _much_ faster than once per-processor,
 	// especially when dealing w/ very large projects and many processors or patterns.
-	indexer := NewPathIndexer(includes, p.excludes)
-	if err := indexer.Index(ctx, pathSpecs...); err != nil {
+	index, err := NewPathIndexer(basePath, includes, p.excludes).Index(ctx, pathSpecs...)
+	if err != nil {
 		return nil, err
 	}
 	logger.Debugf("Indexed in %s", time.Since(startedAt))
@@ -60,9 +62,7 @@ func (p *Pipeline) Match(ctx context.Context, pathSpecs []string) ([]PipelineMat
 		// configured for this processor.
 		pathSet := NewPathSet()
 		for _, inc := range processor.Includes {
-			if incPaths, ok := indexer.PathsByInclude[inc]; ok {
-				pathSet = pathSet.Union(incPaths)
-			}
+			pathSet.Append(index.PathsFor(inc).AbsolutePaths()...)
 		}
 
 		// Now, filter out anything _this processor_ is configured to ignore.
@@ -71,7 +71,7 @@ func (p *Pipeline) Match(ctx context.Context, pathSpecs []string) ([]PipelineMat
 		for path := range pathSet.Iter() {
 			excluded := false
 			for _, pattern := range processor.Excludes {
-				ok, err := doublestar.PathMatch(pattern, path)
+				ok, err := matchPattern(pattern, path)
 				if err != nil {
 					return nil, err
 				}
@@ -97,20 +97,24 @@ func (p *Pipeline) Match(ctx context.Context, pathSpecs []string) ([]PipelineMat
 }
 
 // Check executes the check command for each processor in the pipeline.
-func (p *Pipeline) Check(ctx context.Context, pathSpecs []string) ([]*Result, error) {
-	return p.execute(ctx, pathSpecs, CommandTypeCheck)
+func (p *Pipeline) Check(
+	ctx context.Context, basePath string, pathSpecs []string,
+) ([]*Result, error) {
+	return p.execute(ctx, basePath, pathSpecs, CommandTypeCheck)
 }
 
 // Check executes the fix command for each processor in the pipeline.
-func (p *Pipeline) Fix(ctx context.Context, pathSpecs []string) ([]*Result, error) {
-	return p.execute(ctx, pathSpecs, CommandTypeFix)
+func (p *Pipeline) Fix(
+	ctx context.Context, basePath string, pathSpecs []string,
+) ([]*Result, error) {
+	return p.execute(ctx, basePath, pathSpecs, CommandTypeFix)
 }
 
 func (p *Pipeline) execute(
-	ctx context.Context, pathSpecs []string, ct CommandType,
+	ctx context.Context, basePath string, pathSpecs []string, ct CommandType,
 ) ([]*Result, error) {
 	// Match the pathSpecs.
-	matches, err := p.Match(ctx, pathSpecs)
+	matches, err := p.Match(ctx, basePath, pathSpecs)
 	if err != nil {
 		return nil, err
 	}
@@ -132,7 +136,7 @@ func (p *Pipeline) execute(
 	for _, match := range matches {
 		match := match
 		group.Go(func() error {
-			pr, err := match.Processor.Execute(ctx, ct, match.Paths)
+			pr, err := match.Processor.Execute(ctx, basePath, match.Paths, ct)
 			if err != nil {
 				return err
 			}
@@ -150,6 +154,7 @@ func (p *Pipeline) execute(
 	// Run the results through some post-processing steps.
 	transformers := []ResultsTransformer{
 		FilterResults,
+		AdjustPath,
 		SortResults,
 		EnsureContextLines,
 	}
@@ -238,6 +243,22 @@ func EnsureContextLines(ctx context.Context, results []*Result) ([]*Result, erro
 	err := group.Wait()
 	if err != nil {
 		return nil, err
+	}
+
+	return results, nil
+}
+
+func AdjustPath(ctx context.Context, results []*Result) ([]*Result, error) {
+	config := AppConfig(ctx)
+	cwd, _ := os.Getwd()
+	adjuster := NewPathAdjuster(cwd, config.Output.Paths)
+
+	var err error
+	for _, result := range results {
+		result.Location.Path, err = adjuster.Convert(result.Location.Path)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return results, nil

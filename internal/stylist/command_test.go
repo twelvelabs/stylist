@@ -163,7 +163,7 @@ func TestCommand_Execute(t *testing.T) {
 			}
 
 			ctx := app.InitContext(context.Background())
-			actual, err := tt.command.Execute(ctx, "test-linter", tt.paths)
+			actual, err := tt.command.Execute(ctx, "test-linter", ".", tt.paths)
 
 			if tt.err == "" {
 				assert.NoError(t, err)
@@ -178,7 +178,7 @@ func TestCommand_Execute(t *testing.T) {
 func TestCommand_executeBatch_ErrorCases(t *testing.T) {
 	command := &Command{}
 
-	results, err := command.executeBatch(context.Background(), "", []string{})
+	results, err := command.executeBatch(context.Background(), "", ".", []string{})
 	assert.Equal(t, []*Result(nil), results)
 	assert.NoError(t, err)
 }

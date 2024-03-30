@@ -1,11 +1,28 @@
 package stylist
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/twelvelabs/termite/render"
 )
+
+func TestProcessor_Execute_WhenNoCommandDefined(t *testing.T) {
+	ctx := context.Background()
+	processor := &Processor{
+		CheckCommand: nil,
+		FixCommand:   nil,
+	}
+
+	// Calling execute when no command defined is a noop.
+	results, err := processor.Execute(ctx, ".", nil, CommandTypeCheck)
+	assert.NoError(t, err)
+	assert.Nil(t, results)
+	results, err = processor.Execute(ctx, ".", nil, CommandTypeFix)
+	assert.NoError(t, err)
+	assert.Nil(t, results)
+}
 
 func TestProcessor_Merge(t *testing.T) {
 	p1 := &Processor{
