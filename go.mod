@@ -9,7 +9,7 @@ require (
 	github.com/denormal/go-gitignore v0.0.0-20180930084346-ae8ad1d07817
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
 	github.com/imdario/mergo v1.0.0
-	github.com/owenrumney/go-sarif/v2 v2.3.0
+	github.com/owenrumney/go-sarif/v2 v2.3.1
 	github.com/prashantv/gostub v1.1.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/sourcegraph/go-diff v0.7.0
