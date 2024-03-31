@@ -134,7 +134,6 @@ func (p *Pipeline) execute(
 	// Execute the processors in goroutines and aggregate their results.
 	results := []*Result{}
 	for _, match := range matches {
-		match := match
 		group.Go(func() error {
 			pr, err := match.Processor.Execute(ctx, basePath, match.Paths, ct)
 			if err != nil {
@@ -219,7 +218,6 @@ func EnsureContextLines(ctx context.Context, results []*Result) ([]*Result, erro
 	group, _ := errgroup.WithContext(ctx)
 	group.SetLimit(runtime.NumCPU())
 	for _, result := range results {
-		result := result
 		group.Go(func() error {
 			if config.Output.ShowContext {
 				lines, err := loader.Load(result.Location)

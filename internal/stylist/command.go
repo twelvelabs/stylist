@@ -43,7 +43,6 @@ func (c *Command) Execute(
 	group.SetLimit(c.parallelism())
 
 	for _, batch := range c.partition(paths) {
-		batch := batch
 		group.Go(func() error {
 			batchResults, err := c.executeBatch(ctx, name, basePath, batch)
 			if err != nil {

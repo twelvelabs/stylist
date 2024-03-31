@@ -349,7 +349,7 @@ func (p *TtyPrinter) printUnderLinePointer(result *Result, formatter *ui.Formatt
 		indicatorCols = endCol0 - startCol0
 	}
 	indicatorRunes := make([]rune, 0, indicatorCols)
-	for j := 0; j < indicatorCols; j++ {
+	for range indicatorCols {
 		indicatorRunes = append(indicatorRunes, '^')
 	}
 
