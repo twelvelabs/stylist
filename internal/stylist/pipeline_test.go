@@ -3,6 +3,8 @@ package stylist
 import (
 	"context"
 	"errors"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -21,6 +23,7 @@ func TestPipeline_Check(t *testing.T) {
 		setupFunc  func(c *run.Client)
 		processors []*Processor
 		excludes   []string
+		basePath   string
 		pathSpecs  []string
 		expected   []*Result
 		err        string
@@ -129,7 +132,7 @@ func TestPipeline_Check(t *testing.T) {
 			ctx := app.InitContext(context.Background())
 
 			pipeline := NewPipeline(tt.processors, tt.excludes)
-			actual, err := pipeline.Check(ctx, tt.pathSpecs)
+			actual, err := pipeline.Check(ctx, tt.basePath, tt.pathSpecs)
 
 			if tt.err == "" {
 				assert.NoError(t, err)
@@ -211,7 +214,7 @@ func TestPipeline_Match(t *testing.T) {
 			ctx := app.InitContext(context.Background())
 
 			pipeline := NewPipeline(tt.processors, tt.excludes)
-			matches, err := pipeline.Match(ctx, tt.pathSpecs)
+			matches, err := pipeline.Match(ctx, ".", tt.pathSpecs)
 
 			if tt.err == "" {
 				assert.NoError(t, err)
@@ -516,6 +519,97 @@ func TestSortResults(t *testing.T) {
 			ctx := app.InitContext(context.Background())
 
 			actual, err := SortResults(ctx, tt.results)
+
+			if tt.err == "" {
+				require.NoError(t, err)
+			} else {
+				require.ErrorContains(t, err, tt.err)
+			}
+
+			require.Equal(t, tt.expected, actual)
+		})
+	}
+}
+
+func TestAdjustPath(t *testing.T) {
+	cwd, _ := os.Getwd()
+	tests := []struct {
+		desc     string
+		config   *OutputConfig
+		results  []*Result
+		expected []*Result
+		err      string
+	}{
+		{
+			desc: "converts to relative path by default",
+			results: []*Result{
+				{
+					Location: ResultLocation{
+						Path: filepath.Join(cwd, "aaa", "bbb"),
+					},
+				},
+			},
+			expected: []*Result{
+				{
+					Location: ResultLocation{
+						Path: filepath.Join("aaa", "bbb"),
+					},
+				},
+			},
+			err: "",
+		},
+		{
+			desc: "cleans path if already relative",
+			config: &OutputConfig{
+				Paths: ResultPathRelative,
+			},
+			results: []*Result{
+				{
+					Location: ResultLocation{
+						Path: filepath.Join(".", "aaa", "bbb"),
+					},
+				},
+			},
+			expected: []*Result{
+				{
+					Location: ResultLocation{
+						Path: filepath.Join("aaa", "bbb"),
+					},
+				},
+			},
+			err: "",
+		},
+		{
+			desc: "converts to absolute path when configured",
+			config: &OutputConfig{
+				Paths: ResultPathAbsolute,
+			},
+			results: []*Result{
+				{
+					Location: ResultLocation{
+						Path: filepath.Join(".", "aaa", "bbb"),
+					},
+				},
+			},
+			expected: []*Result{
+				{
+					Location: ResultLocation{
+						Path: filepath.Join(cwd, "aaa", "bbb"),
+					},
+				},
+			},
+			err: "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.desc, func(t *testing.T) {
+			app := NewTestApp()
+			if tt.config != nil {
+				app.Config.Output = *tt.config
+			}
+			ctx := app.InitContext(context.Background())
+
+			actual, err := AdjustPath(ctx, tt.results)
 
 			if tt.err == "" {
 				require.NoError(t, err)

@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 
@@ -60,14 +61,22 @@ func (a *FilesAction) Run(ctx context.Context) error {
 	}
 
 	pipeline := stylist.NewPipeline(processors, excludes)
-	matches, err := pipeline.Match(ctx, a.pathSpecs)
+
+	cwd, _ := os.Getwd()
+	matches, err := pipeline.Match(ctx, cwd, a.pathSpecs)
 	if err != nil {
 		return err
 	}
 
+	adjuster := stylist.NewPathAdjuster(cwd, a.Config.Output.Paths)
+
 	for _, match := range matches {
 		fmt.Printf("Processor: %s\n", match.Processor.Name)
 		for _, path := range match.Paths {
+			path, err = adjuster.Convert(path)
+			if err != nil {
+				return err
+			}
 			fmt.Printf(" - %s\n", path)
 		}
 		fmt.Printf("\n")

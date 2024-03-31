@@ -1,4 +1,5 @@
 output:
+  paths: relative
   show_context: true
   show_url: true
   syntax_highlight: true

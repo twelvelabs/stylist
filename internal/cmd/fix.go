@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 
@@ -61,7 +62,9 @@ func (a *FixAction) Run(ctx context.Context) error {
 	}
 
 	pipeline := stylist.NewPipeline(processors, excludes)
-	results, err := pipeline.Fix(ctx, a.pathSpecs)
+
+	cwd, _ := os.Getwd()
+	results, err := pipeline.Fix(ctx, cwd, a.pathSpecs)
 	if err != nil {
 		return err
 	}
