@@ -3,7 +3,7 @@ module github.com/twelvelabs/stylist
 go 1.22
 
 require (
-	github.com/alecthomas/chroma/v2 v2.13.0
+	github.com/alecthomas/chroma/v2 v2.14.0
 	github.com/bmatcuk/doublestar/v4 v4.6.1
 	github.com/deckarep/golang-set/v2 v2.6.0
 	github.com/denormal/go-gitignore v0.0.0-20180930084346-ae8ad1d07817
