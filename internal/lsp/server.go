@@ -121,12 +121,12 @@ func (s *Server) newGlspServer() *glspSrv.Server {
 		}
 		doc.ApplyChanges(params.ContentChanges)
 
-		doc.Debouncer.Run(func() {
-			err := s.diagnostics.Publish(doc, context)
-			if err != nil {
-				s.server.Log.Error(err.Error())
-			}
-		})
+		// doc.Debouncer.Run(func() {
+		// 	err := s.diagnostics.Publish(doc, context)
+		// 	if err != nil {
+		// 		s.server.Log.Error(err.Error())
+		// 	}
+		// })
 
 		return nil
 	}
@@ -137,12 +137,10 @@ func (s *Server) newGlspServer() *glspSrv.Server {
 			return nil
 		}
 
-		doc.Debouncer.Run(func() {
-			err := s.diagnostics.Publish(doc, context)
-			if err != nil {
-				s.server.Log.Error(err.Error())
-			}
-		})
+		err := s.diagnostics.Publish(doc, context)
+		if err != nil {
+			s.server.Log.Error(err.Error())
+		}
 
 		return nil
 	}

@@ -3,6 +3,7 @@ package lsp
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/tliron/glsp"
 	protocol "github.com/tliron/glsp/protocol_3_16"
@@ -23,9 +24,10 @@ type DiagnosticService struct {
 }
 
 func (d *DiagnosticService) Calculate(doc *Document) error {
+	cwd, _ := os.Getwd()
 	// Execute the stylist pipeline.
 	ctx := d.app.InitContext(context.Background())
-	results, err := d.pipeline.Check(ctx, []string{doc.Path})
+	results, err := d.pipeline.Check(ctx, cwd, []string{doc.Path})
 	if err != nil {
 		return fmt.Errorf("diagnostic calculate: %w", err)
 	}
@@ -72,15 +74,39 @@ func (d *DiagnosticService) toSeverity(level stylist.ResultLevel) *protocol.Diag
 }
 
 func (d *DiagnosticService) toDiagnostic(result *stylist.Result) protocol.Diagnostic {
-	return protocol.Diagnostic{
+	diagnostic := protocol.Diagnostic{
+		Range:    protocol.Range{},
 		Severity: d.toSeverity(result.Level),
 		Code: &protocol.IntegerOrString{
 			Value: result.Rule.ID,
 		},
-		CodeDescription: &protocol.CodeDescription{
-			HRef: result.Rule.URI,
-		},
 		Source:  &result.Source,
 		Message: result.Rule.Description,
 	}
+
+	if result.Location.StartLine > 0 {
+		diagnostic.Range.Start.Line = uint32(result.Location.StartLine - 1)
+	}
+	if result.Location.StartColumn > 0 {
+		diagnostic.Range.Start.Character = uint32(result.Location.StartColumn - 1)
+	}
+
+	if result.Location.EndLine > 0 {
+		diagnostic.Range.End.Line = uint32(result.Location.EndLine - 1)
+	} else {
+		diagnostic.Range.End.Line = diagnostic.Range.Start.Line
+	}
+	if result.Location.EndColumn > 0 {
+		diagnostic.Range.End.Character = uint32(result.Location.EndColumn - 1)
+	} else {
+		diagnostic.Range.End.Character = diagnostic.Range.Start.Character
+	}
+
+	if result.Rule.URI != "" {
+		diagnostic.CodeDescription = &protocol.CodeDescription{
+			HRef: result.Rule.URI,
+		}
+	}
+
+	return diagnostic
 }
