@@ -4,8 +4,7 @@ linters:
     - cyclop
     - depguard
     - dupl
-    - goerr113
-    - exhaustivestruct
+    - err113
     - exhaustruct
     - forbidigo
     - forcetypeassert
@@ -17,6 +16,9 @@ linters:
     - godox
     - gofumpt
     - gomnd
+    - govet
+    - ireturn
+    - mnd
     - nlreturn
     - paralleltest
     - perfsprint
@@ -31,15 +33,8 @@ linters:
     - rowserrcheck
     - wastedassign
     # deprecated
-    - deadcode
-    - golint
-    - ifshort
-    - interfacer
-    - maligned
-    - nosnakecase
-    - scopelint
-    - structcheck
-    - varcheck
+    - execinquery
+    - exportloopref
 
 linters-settings:
   exhaustive:
@@ -59,7 +54,7 @@ linters-settings:
       - github.com/imdario/mergo
 
   lll:
-    line-length: 100
+    line-length: 120
 
   revive:
     rules:

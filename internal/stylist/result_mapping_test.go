@@ -213,7 +213,7 @@ func TestResultMapping_ToResult(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.desc, func(t *testing.T) {
 			if tt.setup != nil {
-				tt.setup(&tt.data, &tt.mapping, tt.expected) //nolint: gosec
+				tt.setup(&tt.data, &tt.mapping, tt.expected)
 			}
 
 			actual, err := tt.mapping.ToResult(tt.data)
