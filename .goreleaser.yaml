@@ -1,3 +1,5 @@
+version: 2
+
 project_name: stylist
 
 builds:
@@ -25,7 +27,7 @@ brews:
       name: homebrew-tap
       branch: main
       token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
-    folder: Formula
+    directory: Formula
 
     homepage: "https://github.com/twelvelabs/stylist"
     description: "Manage all your code quality tools with a single executable"
@@ -89,4 +91,4 @@ docker_manifests:
 report_sizes: true
 
 snapshot:
-  name_template: "{{ incpatch .Version }}-next" # cspell: disable-line
+  version_template: "{{ incpatch .Version }}-next" # cspell: disable-line
