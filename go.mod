@@ -5,7 +5,7 @@ go 1.23
 require (
 	github.com/alecthomas/chroma/v2 v2.14.0
 	github.com/bmatcuk/doublestar/v4 v4.7.1
-	github.com/deckarep/golang-set/v2 v2.6.0
+	github.com/deckarep/golang-set/v2 v2.7.0
 	github.com/denormal/go-gitignore v0.0.0-20180930084346-ae8ad1d07817
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
 	github.com/imdario/mergo v1.0.1
