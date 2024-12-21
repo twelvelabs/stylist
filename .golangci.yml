@@ -15,13 +15,13 @@ linters:
     - gocyclo
     - godox
     - gofumpt
-    - gomnd
     - govet
     - ireturn
     - mnd
     - nlreturn
     - paralleltest
     - perfsprint
+    - recvcheck
     - tagalign
     - tagliatelle
     - testifylint
@@ -33,7 +33,6 @@ linters:
     - rowserrcheck
     - wastedassign
     # deprecated
-    - execinquery
     - exportloopref
 
 linters-settings:
@@ -48,10 +47,6 @@ linters-settings:
 
   goconst:
     ignore-tests: true
-
-  gomoddirectives:
-    replace-allow-list:
-      - github.com/imdario/mergo
 
   lll:
     line-length: 120

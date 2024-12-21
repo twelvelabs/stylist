@@ -62,6 +62,7 @@ words:
   - testutil
   - tflint
   - tfvars
+  - trimpath
   - twelvelabs
   - unmarshaller
   - unparam
