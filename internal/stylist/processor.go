@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
+	"dario.cat/mergo"
 	mapset "github.com/deckarep/golang-set/v2"
-	"github.com/imdario/mergo"
 )
 
 type Processor struct {

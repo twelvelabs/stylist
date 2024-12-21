@@ -57,7 +57,7 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v6
         with:
-          version: v1.61
+          version: v1.62
           only-new-issues: true
 
   release:
@@ -97,7 +97,7 @@ jobs:
       - name: Release
         uses: goreleaser/goreleaser-action@v6
         with:
-          version: ~> 2.3
+          version: ~> 2.5
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

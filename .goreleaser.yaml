@@ -13,8 +13,13 @@ builds:
     goarch:
       - amd64
       - arm64
+    # `flags`, `ldflags`, and `mod_timestamp` are configured for reproducible builds.
+    # See: https://goreleaser.com/customization/builds/#reproducible-builds
+    flags:
+      - -trimpath
     ldflags:
-      - -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}}
+      - -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.CommitDate}}
+    mod_timestamp: "{{ .CommitTimestamp }}"
 
 archives:
   - id: stylist
@@ -87,6 +92,9 @@ docker_manifests:
     image_templates:
       - "ghcr.io/twelvelabs/{{ .ProjectName }}:{{ .Tag }}-amd64"
       - "ghcr.io/twelvelabs/{{ .ProjectName }}:{{ .Tag }}-arm64"
+
+gomod:
+  proxy: true
 
 report_sizes: true
 
