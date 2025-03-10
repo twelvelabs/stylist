@@ -1,7 +1,6 @@
 module github.com/twelvelabs/stylist
 
 go 1.23
-
 require (
 	dario.cat/mergo v1.0.1
 	github.com/alecthomas/chroma/v2 v2.15.0
@@ -18,7 +17,7 @@ require (
 	github.com/stretchr/testify v1.10.0
 	github.com/tidwall/gjson v1.18.0
 	github.com/twelvelabs/termite v0.13.2
-	golang.org/x/sync v0.11.0
+	golang.org/x/sync v0.12.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
