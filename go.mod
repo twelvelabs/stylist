@@ -3,7 +3,7 @@ module github.com/twelvelabs/stylist
 go 1.23.0
 
 require (
-	dario.cat/mergo v1.0.1
+	dario.cat/mergo v1.0.2
 	github.com/alecthomas/chroma/v2 v2.18.0
 	github.com/bmatcuk/doublestar/v4 v4.9.1
 	github.com/deckarep/golang-set/v2 v2.8.0
